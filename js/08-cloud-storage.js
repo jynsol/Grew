@@ -474,7 +474,8 @@ function todayStamp(c){
  const stage=Model.stage(c),log=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
  if(stage===0)return button('<span class="stamp-start-label">'+(c.type==='movie'?'감상<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button is-start',attr(c.id)+' aria-label="'+(c.type==='movie'?'감상 시작하기':'읽기 시작하기')+'"');
  if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+stampSVG(c,true)+'</div></div>';
- return button(stampSVG(c,false),'record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
+ // Not yet stamped: a plain grey face (no rings) so it reads clearly apart from the printed stamp.
+ return button('<span class="stamp-face"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>오늘<br>'+verb+'</span></span>','record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
 }
 // Long titles shrink until the whole title fits in two lines next to the cover stickers.
 // Long titles shrink until the whole title fits in two lines beside the cover.

@@ -3935,3 +3935,9 @@ html, body { overflow-x:clip; }
 /* 최근 완료: the tree alone, centred (the title already names the work) */
 .sticker-recent-card .sticker-recent-art .sticker-tree.is-cut { left:50%;right:auto;top:8px;bottom:auto;width:92px;height:92px;margin-left:-46px; }
 .sticker-recent-card .sticker-recent-art, .sticker-recent-card[data-type] .sticker-recent-art { box-shadow:none;margin-bottom:2px; }
+/* Before recording: flat grey faces, no outlines (stamp and today's dot) */
+.today-v2 .stamp-button:not(.is-done), .stamp-button:not(.is-done) { background:#ECECE8;border:0;box-shadow:none;color:#7A7A75;transform:none; }
+.stamp-face { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px; }
+.stamp-face svg { width:22px;height:22px;color:#9A9A95; }
+.stamp-face span { font:800 14px/1.25 var(--font-family);color:#6B6B66;text-align:center; }
+.today-v2 .sticker-week li.is-today:not(.is-logged) { background:#ECECE8;box-shadow:none;color:var(--sb-ink); }
