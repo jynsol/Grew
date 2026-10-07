@@ -127,13 +127,15 @@ document.addEventListener('click',async e=>{
   else showModal(b.dataset.date+'의 경험','<div class="content-list">'+list.map(c=>row(c)).join('')+'</div>','day');
   return
  }
- if(a==='shareForest'){makeShare('forest');return}
+ if(a==='shareForest'){makeShare('year');return}
  if(a==='shareMonth'){makeShare('month');return}
+ if(a==='shareWork'){makeShare('work',id);return}
+ if(a==='shareFormat'){if(['story','feed'].includes(b.dataset.format)){shareFormat=b.dataset.format;makeShare(shareKind,shareTarget)}return}
  if(a==='retryShare'){makeShare(shareKind);return}
  if(a==='nativeShare'){nativeShare();return}
  if(a==='saveImage'){
   if(!shareFresh()){await makeShare(shareKind);toast('최신 기록으로 갱신했어요. 다시 저장해주세요.');return}
-  if(shareBlob){download(shareBlob,'grew-'+(shareKind==='forest'?year:month)+'.png');toast('이미지를 다운로드했어요.')}return
+  if(shareBlob){download(shareBlob,shareFileName());toast('이미지를 다운로드했어요.')}return
  }
  if(a==='profile'){openProfile();return}
  if(a==='profilePhotoChoose'){if(modal==='profile')$('profilePhotoFile')?.click();return}

@@ -3396,3 +3396,24 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
 .bm-visitor.is-near .bm-visitor-art { filter:grayscale(1) brightness(1.6) opacity(.5); }
 .bm-visitor-art.is-q { width:100%;height:96px;border-radius:14px;border:1.5px dashed rgba(30,42,34,.2);box-sizing:border-box;filter:none;display:flex;align-items:center;justify-content:center;font:680 20px/1 var(--sb-label);color:var(--sb-muted);font-style:normal; }
 .bm-visitor-art.is-hero { background-size:200% 200%;background-position:0 0;filter:none; }
+
+/* Share sheet (redesign 16a): preview, story/feed choice, save or share. */
+.sheet-back[data-kind="share"] .sheet { background:var(--sb-bg);color:var(--sb-ink);border-radius:32px 32px 0 0;padding-bottom:calc(max(18px, env(safe-area-inset-bottom)) + 10px); }
+.share-preview { display:flex;align-items:center;justify-content:center;margin:6px auto 0;min-height:200px; }
+.share-preview img { display:block;border-radius:20px;box-shadow:0 0 0 1px rgba(30,42,34,.08),0 16px 30px -18px rgba(30,42,34,.45);max-width:100%; }
+.share-preview.is-feed img { width:min(72%,290px); }
+.share-preview.is-story img { width:min(46%,200px); }
+.share-preview .muted { font:560 13px/1.4 var(--font-family);color:var(--sb-muted); }
+.share-formats { display:flex;gap:8px;margin-top:20px; }
+.share-formats button { flex:1;display:flex;align-items:center;gap:12px;min-height:0;height:64px;padding:0 16px;border:0;border-radius:18px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.1);color:var(--sb-ink);text-align:left; }
+.share-formats button.active { box-shadow:0 0 0 2px var(--sb-ink); }
+.share-formats strong { display:block;font:680 15px/1.2 var(--font-family); }
+.share-formats small { display:block;font:620 12px/1.2 var(--sb-label);color:var(--sb-muted); }
+.share-format-icon { flex:none;width:14px;height:24px;border-radius:3px;background:#D9D9D5; }
+.share-format-icon.is-feed { width:22px;height:26px;background:var(--sb-ink); }
+.share-formats button.active .share-format-icon.is-story { background:var(--sb-ink); }
+.share-formats button:not(.active) .share-format-icon.is-feed { background:#D9D9D5; }
+.sheet-back[data-kind="share"] .share-actions { display:flex;gap:10px;margin-top:22px; }
+.share-save, .share-go { height:58px;min-height:0;border:0;border-radius:29px;display:flex;align-items:center;justify-content:center;gap:8px;font:680 16px/1 var(--font-family); }
+.share-save { flex:1;background:#fff;box-shadow:0 0 0 1.5px var(--sb-ink) inset;color:var(--sb-ink); }
+.share-go { flex:1.3;background:var(--sb-ink);color:#fff; }

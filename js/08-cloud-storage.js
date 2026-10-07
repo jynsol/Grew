@@ -1755,7 +1755,7 @@ function plantedMoment(c){
  (validRating(c.rating)?'<span class="planted-rating"><b>★</b>'+Number(c.rating).toFixed(1)+'</span>':'')+
  '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span></div>'+
  '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(meta)+'</span></div>'+
- '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+button(icon('share'),'shareMonth','planted-share','aria-label="'+month+'월 기록 공유하기"')+'</div>','planted');
+ '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+button(icon('share'),'shareWork','planted-share',attr(c.id)+' aria-label="'+esc(c.title)+' 공유하기"')+'</div>','planted');
 }
 function complete(id){const c=get(id);if(!c||c.completed)return;ratingPrompt(c,true)}
 function editLog(id,logId){
