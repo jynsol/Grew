@@ -373,7 +373,7 @@ function handleCoverError(event){
 document.addEventListener('error',handleCoverError,true);
 function menu(c){return '<details class="more"><summary aria-label="콘텐츠 메뉴">⋯</summary><div class="more-menu">'+button('다른 스크랩으로 바꾸기','pick','')+button('콘텐츠 상세 보기','detail','',attr(c.id))+'</div></details>'}
 // Status bar tint follows the page colour (intro slides, cream sticker pages).
-const INTRO_THEME_COLORS=['#EADFFC','#FCF0C2','#D2EED8'];
+const INTRO_THEME_COLORS=['#DCCFF7','#FBEFB4','#BEE6CB'];
 function syncThemeColor(){
  const meta=document.querySelector('meta[name="theme-color"]');if(!meta)return;
  const color=authRoute==='intro'?INTRO_THEME_COLORS[introductionStep]||'#FAF7F0':authRoute!=='app'?'#FAF7F0':'#F8F8F6';
