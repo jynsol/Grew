@@ -3665,3 +3665,8 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .forest-tool svg { width:16px;height:16px; }
 .forest-tools-row.is-static { margin-top:16px; }
 @media (max-width:374px) { .forest-tool { padding:0 10px;font-size:12px; } }
+/* Today header: date as a small kicker over the page title, like the other tabs */
+.sticker-top { align-items:flex-end; }
+.sticker-titles { display:flex;flex-direction:column;gap:6px;min-width:0; }
+.sticker-titles .sticker-date { font-size:11px;color:var(--sb-muted); }
+.page .sticker-titles .page-title { margin:0;font:780 26px/1.1 var(--font-family);letter-spacing:-.03em;color:var(--sb-ink); }

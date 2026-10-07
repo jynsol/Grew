@@ -500,7 +500,7 @@ function todayBoard(c){
  const split=String(c.title).match(/^(.+?)\s*[(（]([^()（）]+)[)）]\s*$/),mainTitle=split?split[1]:c.title;
  const suffix=todayStageSuffix(c),sub=split?split[2]:c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
  return '<section class="sticker-today" data-type="'+c.type+'" data-stage="'+stage+'">'+
- '<div class="sticker-top"><span class="sticker-date">'+dateLabel+'</span><div class="page-heading-actions">'+scrapAddButton()+'</div></div>'+
+ '<div class="sticker-top"><div class="sticker-titles"><span class="sticker-date">'+dateLabel+'</span><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div>'+
  '<div class="today-panel">'+
   '<div class="today-panel-top"><span>오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span>'+
    (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+'</div>'+
