@@ -3721,9 +3721,14 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 @media (max-width:360px) { .sticker-actions>.stamp-button:not(.is-done) { margin:6px; } }
 .scrap-page .type-tab::before { display:none !important; content:none; }
 .composer-toolbar .composer-type-tab::before { display:none !important;content:none; }
-/* Dashed lines belong to stamps only; everything else is solid */
-.sticker-week li.is-today:not(.is-logged), .intro-week span.is-today { border-style:solid; }
+/* Dashed lines belong to stamps only (onboarding keeps its decoration); everything else is solid */
+.sticker-week li.is-today:not(.is-logged) { border-style:solid; }
 .scrap-status.is-active { border-style:solid; }
 .detail-action-primary i { display:none; }
 .bm-visitor-art.is-q { border-style:solid; }
-.intro-shapes>.intro-ring { border-style:solid;border-width:1.5px; }
+/* Nothing may widen the page sideways (iOS then shifts fixed bars): clip horizontal overflow,
+   size the full-bleed board from the viewport, centre the tab bar without a transform. */
+html, body { overflow-x:clip; }
+.app, #page { overflow-x:clip; }
+.forest-month.is-board .forest-board { width:100vw;margin-left:calc(50% - 50vw);margin-right:0;align-self:flex-start; }
+.tabs { left:0;right:0;margin-left:auto;margin-right:auto;transform:none; }
