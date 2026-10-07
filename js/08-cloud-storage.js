@@ -392,6 +392,7 @@ function render(){
   if(legacy||archives)$('page').insertAdjacentHTML('beforeend','<section class="settings-group"><h2>기록 보관함</h2><details class="settings-archive"><summary>이전 기록과 백업</summary>'+(archives?'<p>다른 기기와 충돌했을 때 보관한 기록을 내려받을 수 있어요.</p>'+button('보관 기록 확인','syncArchives','secondary'):'')+(legacy?'<p>계정별 저장으로 전환하기 전의 기록이에요. 필요한 경우 내려받아 복원할 수 있어요.</p>'+button('이전 기록 내려받기','legacyBackup','secondary'):'')+'</details></section>');
  }
  if(view==='forest')setupForest();
+ if(view==='today')fitTodayTitle();
  updateForestSoundUI();
  if(!storageOK&& !$('storageAlert').innerHTML)$('storageAlert').innerHTML='<div class="storage-alert">이 환경에서는 자동 저장을 사용할 수 없어요.</div>';
 }
@@ -452,6 +453,19 @@ function todayStamp(c){
  if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+ring+check+'<span>오늘<br>기록 완료</span></div><div class="stamp-done-actions">'+button(log.memo?'메모 수정':'메모 남기기','editMemo','textbtn',attr(c.id)+' data-log="'+esc(log.id)+'"')+button('취소','undoLog','textbtn',attr(c.id))+'</div></div>';
  return button(ring+check+'<span>오늘<br>'+verb+'</span>','record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
 }
+// Long titles shrink until the whole title fits in two lines next to the cover stickers.
+function fitTodayTitle(){
+ const el=document.querySelector('.sticker-title h1 button');if(!el)return;
+ el.classList.add('is-fitting');el.classList.remove('is-long');let size=40;
+ const apply=()=>{el.style.fontSize=size+'px';el.style.letterSpacing=size>=34?'':size>=26?'-.035em':'-.02em'};
+ const fits=(lines=2)=>el.scrollWidth<=el.clientWidth+1&&el.scrollHeight<=size*1.12*lines+2;
+ apply();
+ while(size>20&&!fits()){size-=2;apply()}
+ // Very long titles get up to four lines at the smallest size rather than an ellipsis.
+ if(!fits())el.classList.add('is-long');
+ el.classList.remove('is-fitting');
+}
+addEventListener('resize',()=>{if(view==='today')fitTodayTitle()});
 function openReadingList(currentId){
  const list=state.items.filter(x=>!x.completed&&Model.stage(x)>0&&x.id!==currentId).sort((a,b)=>Math.max(0,...b.logs.map(l=>Date.parse(l.date)||0))-Math.max(0,...a.logs.map(l=>Date.parse(l.date)||0)));
  showModal('읽는 중인 작품','<div class="content-list">'+list.map(x=>row(x,true)).join('')+'</div>'+button('다른 스크랩에서 고르기','pick','secondary'),'reading');
