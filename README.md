@@ -21,6 +21,16 @@ Grew prototype — GitHub Pages-ready static project.
 
 All static asset paths are relative, so the project works both at a custom domain and under a repository path such as `https://<user>.github.io/<repo>/`.
 
+## Releasing changes
+
+Phones keep old CSS/JS cached, so every local `css/` and `js/` link in `index.html` carries a `?v=` stamp. Bump it on each release:
+
+```sh
+V=$(date -u +%Y%m%d%H%M); sed -i -E "s#(\./(css|js)/[0-9A-Za-z_-]+\.(css|js))(\?v=[0-9]+)?\"#\1?v=$V\"#g" index.html
+```
+
+The onboarding sticker art ships as pictures in `assets/images/onboarding/`. The live versions are still in `js/11-onboarding.js` (`INTRO_SLIDES[].art`, `entryStickerArt`); set `window.INTRO_LIVE_ART = true` before rendering to see them, and re-capture the pictures if they change.
+
 ## Important legacy names
 
 Some internal identifiers still contain `songrim` (for example localStorage keys, internal DOM/runtime names, and the existing Supabase table name). They are intentionally retained so existing user data and backend compatibility are not broken. The product/brand displayed to users is **그루 / Grew**.

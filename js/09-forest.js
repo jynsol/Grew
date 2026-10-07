@@ -4,17 +4,20 @@ function forestCameraFrame(vp,world,bounds=world.getBBox()){
  const unit=Math.min(vp.clientWidth/720,vp.clientHeight/540)||1;
  const padding=6,visibleW=vp.clientWidth/unit,visibleH=vp.clientHeight/unit;
  const fit=Math.min((vp.clientWidth-padding*2)/(Math.max(1,bounds.width)*unit),(vp.clientHeight-padding*2)/(Math.max(1,bounds.height)*unit));
- return {bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},unit,visibleW,visibleH,padding:padding/unit,fit,min:fit*.92,max:fit*3.25,cx:bounds.x+bounds.width/2,cy:bounds.y+bounds.height/2,tier:forestLayoutConfig(forestItems(state,year).length).tier};
+ return {bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},unit,visibleW,visibleH,padding:padding/unit,fit,min:fit*.92,max:fit*2.4,cx:bounds.x+bounds.width/2,cy:bounds.y+bounds.height/2,tier:forestLayoutConfig(forestBoardCount(vp)).tier};
+}
+// The board on screen may be one month, not the whole year: size everything from what was drawn.
+function forestBoardCount(vp){const n=vp?.querySelector('svg[data-count]')?.dataset.count;return n!=null?+n:forestItems(state,year).length;
 }
 function forestFittedState(frame){return {scale:frame.fit,x:(360-frame.cx)*frame.fit,y:(270-frame.cy)*frame.fit}}
 function initializeForestViewport(frame){
  const previous=forestViewportFrame;
- if(forestViewportYear!==year||!previous||previous.tier!==frame.tier||zoomState.scale<=previous.fit*1.03){zoomState=forestFittedState(frame)}
+ if(forestViewportYear!==year+'|'+month||!previous||previous.tier!==frame.tier||zoomState.scale<=previous.fit*1.03){zoomState=forestFittedState(frame)}
  else{
   const scale=Math.max(frame.min,Math.min(frame.max,zoomState.scale/previous.fit*frame.fit)),ratio=scale/zoomState.scale;
   zoomState={scale,x:zoomState.x*ratio,y:zoomState.y*ratio};
  }
- forestViewportYear=year;forestViewportFrame=frame;
+ forestViewportYear=year+'|'+month;forestViewportFrame=frame;
 }
 
 function setupForest(){
@@ -207,7 +210,7 @@ function setupForest(){
  apply();
  if(pendingForestArrival){const arrived=[...vp.querySelectorAll('[data-tree]')].find(g=>g.dataset.tree===pendingForestArrival);if(arrived){const pos=arrived.transform.baseVal.getItem(0).matrix;zoomState.scale=Math.min(camera.max,Math.max(zoomState.scale,camera.fit*1.15));zoomState.x=(360-pos.e)*zoomState.scale;zoomState.y=(290-pos.f)*zoomState.scale;apply();zoomTarget={...zoomState};showTip(arrived,'pin');arrived.querySelector('.tree-art')?.classList.add('forest-arrival');pendingForestArrival=null}}
  clearTimeout(window.__songrimVisitorTimer);
- const layer=world.querySelector('#forest-visitor-layer'),cfg=forestLayoutConfig(forestItems(state,year).length);
+ const layer=world.querySelector('#forest-visitor-layer'),cfg=forestLayoutConfig(forestBoardCount(vp));
  let visitorElapsed=0,visitorTickAt=performance.now();
  const syncVisitorVisibility=()=>{layer?.classList.toggle('visitors-paused',document.hidden);visitorTickAt=performance.now()};
  document.addEventListener('visibilitychange',syncVisitorVisibility);syncVisitorVisibility();
@@ -219,7 +222,7 @@ function setupForest(){
    const b=treeArtElementBounds(g.querySelector('.tree-art')),m=g.transform.baseVal.consolidate().matrix;
    return {left:m.e+b.x*m.a,right:m.e+(b.x+b.width)*m.a,top:m.f+b.y*m.d,bottom:m.f+(b.y+b.height)*m.d};
   });
-  const scale=cfg.treeScale*.72,pos=visitorPosition(cfg,boxes,scale);
+  const scale=cfg.treeScale*1.05,pos=visitorPosition(cfg,boxes,scale);
   layer.innerHTML='';if(!pos)return;
   const chosen=nextForestVisitor();if(!chosen)return;
 

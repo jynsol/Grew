@@ -3540,11 +3540,62 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
 .forest-chips { margin-top:10px; }
 .forest-reading b { font-weight:780;color:var(--sb-ink); }
 .forest-toggle { margin-top:14px; }
-#page .forest-board .forest-viewport { aspect-ratio:auto;min-height:0;height:clamp(200px,calc(100svh - 346px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),min(88vw,380px)); }
-.forest-board { margin:-6px -8px 0; }
+#page .forest-board .forest-viewport { aspect-ratio:auto;min-height:0;height:clamp(200px,calc(100svh - 356px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),min(88vw,380px)); }
+.forest-board { margin:4px -8px 0; }
 .forest-tools-row { position:relative;z-index:5;margin-top:6px; }
 /* Status bar strip: content scrolling under the clock is covered instead of showing through */
 .app::before { content:"";position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top);background:var(--sb-bg);z-index:6;pointer-events:none; }
 /* Segmented pills keep one weight in both states so switching never changes their width */
 :is(.scrap-page .type-tab,.composer-toolbar .composer-type-tab,.forest-toggle button,.forest-type-filter button,.bm-page-tabs button,.bm-filter-chips button) { font-weight:680; }
 .scrap-filter-group.is-chips .scrap-filter-option span { font-weight:680; }
+
+/* Every other sheet (settings, forms, confirms, pickers) in the same sticker style:
+   off-white sheet, white fields with a hairline, ink primary, quiet text links. */
+.sheet-back { background:rgba(30,42,34,.38); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet { background:var(--sb-bg);color:var(--sb-ink);border-radius:32px 32px 0 0;padding:10px 22px calc(max(18px, env(safe-area-inset-bottom)) + 10px);box-shadow:0 -10px 30px -18px rgba(30,42,34,.4); }
+.sheet::before { width:40px;height:4px;margin:0 auto 16px;background:rgba(30,42,34,.16); }
+.sheet .sheet-head { align-items:center;gap:12px;margin-bottom:6px; }
+.sheet .sheet-head h2 { padding-top:0;font:780 22px/1.25 var(--font-family);letter-spacing:-.03em; }
+.sheet .sheet-head .iconbtn { border:0; }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet :is(p,.muted,.summary,.note,.creator) { font:560 14px/1.6 var(--font-family);color:var(--sb-muted); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet :is(.muted.tiny,.tiny,small.muted,.field-help,.link-import-help) { margin-top:8px;font:560 12px/1.5 var(--font-family);color:var(--sb-faint); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet label:not(.checkrow):not(.switch):not(.scrap-filter-option) { display:block;margin:18px 0 8px;font:680 13px/1.2 var(--font-family);color:var(--sb-ink); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),select,textarea) { width:100%;box-sizing:border-box;min-height:52px;padding:0 16px;border:0;border-radius:16px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.12);color:var(--sb-ink);font:560 16px/1.4 var(--font-family);outline:0;-webkit-appearance:none;appearance:none; }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet textarea { min-height:104px;padding:14px 16px;resize:none; }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet :is(input,select,textarea):focus { outline:0;box-shadow:0 0 0 2px var(--sb-ink); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet input::placeholder, .sheet textarea::placeholder { color:var(--sb-faint); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet input[type=date] { display:flex;align-items:center; }
+.sheet input[type=file] { width:100%;padding:12px;border-radius:16px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.12);font:560 13px/1 var(--font-family);color:var(--sb-muted);box-sizing:border-box; }
+.sheet input[type=file]::file-selector-button { margin-right:10px;height:34px;padding:0 14px;border:0;border-radius:17px;background:var(--sb-ink);color:#fff;font:680 13px/1 var(--font-family); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .primary { width:100%;height:56px;min-height:0;margin-top:22px;border:0;border-radius:28px;background:var(--sb-ink);color:#fff;font:680 16px/1 var(--font-family);box-shadow:none; }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .primary.danger { background:var(--sb-coral); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .primary:disabled { background:rgba(30,42,34,.12);color:var(--sb-faint); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .secondary { width:100%;height:52px;min-height:0;border:0;border-radius:26px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.14);color:var(--sb-ink);font:680 15px/1 var(--font-family); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .textbtn { min-height:44px;background:none;border:0;color:var(--sb-muted);font:620 14px/1 var(--font-family);text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(30,42,34,.25); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .form-error:not(:empty) { margin:12px 0 0;padding:12px 14px;border-radius:14px;background:#FBE6E1;color:#B4402F;font:620 13px/1.45 var(--font-family); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .form-error:empty { display:none; }
+.sheet-back[data-kind="confirm"] .sheet>p { margin:4px 0 0; }
+/* Pickers: white cards, the chosen one in ink with a coral check */
+.bm-decoration-card { background:#fff;border:0;box-shadow:var(--sb-card);border-radius:22px; }
+.bm-decoration-card.selected { background:var(--sb-mint);border:0;box-shadow:0 0 0 2px var(--sb-ink); }
+.bm-decoration-card .bm-decoration-name { font:680 13px/1.2 var(--font-family);color:var(--sb-ink); }
+.bm-decoration-card .bm-decoration-name b { color:var(--sb-coral); }
+.bm-decoration-work span { font:780 11px/1 var(--sb-label);letter-spacing:.06em;color:var(--sb-muted); }
+.bm-decoration-work h3 { font:780 18px/1.3 var(--font-family);color:var(--sb-ink); }
+.sheet :is(button,a,summary):focus:not(:focus-visible) { outline:0; }
+.sheet-back[data-kind="collection"] .sheet.collection-sheet { padding:0 0 calc(max(18px, env(safe-area-inset-bottom)) + 10px);background:var(--sb-bg);border-radius:32px 32px 0 0; }
+.sheet-back[data-kind="collection"] .collection-sheet>.sheet-head { background:var(--sb-bg);padding:20px 22px 12px;margin:0; }
+.sheet-back[data-kind="collection"] .bm-decoration-body { padding:0 22px; }
+/* The old lime brand colour is retired: anything still pointing at it takes the redesign's mint,
+   and default primary actions are ink with white text. */
+:root { --lime:var(--sb-mint);--action:var(--sb-ink);--action-ink:#fff;--action-pressed:#000; }
+:is(.primary,.ink-button) { color:#fff; }
+.bm-checkout .bm-acquire-actions { background:var(--sb-bg); }
+.sheet-back[data-kind="collection"] .bm-checkout { padding:0 22px 8px; }
+.sheet-back[data-kind="collection"] .bm-acquire-actions .primary { margin-top:0; }
+.bm-payment-methods button.active { background:var(--sb-mint);border-color:transparent;box-shadow:0 0 0 2px var(--sb-ink); }
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus { -webkit-box-shadow:0 0 0 100px #fff inset,0 0 0 1px rgba(30,42,34,.12);-webkit-text-fill-color:var(--sb-ink);caret-color:var(--sb-ink); }
+.intro-board-wrap { top:96px;transform:scale(.9); }
+/* Baked onboarding art: one picture per slide, no live filters */
+.intro-stage>.intro-art { position:absolute;height:auto;max-width:none;pointer-events:none;user-select:none;-webkit-user-select:none; }
+.entry-sticker-art>.entry-art { position:absolute;left:-7.06%;top:-9.23%;width:114.12%;height:auto;max-width:none;pointer-events:none; }

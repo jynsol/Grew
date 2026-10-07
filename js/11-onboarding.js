@@ -50,6 +50,7 @@ function introSeen(){try{return localStorage.getItem(INTRO_SEEN_KEY)==='1'}catch
 function markIntroSeen(){try{localStorage.setItem(INTRO_SEEN_KEY,'1')}catch{}}
 // Small sticker forest shared by the welcome and ready screens.
 function entryStickerArt(label='책과 영화로 자라난 작은 숲'){
+ if(!window.INTRO_LIVE_ART)return '<div class="entry-sticker-art" role="img" aria-label="'+esc(label)+'"><img class="entry-art" src="./assets/images/onboarding/welcome.webp?v=1" alt="" decoding="async"></div>';
  return '<div class="entry-sticker-art" role="img" aria-label="'+esc(label)+'">'+
  introSticker('trees/cherry.webp','left:4%;top:18px;width:46%;transform:rotate(-4deg)')+
  introSticker('trees/oak.webp','right:2%;top:0;width:54%;transform:rotate(3deg)')+
@@ -73,36 +74,43 @@ const introRing=(x,y,size,color)=>'<i class="intro-ring" style="left:'+x+'px;top
 function introBoardHTML(){
  const ground=stickerGroundArtwork({boardW:290,boardH:121},195,178.5),cell=(u,v)=>({x:195+(u-v)*37.8,y:102.9+(u+v)*18.9});
  const plants=[['trees/maple.webp',62],['trees/cherry.webp',60],['trees/ginkgo.webp',58],['trees/oak.webp',62],['trees/birch.webp',56],['trees/young.webp',50],['trees/sprout.webp',36],['trees/maple.webp',58],['trees/sprout.webp',34],['trees/cherry.webp',56],['trees/oak.webp',58],['trees/ginkgo.webp',54],['forest/decor-flower-lilac.webp',26],['forest/decor-flower-peach.webp',26]];
- const cells=Array.from({length:25},(_,i)=>i).sort((a,b)=>hash('intro|'+a)-hash('intro|'+b));
- const placed=plants.map(([src,size],k)=>{const c=cells[k],p=cell(c%5,Math.floor(c/5));return {src,size,x:p.x+(hash('ix'+k)%7-3),y:p.y+(hash('iy'+k)%5-2)}});
+ // Hand-placed checkerboard so the baked picture reads as a full, even little forest.
+ const cells=[[0,0],[2,0],[4,0],[1,1],[3,1],[0,2],[4,2],[1,3],[3,3],[0,4],[2,4],[4,4],[1,2],[3,2],[2,2]].map(([u,v])=>u+v*5);
+ const placed=plants.map(([src,base],k)=>{const size=Math.round(base*1.4);const c=cells[k],p=cell(c%5,Math.floor(c/5));return {src,size,x:p.x+(hash('ix'+k)%7-3),y:p.y+(hash('iy'+k)%5-2)}});
  const rabbit=cell(cells[plants.length]%5,Math.floor(cells[plants.length]/5));
- const items=[...placed.map(t=>({y:t.y,html:'<img class="intro-cut" src="./assets/images/'+t.src+'" alt="" style="left:'+(t.x-t.size/2).toFixed(1)+'px;top:'+(t.y-t.size*.9).toFixed(1)+'px;width:'+t.size+'px;height:'+t.size+'px;filter:none">'})),{y:rabbit.y,html:introVisitor('rabbit','left:'+(rabbit.x-17).toFixed(1)+'px;top:'+(rabbit.y-30).toFixed(1)+'px;width:34px;height:34px;filter:none')}].sort((a,b)=>a.y-b.y);
+ const items=[...placed.map(t=>({y:t.y,html:'<img class="intro-cut" src="./assets/images/'+t.src+'" alt="" style="left:'+(t.x-t.size/2).toFixed(1)+'px;top:'+(t.y-t.size*.9).toFixed(1)+'px;width:'+t.size+'px;height:'+t.size+'px;filter:none">'})),{y:rabbit.y,html:introVisitor('rabbit','left:'+(rabbit.x-24).toFixed(1)+'px;top:'+(rabbit.y-42).toFixed(1)+'px;width:48px;height:48px;filter:none')}].sort((a,b)=>a.y-b.y);
  return '<svg class="intro-board" viewBox="0 0 390 340" aria-hidden="true"><defs>'+ground.defs+'</defs>'+ground.body+'</svg>'+items.map(t=>t.html).join('');
 }
 const INTRO_SLIDES=[
  {title:'마음에 든 작품,<br>가볍게 <mark style="--tilt:-2deg">스크랩.</mark>',copy:'읽고 싶은 책, 보고 싶은 영화를 한곳에 담아요.',label:'책과 영화 카드, 씨앗, 다람쥐 스티커',
   shapes:introBurst(130,66,290,'#F6E7A8',16,40,8)+introBurst(-50,336,170,'rgba(255,255,255,.28)',12,37,-10)+introSpark(20,64,24,'#1E2A22')+introSpark(340,86,18,'#E85A47',15)+introSpark(336,446,28,'#1E2A22',10,'intro-low')+introSpark(14,466,16,'#fff',0,'intro-low')+introRing(-20,96,88,'rgba(30,42,34,.55)')+introRing(300,366,64,'rgba(255,255,255,.9)'),
-  stage:'<div class="intro-card" style="left:40px;top:62px;background:#F9D9C8;transform:rotate(-10deg)"><span>BOOK</span>'+INTRO_BOOK_ART+'</div><div class="intro-card" style="left:198px;top:96px;background:#C5E8CE;transform:rotate(8deg)"><span>MOVIE</span>'+INTRO_MOVIE_ART+'</div>'+
-   '<span class="intro-chip" style="left:126px;top:30px;background:#1E2A22;color:#fff;transform:rotate(-7deg)">+ 스크랩</span>'+
-   introVisitor('squirrel','left:6px;top:292px;width:146px;height:146px;transform:rotate(-5deg)')+introSticker('trees/seed.webp','left:152px;top:312px;width:120px;height:120px;transform:rotate(7deg)')+introSticker('forest/decor-flower-peach.webp','left:276px;top:328px;width:78px;height:78px;transform:rotate(-12deg)')},
+  art:()=>'<div class="intro-card" style="left:40px;top:62px;background:#F9D9C8;transform:rotate(-10deg)"><span>BOOK</span>'+INTRO_BOOK_ART+'</div><div class="intro-card" style="left:198px;top:96px;background:#C5E8CE;transform:rotate(8deg)"><span>MOVIE</span>'+INTRO_MOVIE_ART+'</div>'+
+   introVisitor('squirrel','left:6px;top:292px;width:146px;height:146px;transform:rotate(-5deg)')+introSticker('trees/seed.webp','left:152px;top:312px;width:120px;height:120px;transform:rotate(7deg)')+introSticker('forest/decor-flower-peach.webp','left:276px;top:328px;width:78px;height:78px;transform:rotate(-12deg)'),
+  overlay:'<span class="intro-chip" style="left:126px;top:30px;background:#1E2A22;color:#fff;transform:rotate(-7deg)">+ 스크랩</span>'},
  {title:'하루 한 번,<br>도장 <mark class="is-ink" style="--tilt:3deg">쾅!</mark>',copy:'담아둔 작품 하나를 골라 오늘 읽었다고 찍어요.',label:'새싹, 오늘 읽었어요 도장, 이번 주 도장 스티커와 토끼',
   shapes:introBurst(150,62,270,'rgba(255,255,255,.45)',20,43)+introBurst(-40,216,150,'#E6DDF8',10,36,12,'opacity:.45')+introSpark(344,256,26,'#1E2A22',0,'intro-low')+introSpark(16,70,18,'#1E2A22',20)+introSpark(262,466,16,'#E85A47',0,'intro-low')+introRing(310,70,64,'rgba(30,42,34,.55)')+introRing(20,446,54,'rgba(255,255,255,.9)'),
-  stage:introSticker('trees/sprout.webp','left:8px;top:70px;width:196px;height:196px;transform:rotate(-6deg)')+
-   '<div class="intro-stamp" style="left:192px;top:60px"><i class="stamp-ring"></i>'+INTRO_CHECK(36)+'<span>오늘<br>읽었어요</span></div>'+
+  art:()=>introSticker('trees/sprout.webp','left:8px;top:70px;width:196px;height:196px;transform:rotate(-6deg)')+introVisitor('rabbit','left:240px;top:354px;width:122px;height:122px;transform:rotate(7deg)')+introSticker('forest/decor-flower-lilac.webp','left:34px;top:378px;width:70px;height:70px;transform:rotate(-10deg)'),
+  overlay:'<div class="intro-stamp" style="left:192px;top:60px"><i class="stamp-ring"></i>'+INTRO_CHECK(36)+'<span>오늘<br>읽었어요</span></div>'+
    '<span class="intro-chip" style="left:30px;top:40px;background:#fff;transform:rotate(-6deg)">하루 한 번</span>'+
-   '<div class="intro-week">'+['월','화','수','목','금','토','일'].map((d,i)=>i<2?'<span class="is-done" style="transform:rotate('+(i?6:-8)+'deg)">'+INTRO_CHECK(17)+'</span>':i===2?'<span class="is-today">'+d+'</span>':'<span>'+d+'</span>').join('')+'</div>'+
-   introVisitor('rabbit','left:240px;top:354px;width:122px;height:122px;transform:rotate(7deg)')+introSticker('forest/decor-flower-lilac.webp','left:34px;top:378px;width:70px;height:70px;transform:rotate(-10deg)')},
+   '<div class="intro-week">'+['월','화','수','목','금','토','일'].map((d,i)=>i<2?'<span class="is-done" style="transform:rotate('+(i?6:-8)+'deg)">'+INTRO_CHECK(17)+'</span>':i===2?'<span class="is-today">'+d+'</span>':'<span>'+d+'</span>').join('')+'</div>'},
  {title:'다 읽은 작품이<br>나의 <mark style="--tilt:-3deg;background:#F6E7A8">숲</mark>이 돼요.',copy:'완료한 책과 영화가 달마다 숲에 나무로 남아요.',label:'나무와 새싹이 자라는 숲 판, 여우 스티커',
   shapes:introBurst(40,58,310,'#F6E7A8',24,44,0,'opacity:.9')+introBurst(300,376,110,'rgba(255,255,255,.28)',10,36,18)+introSpark(14,76,22,'#1E2A22')+introSpark(350,96,18,'#fff')+introSpark(10,446,26,'#1E2A22',12,'intro-low')+introSpark(196,64,14,'#E85A47')+introRing(318,66,60,'rgba(30,42,34,.55)'),
-  stage:'<div class="intro-board-wrap">'+introBoardHTML()+'</div>'+
-   '<span class="intro-chip" style="left:22px;top:44px;background:#F6E7A8;transform:rotate(-8deg);font-size:16px">+1 TREE</span><span class="intro-chip" style="left:226px;top:64px;background:#fff;transform:rotate(6deg)">'+Number(now().slice(5,7))+'월의 숲</span>'+
-   introVisitor('fox','left:250px;top:330px;width:124px;height:124px;transform:rotate(-6deg)')+introSticker('forest/decor-flower-peach.webp','left:14px;top:348px;width:64px;height:64px;transform:rotate(10deg)')}
+  art:()=>'<div class="intro-board-wrap">'+introBoardHTML()+'</div>'+introVisitor('fox','left:250px;top:330px;width:124px;height:124px;transform:rotate(-6deg)')+introSticker('forest/decor-flower-peach.webp','left:14px;top:348px;width:64px;height:64px;transform:rotate(10deg)'),
+  overlay:()=>'<span class="intro-chip" style="left:22px;top:44px;background:#F6E7A8;transform:rotate(-8deg);font-size:16px">+1 TREE</span><span class="intro-chip" style="left:226px;top:64px;background:#fff;transform:rotate(6deg)">'+Number(now().slice(5,7))+'월의 숲</span>'}
 ];
+// The sticker art is drawn once and shipped as a picture (assets/images/onboarding); the live
+// version (art) is kept only to re-bake it. Set window.INTRO_LIVE_ART=true to see the live one.
+const INTRO_ART_PAD=30;
+function introArtLayer(step){
+ if(window.INTRO_LIVE_ART)return INTRO_SLIDES[step].art();
+ if(!introArtLayer.warm){introArtLayer.warm=true;[1,2,3].forEach(n=>{const i=new Image();i.decoding='async';i.src='./assets/images/onboarding/intro-'+n+'.webp?v=1'})}
+ return '<img class="intro-art" src="./assets/images/onboarding/intro-'+(step+1)+'.webp?v=1" alt="" decoding="async" style="left:-'+INTRO_ART_PAD+'px;top:-'+INTRO_ART_PAD+'px;width:'+(390+INTRO_ART_PAD*2)+'px">';
+}
 function renderIntroduction(){
  const step=introductionStep,s=INTRO_SLIDES[step],last=step===2;
  return '<section class="sticker-intro" data-step="'+step+'"><div class="intro-shapes" aria-hidden="true">'+s.shapes+'</div>'+
  '<div class="intro-top"><span class="intro-wordmark">'+esc(APP_BRAND.en)+'</span>'+button('건너뛰기','introSkip','textbtn intro-skip')+'</div>'+
- '<div class="intro-stage" role="img" aria-label="'+esc(s.label)+'">'+s.stage+'</div>'+
+ '<div class="intro-stage" role="img" aria-label="'+esc(s.label)+'">'+introArtLayer(step)+(typeof s.overlay==='function'?s.overlay():s.overlay)+'</div>'+
  '<div class="intro-bottom"><span class="sr-only">3장 중 '+(step+1)+'번째</span><h1>'+s.title+'</h1><p>'+s.copy+'</p><div class="intro-footer"><div class="intro-dots" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i===step?'on':'')+'"></i>').join('')+'</div>'+
  button((last?'시작하기':'다음')+'<span aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>','introNext','intro-next')+'</div></div></section>';
 }
