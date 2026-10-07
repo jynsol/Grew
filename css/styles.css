@@ -3932,3 +3932,6 @@ html, body { overflow-x:clip; }
 .planted-cover, .finish-cover, .scrap-composer-body .content-row div.cover { background-color:var(--book-tint); }
 .sticker-recent-card[data-type="book"] i.sticker-recent-cover { background-color:var(--book-tint); }
 .sticker-recent-card[data-type="movie"] i.sticker-recent-cover { background-color:var(--movie-tint); }
+/* 최근 완료: the tree alone, centred (the title already names the work) */
+.sticker-recent-card .sticker-recent-art .sticker-tree.is-cut { left:50%;right:auto;top:8px;bottom:auto;width:92px;height:92px;margin-left:-46px; }
+.sticker-recent-card .sticker-recent-art, .sticker-recent-card[data-type] .sticker-recent-art { box-shadow:none;margin-bottom:2px; }
