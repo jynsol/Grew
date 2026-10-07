@@ -339,7 +339,9 @@ function selected(){return Model.get(state,state.selected)}
 function get(id){return Model.get(state,id)}
 function button(text,action,cls='primary',attrs=''){return '<button type="button" class="'+cls+'" data-action="'+action+'" '+attrs+'>'+text+'</button>'}
 function attr(id){return 'data-id="'+esc(id)+'"'}
-function toast(message,undo){$('toast').classList.remove('planted');clearTimeout(toastTimer);undoAction=undo||null;$('toast').innerHTML='<span>'+esc(message)+'</span>'+(undo?button('취소','toastUndo',''):'');toastTimer=setTimeout(()=>{$('toast').innerHTML='';undoAction=null},undo?10000:4500)}
+function toast(message,undo){$('toast').classList.remove('planted');clearTimeout(toastTimer);undoAction=undo||null;$('toast').innerHTML='<span>'+esc(message)+'</span>'+(undo?button('취소','toastUndo',''):'');toastTimer=setTimeout(()=>{$('toast').innerHTML='';undoAction=null},undo?4500:2200)}
+// A tap on the toast (outside its undo button) dismisses it at once.
+document.addEventListener('click',e=>{const t=e.target.closest?.('#toast');if(t&&!e.target.closest('[data-action]'))dismissToast()});
 function dismissToast(){$('toast').classList.remove('planted');clearTimeout(toastTimer);$('toast').innerHTML='';undoAction=null}
 function commit(close=false){if(!persist())return false;if(close)closeModal();render();return true}
 function focusPageHeading(){requestAnimationFrame(()=>{if(modal)return;const heading=$('page').querySelector('h1');if(heading){heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true})}})}
