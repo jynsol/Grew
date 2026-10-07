@@ -297,6 +297,7 @@ document.addEventListener('submit',async e=>{
  if(f.id==='filterForm'){updateScrapFilters({sort:$('filterSort').value},true);return}
  if(f.id==='profileForm'){saveProfile(f);return}
  if(f.id==='tasteForm'){state.profile.tastes=[...f.querySelectorAll('input:checked')].map(x=>x.value);if(!commit(true))return;toast('취향을 저장했어요.')}
+ if(f.id==='recordDoneForm'){const l=get(f.dataset.id)?.logs.find(l=>l.id===f.dataset.log),memo=$('recordDoneMemo').value.trim();if(l&&memo!==l.memo){l.memo=memo;if(!commit(true))return;toast('메모를 저장했어요.')}else closeModal();return}
  if(f.id==='memoForm'){const l=get(f.dataset.id)?.logs.find(l=>l.id===f.dataset.log);if(l){l.memo=$('todayMemo').value.trim();if(!commit(true))return;toast('메모를 저장했어요.')}return}
  if(f.id==='logForm'){
   const c=get(f.dataset.id),l=c.logs.find(l=>l.id===f.dataset.log),date=$('logDate').value,page=$('logPage')?.value||'',memo=$('logMemo').value;
