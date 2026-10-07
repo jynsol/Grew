@@ -3486,3 +3486,41 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
 .sticker-recent-card[data-type="movie"] .sticker-recent-type { background:var(--sb-mint); }
 .detail-chip.is-ink svg { margin-right:2px; }
 .fcal-day.is-done { background:var(--sb-butter); }
+
+/* Recent cards follow the design: movie butter with a mint cover, book lilac with a peach cover, plain label. */
+.sticker-recent-card[data-type="movie"] .sticker-recent-art { background:var(--sb-butter); }
+.sticker-recent-card[data-type="movie"] i.sticker-recent-cover { background-color:var(--sb-mint); }
+.sticker-recent-card[data-type="book"] i.sticker-recent-cover { background-color:var(--sb-peach); }
+.sticker-recent-card .sticker-recent-type { display:block;padding:0 2px;background:none !important;font-stretch:125%;color:var(--sb-muted); }
+
+/* Detail pass against the design */
+.scrap-page .type-tabs { flex:none; }
+.scrap-page .type-tab { width:auto;min-width:0;flex:none; }
+.settings-card .menu-row { font:620 15px/1 var(--font-family);color:var(--sb-ink); }
+.settings-card .menu-row-value { font:560 13px/1 var(--font-family); }
+.settings-card .menu-row-value svg { width:14px;height:14px; }
+.forest-reading-line { margin:10px 0 0;font:560 13px/1 var(--font-family);color:var(--sb-muted); }
+.forest-board { margin:-18px -8px -8px; }
+.forest-board .forest-viewport { aspect-ratio:720/500; }
+.forest-tools-row { margin-top:4px; }
+.fcal-tree { display:flex;align-items:center;justify-content:center;margin-top:-2px; }
+.fcal-tree img { width:40px;height:40px; }
+.fcal-day.is-done { overflow:visible; }
+.bm-shop-badge.is-base { background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.18); }
+.bm-shop-badge.is-record { background:var(--sb-mint); }
+.bm-shop-badge.is-shop { background:var(--sb-lilac); }
+.bm-shop-badge.is-mystery { background:var(--sb-butter); }
+.bm-visitor { position:relative; }
+.bm-soon { position:absolute;right:18%;top:-4px;padding:5px 8px;border:2px solid #fff;border-radius:99px;background:var(--sb-coral);color:#fff;font:780 10px/1 var(--font-family);transform:rotate(8deg);z-index:1; }
+.finish-date { position:relative; }
+.finish-date b { margin-left:auto;font:620 14px/1 var(--font-family);color:var(--sb-muted); }
+.finish-date input { position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer; }
+.notification-time-pill { position:relative;display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:18px;background:var(--sb-butter); }
+.notification-time-pill b { font:780 14px/1 var(--sb-label);color:var(--sb-ink); }
+.notification-time-pill.is-off { opacity:.45; }
+.settings-card .notification-time-row .notification-time-pill input { position:absolute;inset:0;width:100%;height:100%;opacity:0;padding:0;cursor:pointer; }
+.scrap-composer-body .content-row:nth-child(5n+2) div.cover { background-color:var(--sb-peach); }
+.scrap-composer-body .content-row:nth-child(5n+3) div.cover { background-color:var(--sb-mint); }
+.scrap-composer-body .content-row:nth-child(5n+4) div.cover { background-color:#fff; }
+.scrap-composer-body .content-row:nth-child(5n+5) div.cover { background-color:var(--sb-butter); }
+.forest-sound-choice:not(.selected) .forest-sound-choice-check { display:none; }

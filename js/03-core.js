@@ -610,7 +610,7 @@ function ratingPrompt(c,advance=false){
  showModal(finishing?(c.type==='movie'?'끝까지 봤어요':'다 읽었어요'):'평점과 감상','<form id="ratingForm" class="finish-form" data-id="'+esc(c.id)+'" data-advance="'+(advance?'yes':'no')+'"><div class="finish-head">'+cover+'<div><span>'+(c.completed||finishing?'FINISHED · '+done.slice(5).replace('-','.'):'')+'</span><strong>'+esc(c.title)+'</strong></div></div>'+
  '<div class="finish-rating"><span>어땠어요?</span><div class="rating"><div class="rating-half-stars" data-rating-picker></div></div><input type="hidden" id="ratingValue" value="'+(c.rating||'')+'"><p id="ratingText">'+(c.rating?Number(c.rating).toFixed(1):'선택 안 함')+'</p></div>'+
  '<label class="sr-only" for="reviewMemo">한 줄 감상 · 선택</label><textarea id="reviewMemo" maxlength="4000" placeholder="한 줄 감상 · 선택">'+esc(c.review||'')+'</textarea>'+
- (finishing?'<label class="finish-date"><span>완료일</span><input id="finishDate" type="date" max="'+now()+'" value="'+now()+'"></label>':'')+
+ (finishing?'<label class="finish-date"><span>완료일</span><b id="finishDateText">'+finishDateLabel(now())+' ›</b><input id="finishDate" type="date" max="'+now()+'" value="'+now()+'" aria-label="완료일"></label>':'')+
  '<div class="finish-actions"><button class="primary" type="submit">'+(finishing?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2-6 8h3l-5 7h6v5h4v-5h6l-5-7h3z"/></svg>숲에 심기':'평점·감상 저장')+'</button>'+
  (c.rating?button('평점만 지우기','clearRating','textbtn',attr(c.id)):'')+'</div></form>','finish')}
 
@@ -707,7 +707,7 @@ function bmPageTabs(tabs,current,action){return '<div class="bm-page-tabs" role=
 function bmShopCard(id){
  const owned=bmReadyTreeIds().includes(id),ready=bmTreeReady(id),group=bmCatalogGroup(id);
  const action=!ready?'<span class="bm-shop-action is-soon">1,100원</span>':owned?button(BM_PAGE_ICONS.check.replace('#FF6A55','currentColor')+'보유 중','bmPreviewTree','bm-shop-action is-owned','data-species="'+id+'"'):group==='shop'?button('1,100원','bmQuickBuy','bm-shop-action','data-species="'+id+'" data-kind="tree" aria-label="'+esc(bmTreeName(id))+' 1,100원 구매 체험"'):'<span class="bm-shop-action is-soon">'+(group==='mystery'?'조건 달성':'기록으로 열려요')+'</span>';
- return '<article class="bm-shop-card'+(ready?'':' is-soon')+'">'+(ready?button(bmTreeImg(id),'bmPreviewTree','bm-shop-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"'):'<div class="bm-shop-art">'+bmTreeImg(id)+'</div>')+'<div class="bm-shop-meta"><strong>'+esc(bmTreeName(id))+'</strong><span class="bm-shop-badge">'+({base:'기본',record:'성장',shop:'유료',mystery:'히든'}[group])+'</span></div>'+action+'</article>';
+ return '<article class="bm-shop-card'+(ready?'':' is-soon')+'">'+(ready?button(bmTreeImg(id),'bmPreviewTree','bm-shop-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"'):'<div class="bm-shop-art">'+bmTreeImg(id)+'</div>')+'<div class="bm-shop-meta"><strong>'+esc(bmTreeName(id))+'</strong><span class="bm-shop-badge is-'+group+'">'+({base:'기본',record:'성장',shop:'유료',mystery:'히든'}[group])+'</span></div>'+action+'</article>';
 }
 function bmShopTreesHTML(){
  const pack=bmPackageInfo(),filters=[['shop','유료 16'],['free','무료 10'],['mystery','히든 4'],['owned','보유'],['all','전체 30']];
@@ -723,7 +723,7 @@ function bmCouponBoardHTML(){
  return '<div class="bm-coupon-board"><div class="bm-coupon-top"><div><span class="bm-pack-kicker">TREE COUPON</span><strong>'+have+' / '+q.cost+'장</strong><small>'+(left?left+'장 더 모으면 나무 1종':'나무 1종을 열 수 있어요')+'</small></div><span class="bm-coupon-today">오늘 '+q.watchedToday+' / '+q.dailyLimit+'회</span></div><div class="bm-stamps" role="img" aria-label="쿠폰 '+have+'장, 14장 중">'+stamps+'</div>'+
  button('<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z" fill="#FF6A55"/></svg>'+(q.watchedToday>=q.dailyLimit?'오늘 2장을 모두 모았어요':'광고 보고 쿠폰 받기'),'bmAdStart','bm-ad-button',q.watchedToday>=q.dailyLimit?'disabled':'')+'</div>'+
  (bmPendingProduct?button(bmTreeName(bmPendingProduct.id)+'로 돌아가기','bmReturnProduct','bm-coupon-return'):'')+
- '<ul class="bm-coupon-notes"><li>광고 1회에 쿠폰 1장, 하루 최대 2장이에요.</li><li>쿠폰 14장으로 유료 나무 1종을 영구로 열어요.</li><li>매일 모으면 7일에 한 그루씩 열 수 있어요.</li><li>쿠폰으로 연 나무도 일반 나무 20종 조건에 포함돼요.</li></ul>';
+ '<ul class="bm-coupon-notes"><li>광고 1회에 쿠폰 1장, 하루 최대 2장이에요.</li><li>쿠폰 14장으로 유료 나무 1종을 영구로 열어요.</li><li>매일 모으면 7일에 한 그루씩 열 수 있어요.</li></ul>';
 }
 function renderShopPage(){
  bmRefresh(state);const tab=['floors','coupons'].includes(bmCollectionTab)?bmCollectionTab:'inventory';
@@ -743,12 +743,16 @@ function renderCodexPage(){
  if(tab==='visitors'){
   const seen=new Set(collectionState().visitorsSeen),done=completedAll().length,found=FOREST_VISITORS.filter(v=>seen.has(v.id)),next=FOREST_VISITORS.find(v=>!seen.has(v.id));
   const hero=found.at(-1)||FOREST_VISITORS[0];
-  const card=v=>{const met=seen.has(v.id),near=!met&&v===next;return '<div class="bm-visitor'+(met?'':near?' is-near':' is-unknown')+'">'+(met||near?'<i class="bm-visitor-art" style="background-image:url(./assets/images/forest/visitor-'+v.id+'.webp)"></i>':'<i class="bm-visitor-art is-q">?</i>')+'<strong>'+(met||near?esc(v.name):'???')+'</strong><small>'+(met?'만났어요':'완료 '+(near?Math.max(0,v.need-done)+'개 더':v.need+'개'))+'</small></div>'};
+  const card=v=>{const met=seen.has(v.id),near=!met&&v===next;return '<div class="bm-visitor'+(met?'':near?' is-near':' is-unknown')+'">'+(near?'<b class="bm-soon">곧</b>':'')+(met||near?'<i class="bm-visitor-art" style="background-image:url(./assets/images/forest/visitor-'+v.id+'.webp)"></i>':'<i class="bm-visitor-art is-q">?</i>')+'<strong>'+(met||near?esc(v.name):'???')+'</strong><small>'+(met?'만났어요':'완료 '+(near?Math.max(0,v.need-done)+'개 더':v.need+'개'))+'</small></div>'};
   return '<section class="bm-page">'+head+'<div class="bm-codex-hero is-visitors"><div><span>숲을 찾은 친구</span><strong>'+found.length+'<small>/'+FOREST_VISITORS.length+'</small></strong><p>작품을 완료할수록 새 친구가 와요.'+(next?'<br>다음은 '+esc(next.name)+' · '+Math.max(0,next.need-done)+'개 남음':'')+'</p></div><i class="bm-visitor-art is-hero" style="background-image:url(./assets/images/forest/visitor-'+hero.id+'.webp)"></i></div><div class="bm-visitor-grid">'+FOREST_VISITORS.map(card).join('')+'</div></section>';
  }
  const regular=bmOwnedTreeIds().length,hidden=bmMysteries().filter(t=>t.unlocked).length,owned=[...BM_BASE_IDS,...BM_RECORD_IDS,...BM_SHOP_IDS].filter(id=>bmReadyTreeIds().includes(id));
  const count=g=>g.filter(id=>bmReadyTreeIds().includes(id)).length,latest=owned.at(-1)||'oak';
- const section=(title,badge,ids,mystery=false)=>'<section class="bm-codex-section"><div class="bm-shop-head"><h2>'+title+' <span class="bm-shop-badge">'+badge+'</span></h2><span>'+(mystery?hidden:count(ids))+' / '+ids.length+'</span></div><div class="bm-codex-grid">'+ids.map(bmCodexTreeCard).join('')+'</div></section>';
+ const section=(title,badge,ids,mystery=false)=>'<section class="bm-codex-section"><div class="bm-shop-head"><h2>'+title+' <span class="bm-shop-badge is-'+({'기본':'base','성장':'record','유료':'shop','히든':'mystery'}[badge])+'">'+badge+'</span></h2><span>'+(mystery?hidden:count(ids))+' / '+ids.length+'</span></div><div class="bm-codex-grid">'+ids.map(bmCodexTreeCard).join('')+'</div></section>';
  return '<section class="bm-page">'+head+'<div class="bm-codex-hero"><div><span>모은 나무</span><strong>'+(regular+hidden)+'<small>/30종</small></strong><i class="bm-codex-bar"><b style="width:'+Math.round((regular+hidden)/30*100)+'%"></b></i><p>기본 '+count(BM_BASE_IDS)+' · 성장 '+count(BM_RECORD_IDS)+' · 유료 '+count(BM_SHOP_IDS)+' · 히든 '+hidden+'</p></div><span class="bm-codex-hero-art">'+bmTreeImg(latest)+'</span></div>'+
  section('기본 나무','기본',BM_BASE_IDS)+section('성장 나무','성장',BM_RECORD_IDS)+section('유료 나무','유료',BM_SHOP_IDS)+section('히든 나무','히든',bmMysteries().map(t=>'mystery-'+t.id),true)+'</section>';
 }
+
+// The finish date reads like the design ("10.07 오늘 ›"); the native date picker sits on top, invisible.
+function finishDateLabel(date){return date.slice(5).replace('-','.')+(date===now()?' 오늘':'')}
+document.addEventListener('input',e=>{if(e.target.id==='finishDate'&&Model.validDate(e.target.value)){const t=$('finishDateText');if(t)t.textContent=finishDateLabel(e.target.value)+' ›'}if(e.target.id==='notificationTime'){const t=$('notificationTimeText');if(t)t.textContent=e.target.value}});

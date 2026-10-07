@@ -495,13 +495,15 @@ function todayBoard(c){
  const dateLabel=String(date.getUTCMonth()+1).padStart(2,'0')+'.'+String(date.getUTCDate()).padStart(2,'0')+' '+['SUN','MON','TUE','WED','THU','FRI','SAT'][date.getUTCDay()];
  const coverArt=c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'<span class="sticker-cover-blank" aria-hidden="true"></span>';
  const completeLabel=stage===0?(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요'):(c.type==='movie'?'끝까지 봤어요':'다 읽었어요');
- const suffix=todayStageSuffix(c),sub=c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
+ // A trailing "(…)" in a book title reads as its subtitle, as in the design.
+ const split=String(c.title).match(/^(.+?)\s*[(（]([^()（）]+)[)）]\s*$/),mainTitle=split?split[1]:c.title;
+ const suffix=todayStageSuffix(c),sub=split?split[2]:c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
  return '<section class="sticker-today" data-type="'+c.type+'" data-stage="'+stage+'">'+
- '<div class="sticker-top"><span class="sticker-date">'+dateLabel+'</span><div class="page-heading-actions">'+scrapAddButton()+menu(c)+'</div></div>'+
+ '<div class="sticker-top"><span class="sticker-date">'+dateLabel+'</span><div class="page-heading-actions">'+scrapAddButton()+'</div></div>'+
  '<div class="today-panel">'+
   '<div class="today-panel-top"><span>오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span>'+
    (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+'</div>'+
-  '<div class="today-panel-title"><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+'>'+esc(c.title)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>'+
+  '<div class="today-panel-title"><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+'">'+esc(mainTitle)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>'+
   '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button>'+
   '<div class="today-disc" aria-hidden="true"></div>'+stickerTree(c,stage,'today-tree')+
   '<span class="today-stage"><i aria-hidden="true">'+stickerTree(c,stage)+'</i>'+esc(growthAppearance(stage).name)+(suffix?'<b aria-hidden="true">·</b><em>'+esc(suffix)+'</em>':'')+'</span>'+
@@ -586,7 +588,7 @@ function renderDetail(){
  return '<section class="detail-page" data-type="'+c.type+'"><div class="detail-panel">'+stickerCover(c,'detail-cover')+(stage>0?'<span class="detail-tree">'+stickerTree(c,stage)+'</span>':'')+'</div>'+
  '<div class="detail-head"><span>'+typeName[c.type]+(genre?' · '+esc(genre):'')+'</span><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'<p class="detail-creator">'+esc(c.creator||'제작자 미확인')+(c.publisher?' · '+esc(c.publisher):'')+'</p></div>'+
  '<div class="detail-chips">'+chips+'</div>'+
- '<button type="button" class="detail-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 수정"><span>내 별점</span>'+(validRating(c.rating)?averageStars(c.rating):'<span class="muted">아직 별점 없음</span>')+'<b aria-hidden="true">›</b></button>'+
+ (c.completed?'<button type="button" class="detail-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 수정"><span>내 별점</span>'+(validRating(c.rating)?averageStars(c.rating):'<span class="muted">아직 별점 없음</span>')+'<b aria-hidden="true">›</b></button>':'')+
  (c.review?'<div class="detail-section review-copy"><h2>나의 감상</h2><p>'+esc(c.review)+'</p></div>':'')+
  '<div class="detail-section"><h2>기록</h2>'+(logs.length?'<div class="detail-logs">'+logs.slice(0,5).map(logRow).join('')+'</div>'+(logs.length>5?'<details class="collapse"><summary>지난 기록 '+(logs.length-5)+'개 더 보기</summary><div class="detail-logs">'+logs.slice(5).map(logRow).join('')+'</div></details>':''):'<p class="detail-empty">아직 기록이 없어요.</p>')+'</div>'+
  '<div class="detail-section">'+detailMetadata(c)+button('나무 모습 바꾸기','bmWorkTree','textbtn detail-tree-change',attr(c.id))+'</div>'+
@@ -625,7 +627,7 @@ function renderForestMonth(){
  const m=Number(month.slice(5)),items=forestMonthItems(month),reading=items.filter(c=>!c.completed).length;
  const shareIcon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>';
  const head='<div class="forest-top">'+button(esc(year)+' 올해의 숲 <span aria-hidden="true">›</span>','forestYearView','forest-year-link')+button(shareIcon,'shareMonth','forest-share','aria-label="'+m+'월의 숲 공유하기"')+'</div>'+
-  '<div class="forest-title-row"><div><h1 class="page-title">'+m+'월의 숲</h1>'+forestTypeChips(items,reading?'<span class="forest-reading">'+(items.some(c=>!c.completed&&c.type==='book')?'읽는':'보는')+' 중 '+reading+'</span>':'')+'</div>'+forestNav('forestPrevMonth','forestNextMonth','지난달','다음 달',month<now().slice(0,7))+'</div>';
+  '<div class="forest-title-row"><div><h1 class="page-title">'+m+'월의 숲</h1>'+forestTypeChips(items)+(reading?'<p class="forest-reading-line">'+(items.some(c=>!c.completed&&c.type==='book')?'읽는':'보는')+' 중 '+reading+'</p>':'')+'</div>'+forestNav('forestPrevMonth','forestNextMonth','지난달','다음 달',month<now().slice(0,7))+'</div>';
  const toggle='<div class="forest-toggle" role="group" aria-label="보기 방식">'+button(icon('forest')+'숲으로 보기','forestShow',forestShow==='forest'?'active':'','data-show="forest" aria-pressed="'+(forestShow==='forest')+'"')+button(icon('today')+'달력으로 보기','forestShow',forestShow==='calendar'?'active':'','data-show="calendar" aria-pressed="'+(forestShow==='calendar')+'"')+'</div>';
  if(forestShow==='calendar')return '<section class="forest-page-section forest-month">'+head+toggle+forestCalendarHTML(month)+'</section>';
  const board=items.map(c=>({...c,forestTile:''}));
