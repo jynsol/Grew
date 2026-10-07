@@ -1798,17 +1798,23 @@ function recordDone(c,previousStage,previousKey=growthKey(c,previousStage)){
  setTimeout(()=>toast(message),grew?900:450);
 }
 // Planted (redesign 13a): the finished work's tree, its stamp and a way into this month's forest.
+// Planted moment: a soft gradient page in the work's colours with light rays, sparkles and the
+// coral DONE stamp, then the work and three big numbers (tree no. this month, record days, rating).
 function plantedMoment(c){
  const done=c.completed&&c.completed!=='unknown'?c.completed:now(),month=Number(done.slice(5,7)),months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
- const number=state.items.filter(x=>x.completed&&x.completed!=='unknown'&&x.completed.slice(0,7)===done.slice(0,7)).length;
- const logs=new Set(c.logs.map(l=>l.date)).size,start=Model.firstExperienceDate(c),days=start?Math.max(1,Math.round((Date.parse(done+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/864e5)+1):0;
- const tree=c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무',meta=[logs?logs+'일 기록':'',tree].filter(Boolean).join(' · ');
- const check='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
- showModal('큰 나무를 숲에 심었어요','<p class="moment-kicker">'+months[month-1]+' FOREST · NO.'+Math.max(1,number)+'</p><h3 class="moment-title" aria-hidden="true">큰 나무를<br>숲에 심었어요.</h3>'+
- '<div class="planted-stage" data-type="'+c.type+'"><i class="planted-sun" aria-hidden="true"></i>'+stickerTree(c,3,'planted-tree')+'<div class="planted-stamp-real" aria-hidden="true">'+stampSVG(c,true)+'</div>'+
- (validRating(c.rating)?'<span class="planted-rating"><b>★</b>'+Number(c.rating).toFixed(1)+'</span>':'')+
- '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span></div>'+
- '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(meta)+'</span></div>'+
+ const number=Math.max(1,state.items.filter(x=>x.completed&&x.completed!=='unknown'&&x.completed.slice(0,7)===done.slice(0,7)).length);
+ const logs=new Set(c.logs.map(l=>l.date)).size;
+ const tree=c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무';
+ const spark=(x,y,s,d)=>'<i class="planted-spark" style="left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;animation-delay:'+d+'s"></i>';
+ const stat=(value,unit,label)=>'<div class="planted-stat"><b>'+value+'<small>'+unit+'</small></b><span>'+label+'</span></div>';
+ showModal('큰 나무를 숲에 심었어요','<div class="planted-bg" data-type="'+c.type+'" aria-hidden="true"><i class="planted-glow"></i></div>'+
+ '<p class="moment-kicker">'+months[month-1]+' FOREST · NO.'+number+'</p><h3 class="moment-title" aria-hidden="true">큰 나무를<br>숲에 심었어요.</h3>'+
+ '<div class="planted-stage" data-type="'+c.type+'"><i class="planted-rays" aria-hidden="true"></i><i class="planted-sun" aria-hidden="true"></i>'+
+  spark(14,18,14,0)+spark(80,58,10,.6)+spark(22,70,9,1.1)+spark(70,12,8,1.6)+spark(88,30,12,.3)+spark(8,46,7,1.9)+
+  stickerTree(c,3,'planted-tree')+'<div class="planted-stamp-real" aria-hidden="true">'+stampSVG(c,true)+'</div>'+
+  '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span></div>'+
+ '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+'로 자랐어요</span></div>'+
+ '<div class="planted-stats">'+stat(number,'번째','이달의 나무')+stat(logs||1,'일','함께한 기록')+stat(validRating(c.rating)?Number(c.rating).toFixed(1):'–','','별점')+'</div>'+
  '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+button(icon('share'),'shareWork','planted-share',attr(c.id)+' aria-label="'+esc(c.title)+' 공유하기"')+'</div>','planted');
 }
 function complete(id){const c=get(id);if(!c||c.completed)return;ratingPrompt(c,true)}
