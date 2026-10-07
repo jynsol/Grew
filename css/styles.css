@@ -4030,3 +4030,5 @@ html, body { overflow-x:clip; }
 /* Sheet backdrop: dim and blur what is behind so it never reads as part of the sheet */
 .sheet-back { background:rgba(30,42,34,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px); }
 .sheet :is(button,a,summary):focus:not(:focus-visible), .sheet .content-row:focus { outline:0; }
+/* Card-style rows keep their full outline (the old divider rule dropped the last bottom edge) */
+.sheet-back:not([data-kind="scrap-composer"]) .content-row:last-child { border-bottom:1px solid var(--line); }
