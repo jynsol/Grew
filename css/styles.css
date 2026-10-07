@@ -3980,3 +3980,11 @@ html, body { overflow-x:clip; }
 .scrap-rating { font:700 12px/1 var(--font-family);color:var(--sb-ink); }
 .scrap-row .sticker-tree.is-cut-sm { width:50px;height:50px; }
 .scrap-status.is-active { background:var(--sb-sky);color:#2D5E9A;box-shadow:none; }
+/* Scrap rows on a fixed grid: cover | text | tree slot, so every column lines up */
+.scrap-row { display:grid;grid-template-columns:46px minmax(0,1fr) 52px;align-items:center;column-gap:14px;min-height:94px;padding:12px 0; }
+.scrap-row-body { align-self:center; }
+.scrap-row-body strong, .scrap-row-body small { width:100%; }
+.scrap-tree-slot { width:52px;height:52px;display:flex;align-items:flex-end;justify-content:center; }
+.scrap-tree-slot .sticker-tree.is-cut-sm { width:48px;height:48px;margin:0; }
+.scrap-type { justify-content:center;width:50px;padding:0; }
+.scrap-row-marks { min-height:20px; }

@@ -542,7 +542,7 @@ function scrapCard(c,choose=false){
  const status=Model.status(c),stage=Model.stage(c);
  return '<button type="button" class="scrap-row" data-type="'+c.type+'" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+' aria-label="'+esc(c.title)+' · '+scrapStatusLabel(c)+'">'+stickerCover(c)+
  '<span class="scrap-row-body"><strong>'+esc(c.title)+'</strong><small>'+esc(c.creator||'제작자 미확인')+'</small><span class="scrap-row-marks"><span class="scrap-type is-'+c.type+'">'+(c.type==='movie'?'MOVIE':'BOOK')+'</span>'+(status==='done'?'':'<span class="scrap-status is-'+status+'">'+scrapStatusLabel(c)+'</span>')+(validRating(c.rating)?'<span class="scrap-rating"><b>★</b> '+c.rating+'</span>':'')+'</span></span>'+
- (stage>0?stickerTree(c,stage,'is-cut-sm'):'')+'</button>';
+ '<span class="scrap-tree-slot">'+(stage>0?stickerTree(c,stage,'is-cut-sm'):'')+'</span></button>';
 }
 
 let pickingFilters={q:'',type:'all',status:'all',sort:'recent'};
