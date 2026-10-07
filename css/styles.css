@@ -4156,3 +4156,4 @@ html, body { overflow-x:clip; }
 .forest-sound-choice.selected { background:var(--sb-butter);box-shadow:none;border:0; }
 .forest-sound-choice.is-1.selected { background:var(--sb-sky); }
 .forest-sound-choice.selected .forest-sound-choice-check { background:#fff;color:var(--sb-coral); }
+.my-profile { background:var(--sb-sky); }
