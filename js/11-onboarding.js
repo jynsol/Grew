@@ -43,7 +43,11 @@ function loginFields(){
  return '<label for="flowEmail">이메일</label><input id="flowEmail" type="email" required autocomplete="email" value="'+esc(lastEmail)+'" placeholder="you@example.com"><label for="flowPassword">비밀번호</label><input id="flowPassword" type="password" required minlength="6" autocomplete="current-password" placeholder="6자 이상">'
 }
 
-let introductionStep=0;
+let introductionStep=0,introFirstRun=false;
+// The intro opens by itself once per device; afterwards it stays behind the welcome link.
+const INTRO_SEEN_KEY='grew.intro-seen.v1';
+function introSeen(){try{return localStorage.getItem(INTRO_SEEN_KEY)==='1'}catch{return true}}
+function markIntroSeen(){try{localStorage.setItem(INTRO_SEEN_KEY,'1')}catch{}}
 // Small sticker forest shared by the welcome and ready screens.
 function entryStickerArt(label='책과 영화로 자라난 작은 숲'){
  return '<div class="entry-sticker-art" role="img" aria-label="'+esc(label)+'">'+
@@ -87,6 +91,7 @@ function renderIntroduction(){
  button(last?'시작하기 <span aria-hidden="true">↗</span>':'<span aria-hidden="true">↗</span>','introNext',last?'intro-next is-start':'intro-next',last?'':'aria-label="다음"')+'</div></div></section>';
 }
 function renderEntry(){
+ if(authRoute==='welcome'&&!introSeen()){if(!introFirstRun)introductionStep=0;introFirstRun=true;authRoute='intro'}
  $('head').hidden=false;
  $('tabs').hidden=true;$('page').dataset.view=authRoute;document.body.dataset.view=authRoute;$('head').dataset.view=authRoute;$('page').classList.add('entry-page');$('page').classList.toggle('taste-page',authRoute==='taste');$('page').classList.toggle('intro-page',authRoute==='intro');
  $('head').innerHTML=!['welcome','onboard','taste','ready','intro'].includes(authRoute)?'<div class="row">'+button(icon('back'),'flowBack','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+esc(APP_BRAND.ko)+'</span></div>':'<div class="brand">'+icon('forest')+esc(APP_BRAND.ko)+'</div>';
@@ -118,9 +123,9 @@ function renderEntry(){
 }
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-action]');if(!b||b.disabled)return;
- if(b.dataset.action==='introStart'){introductionStep=0;flowTo('intro')}
- if(b.dataset.action==='introNext'){if(introductionStep<2){introductionStep++;flowTo('intro')}else flowTo('signupOptions')}
- if(b.dataset.action==='introSkip')flowTo('signupOptions');
+ if(b.dataset.action==='introStart'){introductionStep=0;introFirstRun=false;flowTo('intro')}
+ if(b.dataset.action==='introNext'){if(introductionStep<2){introductionStep++;flowTo('intro')}else{markIntroSeen();flowTo(introFirstRun?'welcome':'signupOptions')}}
+ if(b.dataset.action==='introSkip'){markIntroSeen();flowTo(introFirstRun?'welcome':'signupOptions')}
  if(b.dataset.action==='flowEmailSignup'){flowCodeSent=false;flowTo('signup')}
 });
 
