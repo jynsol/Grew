@@ -4157,3 +4157,6 @@ html, body { overflow-x:clip; }
 .forest-sound-choice.is-1.selected { background:var(--sb-sky); }
 .forest-sound-choice.selected .forest-sound-choice-check { background:#fff;color:var(--sb-coral); }
 .my-profile { background:var(--sb-sky); }
+/* One thin separator between settings rows (an old top border doubled it) */
+.settings-card .menu-row { border-top:0;border-bottom:1px solid rgba(30,42,34,.07); }
+.settings-card .menu-row:last-child { border-bottom:0; }
