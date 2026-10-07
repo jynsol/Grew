@@ -451,7 +451,7 @@ function genreCandidates(c){return (GENRE_POOL[c.type]||[]).map(label=>[label,''
 function genreOptions(c){const selected=launchGenre(c.type,c.genre,c);return genreCandidates(c).map(([label])=>'<option value="'+esc(label)+'" '+(label===selected?'selected':'')+'>'+esc(label)+'</option>').join('')}
 function metadataFields(c){return '<label for="contentGenre">장르</label><select id="contentGenre">'+genreOptions(c)+'</select><span id="genreTreePreview" hidden></span><p class="muted tiny">직접 고른 장르는 자동으로 바뀌지 않아요.</p>'}
 document.addEventListener('change',e=>{if(e.target.id==='contentType'){$('contentGenre').innerHTML=genreOptions({type:e.target.value,genre:''});const isBook=e.target.value==='book';}if(['contentType','contentGenre'].includes(e.target.id))$('genreTreePreview').textContent='나무 · '+mappedForestCategoryLabel($('contentType').value,$('contentGenre').value)+' 계열'});
-// Work info as label / value rows (Apple "Information" style). The genre already sits next to the
+// Work info as a few label / value rows (Apple "Information" style): date, length, tree only. The genre already sits next to the
 // BOOK / MOVIE tag, so it is not repeated here.
 function detailMetadata(c){
  const day=v=>{const m=String(v||'').match(/^(\d{4})-?(\d{2})-?(\d{2})/);return m?m[1]+'.'+m[2]+'.'+m[3]:esc(String(v).slice(0,10))};
@@ -460,10 +460,7 @@ function detailMetadata(c){
  if(c.type==='album'&&c.releaseDate)rows.push(['발매일',day(c.releaseDate)]);
  if(c.type==='book'&&c.publishedAt)rows.push(['출간일',day(c.publishedAt)]);
  if(c.runtime&&c.type!=='movie')rows.push(['러닝타임',esc(c.runtime)+'분']);
- if(c.trackCount)rows.push(['곡 수',esc(c.trackCount)+'곡']);
  if(c.length&&c.type==='book')rows.push(['페이지',esc(c.length)+'쪽']);
- if(c.type==='book'&&c.isbn&&!c.providerId)rows.push(['ISBN',esc(c.isbn)]);
- if(Array.isArray(c.saves)&&c.saves.length)rows.push(['스크랩',c.saves.length+'회']);
  const treeName=c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무';
  rows.push([c.completed?'나무':'자랄 나무','<button type="button" class="detail-info-tree" data-action="bmWorkTree" data-id="'+esc(c.id)+'">'+esc(treeName)+' <span aria-hidden="true">›</span></button>']);
  return '<dl class="detail-info">'+rows.map(([k,v])=>'<div><dt>'+k+'</dt><dd>'+v+'</dd></div>').join('')+'</dl>';
