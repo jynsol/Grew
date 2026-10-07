@@ -902,8 +902,24 @@ function meadowGroundArtwork(cfg,cx=360,cy=286,floor='meadow'){
  return {defs,body};
 }
 
+// Basic floor (redesign 11a): a flat sticker block — green top, soil sides, grass tufts,
+// a white cut edge and a soft shadow, matching the forest tab's design.
+function stickerGroundArtwork(cfg,cx=360,cy=286){
+ const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.max(18,rx*.2),f=n=>n.toFixed(1),unit=k=>(hash('ground|'+k)%10000)/10000;
+ const top=`M${f(cx)} ${f(cy-ry)}L${f(cx+rx)} ${f(cy)}L${f(cx)} ${f(cy+ry)}L${f(cx-rx)} ${f(cy)}Z`;
+ const left=`M${f(cx-rx)} ${f(cy)}L${f(cx)} ${f(cy+ry)}L${f(cx)} ${f(cy+ry+depth)}L${f(cx-rx)} ${f(cy+depth)}Z`;
+ const right=`M${f(cx+rx)} ${f(cy)}L${f(cx)} ${f(cy+ry)}L${f(cx)} ${f(cy+ry+depth)}L${f(cx+rx)} ${f(cy+depth)}Z`;
+ const outline=`M${f(cx)} ${f(cy-ry)}L${f(cx+rx)} ${f(cy)}L${f(cx+rx)} ${f(cy+depth)}L${f(cx)} ${f(cy+ry+depth)}L${f(cx-rx)} ${f(cy+depth)}L${f(cx-rx)} ${f(cy)}Z`;
+ let specks='',tufts='';
+ for(let i=0;i<Math.round(rx/5);i++){const side=i%2?1:-1,t=unit(i+'t'),d=.15+unit(i+'d')*.7,x=cx+side*rx*(1-t),y=cy+ry*t+depth*d;specks+=`<rect x="${f(x-1.6)}" y="${f(y-1.6)}" width="3.2" height="3.2" fill="#6F5239" opacity=".8"/>`}
+ for(let i=0;i<Math.round(rx/6);i++){const a=unit(i+'a')*2-1,b=unit(i+'b')*2-1;if(Math.abs(a)+Math.abs(b)>.92)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2;tufts+=`<path d="M${f(x-4)} ${f(y)}L${f(x-1.3)} ${f(y-5)}L${f(x)} ${f(y-1.5)}L${f(x+1.3)} ${f(y-5.5)}L${f(x+4)} ${f(y)}" fill="none" stroke="#6E9C58" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
+ const id='sticker-ground-'+Math.round(rx);
+ const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>`;
+ const body=`<g data-forest-ground="terrain" data-floor="basic" pointer-events="none"><path d="${outline}" transform="translate(0 12)" fill="rgba(30,42,34,.22)" filter="url(#${id}-shadow)"/><path d="${outline}" fill="#fff" stroke="#fff" stroke-width="7" stroke-linejoin="round"/><path d="${left}" fill="#A9825E"/><path d="${right}" fill="#8B6A4C"/>${specks}<path data-ground-surface="true" d="${top}" fill="#9FC888"/>${tufts}</g>`;
+ return {defs,body};
+}
 function forestGroundArtwork(cfg, theme, cx = 360, cy = 286, floor = 'basic') {
-  if(theme!=='snow')return meadowGroundArtwork(cfg,cx,cy,floor);
+  if(theme!=='snow')return floor==='meadow'?meadowGroundArtwork(cfg,cx,cy,floor):stickerGroundArtwork(cfg,cx,cy);
   const snow = theme === 'snow';
   const rx = cfg.boardW / 2 + 44;
   const ry = cfg.boardH / 2 + 34;

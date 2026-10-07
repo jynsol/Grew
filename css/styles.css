@@ -3463,3 +3463,9 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
   .stamp-button { width:100px;height:100px;font-size:14px; }
   .stamp-button.is-done { width:92px;height:92px;font-size:13px; }
 }
+
+/* Each tab has its own active colour. */
+.tabs button[data-tab="scrap"].active { background:var(--sb-lilac); }
+.tabs button[data-tab="forest"].active { background:var(--sb-mint); }
+.tabs button[data-tab="my"].active { background:var(--sb-peach); }
+.forest-board { margin:6px -8px 0; }
