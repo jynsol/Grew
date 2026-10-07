@@ -4185,8 +4185,8 @@ body{letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoo
 .more-menu button{font:500 14px/1.2 var(--font-family);color:var(--text-1)}
 .more-menu button[data-action=delete]{color:var(--sb-coral,#E85A47)}
 .detail-more summary{color:var(--text-1)}
-/* display numerals: Archivo, slightly condensed — the one expressive touch */
-.page .tv-count b,.today-v2 .tv-count b,.page .my-stats strong,.planted-stat b,.page .scrap-heading-count{font-family:"Archivo",var(--font-family);font-stretch:94%;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+/* display numerals: Bricolage Grotesque — the one expressive touch */
+.page .tv-count b,.today-v2 .tv-count b,.page .my-stats strong,.planted-stat b,.page .scrap-heading-count{font-family:"Bricolage Grotesque",var(--font-family);font-stretch:100%;font-weight:700;font-optical-sizing:auto;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .page .tv-count b,.today-v2 .tv-count b{letter-spacing:-.04em}
 .planted-stat b small,.today-v2 .tv-count small{font-family:var(--font-family);font-stretch:100%;letter-spacing:-.01em}
 /* list rows read at body size */
