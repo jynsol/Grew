@@ -471,11 +471,11 @@ function todayStamp(c){
 // Long titles shrink until the whole title fits in two lines beside the cover.
 function fitTodayTitle(){
  const el=document.querySelector('.today-panel-title h1 button');if(!el)return;
- el.classList.add('is-fitting');el.classList.remove('is-long');let size=25;
- const apply=()=>{el.style.fontSize=size+'px';el.style.letterSpacing=size>=21?'':'-.025em'};
+ el.classList.add('is-fitting');el.classList.remove('is-long');let size=22;
+ const apply=()=>{el.style.fontSize=size+'px';el.style.letterSpacing=size>=19?'':'-.025em'};
  const fits=(lines=2)=>el.scrollWidth<=el.clientWidth+1&&el.scrollHeight<=size*1.2*lines+2;
  apply();
- while(size>17&&!fits()){size--;apply()}
+ while(size>16&&!fits()){size--;apply()}
  // Very long titles get up to four lines at the smallest size rather than an ellipsis.
  if(!fits())el.classList.add('is-long');
  el.classList.remove('is-fitting');

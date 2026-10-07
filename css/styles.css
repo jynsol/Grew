@@ -3621,3 +3621,38 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .tabs button svg, .tabs button.active svg { width:22px;height:22px; }
 .tabs button.active svg { stroke-width:2.1; }
 .tabs button .tab-label, .tabs button.active .tab-label { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
+
+/* Type scale pass: everything a notch smaller (inputs stay 16px so iOS does not zoom) */
+.page:not(.entry-page) .page-heading .page-title { font-size:26px; }
+.page .forest-title-row .page-title { font-size:28px; }
+.page .today-panel-title h1, .page .detail-head h1 { font-size:22px; }
+.page .welcome-copy h1 { font-size:34px; }
+.page .intro-bottom h1 { font-size:30px; }
+.moment-title { font-size:29px; }
+.sheet .sheet-head h2 { font-size:20px; }
+.page .sticker-recent h2 { font-size:18px; }
+.page :is(.detail-section h2,.detail-section h3,.bm-shop-head h2) { font-size:15px; }
+.scrap-heading-count { font-size:15px; }
+.scrap-row-body strong { font-size:15px; }
+.scrap-row-body small { font-size:12.5px; }
+.settings-card .menu-row { font-size:14px; }
+.my-stats strong { font-size:18px; }
+.my-profile-copy strong { font-size:16px; }
+.bm-codex-hero strong { font-size:26px; }
+.bm-coupon-top strong { font-size:20px; }
+.bm-pack strong { font-size:18px; }
+.finish-head strong { font-size:19px; }
+.forest-sound-choice-copy strong, .fcal-card-copy strong { font-size:15px; }
+.stamp-button { font-size:15px; }
+.moment-stamp { font-size:15px; }
+.head .back-title, .forest-back { font-size:15px; }
+.welcome-copy p, .intro-bottom p { font-size:14px; }
+.page :is(.intro-next,.intro-next.is-start) { font-size:16px; }
+:is(.scrap-filter-footer,.finish-actions,.forest-year-share,.forest-sound-listen) .primary, .sheet-back:is([data-kind="record-done"],[data-kind="planted"]) .primary { font-size:16px; }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet .primary, .scrap-session-footer .primary, :is(.share-save,.share-go) { font-size:15px; }
+.forest-tool { font-size:13px; }
+.forest-toggle button { font-size:12.5px; }
+.forest-chip, .forest-reading { font-size:12.5px; }
+.bm-pack-buy { font-size:14px; }
+.settings-card .menu-row>span:not(.menu-row-value) { font-size:inherit;color:var(--sb-ink); }
+.settings-card .menu-row>.menu-row-value { font-size:12.5px; }
