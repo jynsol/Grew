@@ -3950,3 +3950,7 @@ html, body { overflow-x:clip; }
 /* 읽기 시작 stamp label matches the 오늘 읽었어요 face */
 .stamp-button.is-start .stamp-start-label { font:800 14px/1.25 var(--font-family);color:#6B6B66; }
 .today-v2 .tv-note { z-index:auto; } .today-v2 .today-tree { z-index:1; }
+/* Without the memo line the hero is shorter, so its middle never sits empty */
+.today-v2 .tv-hero { height:350px; }
+.today-v2 .tv-sun { width:270px;height:270px;bottom:-60px; }
+.today-v2 .today-tree { width:186px;height:186px;bottom:22px; }
