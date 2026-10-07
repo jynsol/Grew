@@ -472,16 +472,18 @@ function fitTodayTitle(){
  el.classList.remove('is-fitting');
 }
 addEventListener('resize',()=>{if(view==='today')fitTodayTitle()});
+// Books are read and films are watched; a mixed list uses the app's shared status name.
+function progressLabel(items){const types=new Set(items.map(x=>x.type));return types.size>1?statusName.active:types.has('movie')?'보는 중':'읽는 중'}
 function openReadingList(currentId){
  const list=state.items.filter(x=>!x.completed&&Model.stage(x)>0&&x.id!==currentId).sort((a,b)=>Math.max(0,...b.logs.map(l=>Date.parse(l.date)||0))-Math.max(0,...a.logs.map(l=>Date.parse(l.date)||0)));
- showModal('읽는 중인 작품','<div class="content-list">'+list.map(x=>row(x,true)).join('')+'</div>'+button('다른 스크랩에서 고르기','pick','secondary'),'reading');
+ showModal(progressLabel(list)+'인 작품','<div class="content-list">'+list.map(x=>row(x,true)).join('')+'</div>'+button('다른 스크랩에서 고르기','pick','secondary'),'reading');
 }
 function todayStickerWeek(c){
  const streak=streakDays(c),names=['월','화','수','목','금','토','일'];
  return '<section class="sticker-week" aria-label="이번 주 기록"><h2>이번 주'+(streak?' · 연속 '+streak+'일':'')+'</h2><ol>'+weekDots(c).map((d,i)=>'<li class="'+(d.logged?'is-logged ':'')+(d.isToday?'is-today ':'')+(d.isFuture?'is-future':'')+'" aria-label="'+d.date+' '+names[i]+'요일'+(d.isToday?' · 오늘':'')+' · '+(d.logged?'기록함':d.isFuture?'예정':'기록 없음')+'"'+(d.isToday?' aria-current="date"':'')+'>'+names[i]+'</li>').join('')+'</ol></section>';
 }
 function todayBoard(c){
- const stage=Model.stage(c),reading=state.items.filter(x=>!x.completed&&x.id!==c.id&&Model.stage(x)>0).length,others=state.items.some(x=>!x.completed&&x.id!==c.id),date=new Date(now()+'T12:00:00Z');
+ const stage=Model.stage(c),readingItems=state.items.filter(x=>!x.completed&&x.id!==c.id&&Model.stage(x)>0),reading=readingItems.length,readingLabel=progressLabel(readingItems),others=state.items.some(x=>!x.completed&&x.id!==c.id),date=new Date(now()+'T12:00:00Z');
  const dateLabel=String(date.getUTCMonth()+1).padStart(2,'0')+'.'+String(date.getUTCDate()).padStart(2,'0')+' '+['SUN','MON','TUE','WED','THU','FRI','SAT'][date.getUTCDay()];
  const note=todayProgressNote(c);
  const coverArt=c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'<span class="sticker-cover-blank" aria-hidden="true">'+icon(c.type)+'</span>';
@@ -492,7 +494,7 @@ function todayBoard(c){
   '<div class="sticker-title"><span>오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+'>'+esc(c.title)+'</button></h1></div>'+
   (reading?'<i class="sticker-cover-back" aria-hidden="true"></i>':'')+
   '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button>'+
-  (reading?button('⇄ 읽는 중 '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 읽는 중인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+
+  (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+
   '<div class="sticker-tree-disc">'+stickerTree(c,stage)+'</div>'+
   '<span class="sticker-stage">'+esc(growthAppearance(stage).name)+'</span>'+
   '<div class="sticker-next"><span>'+note.label+'</span><strong>'+esc(note.text)+'</strong></div>'+
