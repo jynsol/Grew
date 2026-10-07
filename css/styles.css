@@ -3956,3 +3956,27 @@ html, body { overflow-x:clip; }
 .today-v2 .today-tree { width:186px;height:186px;bottom:22px; }
 /* The printed stamp is always coral, like red stamp ink (books and films alike) */
 .today-v2 .stamp-button.is-done .stamp-svg, .stamp-button.is-done .stamp-svg { color:var(--sb-coral); }
+
+/* ── Scrap (same rules as Today) ───────────────────────────────────────────
+   Grouped white list, cover stickers, small BOOK / MOVIE tags in the work's
+   colour, coral for done marks, grey for not-started. */
+.scrap-heading-count { margin-left:8px;padding:0;background:none;color:rgba(30,42,34,.35);font:780 30px/1 var(--font-family);letter-spacing:-.03em;vertical-align:baseline; }
+.scrap-page .scrap-fixed-search, .scrap-page .scrap-search-block, .scrap-page .main-search { background:rgba(30,42,34,.06);box-shadow:none;border:0; }
+.scrap-list { margin-top:12px;padding:2px 16px;border-radius:24px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.06); }
+.scrap-row { gap:14px;padding:14px 0;border-bottom:1px solid #F0F0ED; }
+.scrap-row:last-child { border-bottom:0; }
+.scrap-row .sticker-cover-art { width:46px;height:66px;border-radius:6px;box-shadow:none;filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 5px rgba(30,42,34,.18)); }
+.scrap-row-body { gap:5px; }
+.scrap-row-body strong { font:780 15.5px/1.25 var(--font-family);letter-spacing:-.02em; }
+.scrap-row-body small { font:560 12.5px/1.2 var(--font-family);color:rgba(30,42,34,.55); }
+.scrap-row-marks { gap:6px;margin-top:3px; }
+.scrap-type { display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:6px;font:800 10px/1 var(--sb-label);font-stretch:118%;letter-spacing:.06em; }
+.scrap-type.is-book { background:var(--book-tint);color:var(--book-ink); }
+.scrap-type.is-movie { background:var(--movie-tint);color:var(--movie-ink); }
+.scrap-status, .scrap-status.is-active, .scrap-status.is-done { height:20px;padding:0 8px;border:0;border-radius:6px;font:700 11px/1 var(--font-family);display:inline-flex;align-items:center;gap:3px; }
+.scrap-status.is-saved, .scrap-status:not(.is-active):not(.is-done) { background:#ECECE8;color:#6B6B66; }
+.scrap-status.is-active { background:#fff;color:var(--sb-ink);box-shadow:inset 0 0 0 1.5px var(--sb-ink); }
+.scrap-row[data-type] .scrap-status.is-done { background:var(--sb-ink);color:#fff; }
+.scrap-rating { font:700 12px/1 var(--font-family);color:var(--sb-ink); }
+.scrap-row .sticker-tree.is-cut-sm { width:50px;height:50px; }
+.scrap-status.is-active { background:var(--sb-sky);color:#2D5E9A;box-shadow:none; }

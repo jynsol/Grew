@@ -541,7 +541,7 @@ function scrapStatusLabel(c){const status=Model.status(c);return status==='done'
 function scrapCard(c,choose=false){
  const status=Model.status(c),stage=Model.stage(c);
  return '<button type="button" class="scrap-row" data-type="'+c.type+'" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+' aria-label="'+esc(c.title)+' · '+scrapStatusLabel(c)+'">'+stickerCover(c)+
- '<span class="scrap-row-body"><strong>'+esc(c.title)+'</strong><small><span class="type-tag is-'+c.type+'">'+typeName[c.type]+'</span>'+esc(c.creator||'제작자 미확인')+'</small><span class="scrap-row-marks"><span class="scrap-status is-'+status+'">'+(status==='done'?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>':'')+scrapStatusLabel(c)+'</span>'+(validRating(c.rating)?'<span class="scrap-rating"><b>★</b> '+c.rating+'</span>':'')+'</span></span>'+
+ '<span class="scrap-row-body"><strong>'+esc(c.title)+'</strong><small>'+esc(c.creator||'제작자 미확인')+'</small><span class="scrap-row-marks"><span class="scrap-type is-'+c.type+'">'+(c.type==='movie'?'MOVIE':'BOOK')+'</span><span class="scrap-status is-'+status+'">'+(status==='done'?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>':'')+scrapStatusLabel(c)+'</span>'+(validRating(c.rating)?'<span class="scrap-rating"><b>★</b> '+c.rating+'</span>':'')+'</span></span>'+
  (stage>0?stickerTree(c,stage,'is-cut-sm'):'')+'</button>';
 }
 
