@@ -443,11 +443,11 @@ function renderTodayBase(){
 // Sticker board (redesign 5a): the tree sticker leads, the stamp records, the week stays small.
 const STICKER_TREE_KEYS={0:'seed',1:'sprout',2:'young'};
 function stickerTreeSrc(c,stage=Model.stage(c)){
- const key=stage<3?STICKER_TREE_KEYS[stage]:c.hiddenTree?(c.hiddenTree==='A'?'shining':'moonlight'):contentSpecies(c)?.id;
+ const key=stage<3?growthKey(c,stage):c.hiddenTree?(c.hiddenTree==='A'?'shining':'moonlight'):contentSpecies(c)?.id;
  return (SONGLIM_TREE_ASSETS[key]||SONGLIM_TREE_ASSETS.oak).src;
 }
 function stickerTree(c,stage=Model.stage(c),cls=''){
- const name=stage<3?growthAppearance(stage).name:(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무');
+ const name=stage<3?growthAppearance(stage,c).name:(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무');
  return '<img class="sticker-tree '+cls+'" src="'+esc(stickerTreeSrc(c,stage))+'" alt="'+esc(name)+'" decoding="async">';
 }
 // "N일째" counts the days actually recorded, not calendar days since the first one.
@@ -521,7 +521,7 @@ function todayBoard(c){
   '<div class="tv-hero-main"><div class="today-panel-title"><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+'">'+esc(mainTitle)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+(c.creator?'<span class="today-panel-kicker">'+esc(c.creator)+'</span>':'')+(c.type==='movie'?button('보러 가기 ↗','external','tv-watch',attr(c.id)):'')+'</div>'+
   '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button></div>'+
   '<i class="tv-sun" aria-hidden="true"></i>'+stickerTree(c,stage,'today-tree')+
-  '<div class="today-stage tv-count">'+'<b>'+(stage?count:0)+'</b><small>'+(stage?unit:'일째')+'</small><span>'+esc(growthAppearance(stage).name)+(stage?'':' · 시작 전')+'</span></div>'+
+  '<div class="today-stage tv-count">'+'<b>'+(stage?count:0)+'</b><small>'+(stage?unit:'일째')+'</small><span>'+esc(growthAppearance(stage,c).name)+(stage?'':' · 시작 전')+'</span></div>'+
  '</article>'+
  '<article class="tv-week sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(todayLogOf(c)?button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</article>'+
  '</section>';
@@ -595,7 +595,7 @@ function renderDetail(){
  const logs=[...c.logs].sort((a,b)=>b.date.localeCompare(a.date)),stage=Model.stage(c),logDays=todayLogDates(c).size,days=todayDayCount(c);
  const genre=cleanGenreValue(c.genre)?launchGenre(c.type,c.genre,c):'';
  const chips=c.completed?'<span class="detail-chip is-ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+'<button type="button" class="detail-chip detail-chip-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 '+(validRating(c.rating)?c.rating+'점 · 수정':'남기기')+'"><b>★</b> '+(validRating(c.rating)?c.rating:'별점 남기기')+'</button>':
-  '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'',c.type==='movie'?'기록 '+logDays+'회':''].filter(Boolean).join(' · ')+'</span>':'');
+  '<span class="detail-chip is-ink">'+esc(growthAppearance(stage,c).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'',c.type==='movie'?'기록 '+logDays+'회':''].filter(Boolean).join(' · ')+'</span>':'');
  const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'+ 메모 남기기')+'</span></button>';
  const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
  const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'보기 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
@@ -614,7 +614,7 @@ function renderDetail(){
 }
 function forestGrowthKey(c){
  if(!c||!c.id||c._bmSample||!['book','movie'].includes(c.type)||c.completed)return '';
- const stage=Model.stage(c);return stage===1?'sprout':stage===2?'young':'';
+ const stage=Model.stage(c);return stage===1||stage===2?growthKey(c,stage):'';
 }
 function forestRecordYear(c){
  if(c.completed&&c.completed!=='unknown')return c.completed.slice(0,4);
@@ -1773,21 +1773,23 @@ function startExperience(id){
 }
 function record(id){
  const c=get(id);if(!c||c.completed)return;
- const previousStage=Model.stage(c);if(Model.log(state,id,now())){state.selected=id;if(!commit())return;if(previousStage===0)pendingForestArrival=c.id;recordDone(c,previousStage)}else toast('오늘 기록이 이미 있어요.');
+ const previousStage=Model.stage(c),previousKey=growthKey(c,previousStage);if(Model.log(state,id,now())){state.selected=id;if(!commit())return;if(previousStage===0)pendingForestArrival=c.id;recordDone(c,previousStage,previousKey)}else toast('오늘 기록이 이미 있어요.');
 }
 // After recording, Today itself plays the moment: the stamp slams down and, when the stage
 // changes, the old tree shrinks away while the new one pops up in the same disc.
-function recordDone(c,previousStage){
- const stage=Model.stage(c),grew=stage>previousStage,name=n=>growthAppearance(n).name;
+function recordDone(c,previousStage,previousKey=growthKey(c,previousStage)){
+ const stage=Model.stage(c),key=growthKey(c,stage),grew=key!==previousKey,name=k=>GROWTH_NAMES[k];
  const josa=(word,a,b)=>{const code=word.charCodeAt(word.length-1)-0xAC00;return word+(code>=0&&code<=11171&&code%28?a:b)};
- const message=grew?josa(name(previousStage),'이','가')+' '+josa(name(stage),'으로','로')+' 자랐어요.':'오늘 기록했어요. 한 칸 더 자랐어요.';
+ // 으로/로: a final consonant takes 으로, except ㄹ which takes 로 (덤불로, 어린 나무로).
+ const toward=word=>{const code=word.charCodeAt(word.length-1)-0xAC00,fin=code>=0&&code<=11171?code%28:0;return word+(fin&&fin!==8?'으로':'로')};
+ const message=grew?josa(name(previousKey),'이','가')+' '+toward(name(key))+' 자랐어요.':'오늘 기록했어요. 한 칸 더 자랐어요.';
  const stamp=view==='today'?document.querySelector('.stamp-done .stamp-button'):null;
  if(!stamp){toast(message);return}
  stamp.classList.add('is-slam');
  if(grew){
   const tree=document.querySelector('.today-panel .today-tree');
   if(tree){
-   const prev=tree.cloneNode();prev.src=stickerTreeSrc(c,previousStage);prev.alt='';prev.classList.add('is-leaving');
+   const prev=tree.cloneNode();prev.src=(SONGLIM_TREE_ASSETS[previousKey]||SONGLIM_TREE_ASSETS.young).src;prev.alt='';prev.classList.add('is-leaving');
    if(previousStage<=1)prev.classList.add('is-small');
    tree.classList.add('is-arriving');tree.after(prev);setTimeout(()=>prev.remove(),1300);
    document.querySelector('.today-panel .today-stage')?.classList.add('is-pop');

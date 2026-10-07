@@ -4101,3 +4101,4 @@ html, body { overflow-x:clip; }
 .detail-page[data-stage="0"] .detail-tree, .detail-page .detail-tree:has(img[src*="seed"]), .detail-page .detail-tree:has(img[src*="sprout"]) { width:72px;height:72px;bottom:18px;margin-left:52px; }
 .detail-page .detail-tree:has(img[src*="seed"]) { width:96px;height:96px;bottom:6px;margin-left:36px; }
 .detail-page .detail-tree:has(img[src*="sprout"]) { width:90px;height:90px;bottom:10px;margin-left:40px; }
+.today-v2 .today-tree[src*="bush"] { width:160px;height:160px;right:22px;bottom:30px; }

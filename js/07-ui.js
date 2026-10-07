@@ -20,12 +20,14 @@ share:'<path d="M7 10H4v12h16V10h-3M12 16V2m-5 5 5-5 5 5"/>'
 function icon(name){return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICON[name]||ICON.book)+'</svg>'}
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Growth artwork shares the tree palette; the original four stages are unchanged.
-function growthAppearance(stage,c){
- if(stage===3)return {key:'mature',name:'나무'};
- if(stage===1)return {key:'sprout',name:'새싹'};
- if(stage===2)return {key:'young',name:'어린 나무'};
- return {key:'seed',name:'씨앗'};
+// Growth steps: 씨앗 → 새싹 (1 record day) → 덤불 (2) → 어린 나무 (3+) → 나무 (finished).
+// Stage 2 covers both 덤불 and 어린 나무; the record-day count tells them apart.
+const GROWTH_NAMES={seed:'씨앗',sprout:'새싹',bush:'덤불',young:'어린 나무',mature:'나무'};
+function growthKey(c,stage=Model.stage(c)){
+ if(stage===3)return 'mature';if(stage===1)return 'sprout';if(stage===0)return 'seed';
+ return c&&new Set((c.logs||[]).map(l=>l.date)).size<3?'bush':'young';
 }
+function growthAppearance(stage,c){const key=growthKey(c,stage);return {key,name:GROWTH_NAMES[key]}}
 function growth(stage,c,featured=false){
  const uid='growth-'+(growth.serial=(growth.serial||0)+1),appearance=growthAppearance(stage,c);
  const mature=stage===3&&c;
@@ -590,7 +592,7 @@ function treeArt(c,theme){
 
 function treeVisualProfile(c){
  const growthKey=forestGrowthKey(c);// Growing works stay visibly smaller than finished trees: a sprout is tiny, a young tree about 60%.
- if(growthKey)return {species:contentSpecies(c),shape:growthKey,radius:growthKey==='sprout'?14:18,scaleBias:growthKey==='sprout'?.42:.6};
+ if(growthKey)return {species:contentSpecies(c),shape:growthKey,radius:growthKey==='sprout'?14:growthKey==='bush'?17:18,scaleBias:growthKey==='sprout'?.42:growthKey==='bush'?.5:.6};
  if(typeof c==='object'&&c&&(c.hiddenTree==='A'||c.hiddenTree==='B'))return {species:contentSpecies(c),shape:'hidden',radius:c.hiddenTree==='A'?38:40,scaleBias:1};
  const sp=(typeof c==='object'&&c)?contentSpecies(c):TREE_SPECIES.find(t=>t.id===String(c||''))||TREE_SPECIES[0];
  const byId={birch:{radius:20,bias:.98},oak:{radius:31,bias:1.06},cherry:{radius:27,bias:1.0},zelkova:{radius:32,bias:1.04},ginkgo:{radius:22,bias:.97},metasequoia:{radius:17,bias:1.17},maple:{radius:27,bias:1.0},willow:{radius:26,bias:1.02},magnolia:{radius:25,bias:.99},crape:{radius:25,bias:.98},pine:{radius:30,bias:1.04},cedar:{radius:18,bias:1.16},hackberry:{radius:32,bias:1.04},fringe:{radius:24,bias:.98},fir:{radius:19,bias:1.13},cypress:{radius:16,bias:1.14},yew:{radius:20,bias:1.0},juniper:{radius:29,bias:1.03},paulownia:{radius:22,bias:.98},evergreen:{radius:27,bias:1.03}}; const base=byId[sp.id]||{radius:24,bias:1};
