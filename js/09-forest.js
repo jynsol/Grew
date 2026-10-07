@@ -870,7 +870,7 @@ async function drawShareCard(kind,format,target){
   lines.slice(0,2).forEach((l,k)=>ctx.fillText(k===1&&lines.length>2?l.slice(0,-1)+'…':l,72,(story?380:330)+k*size*1.2));
   const cy=story?1080:800,r=story?380:300;ctx.save();ctx.shadowColor='rgba(30,42,34,.12)';ctx.shadowBlur=30;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,cy,r,0,Math.PI*2);ctx.fill();ctx.restore();
   const tree=await shareAsset(stickerTreeSrc(c,3));if(tree){const s=r*1.6;ctx.drawImage(tree,W/2-s/2,cy-s/2-10,s,s)}
-  const cover=c.cover?await loadShareCover(c.cover):null;ctx.save();ctx.translate(W/2-r*.95,cy+r*.45);ctx.rotate(-8*Math.PI/180);ctx.fillStyle='#fff';shareRounded(ctx,-6,-6,172,248,16);ctx.fill();if(cover)ctx.drawImage(cover,0,0,160,236);else{ctx.fillStyle='#E6DDF8';ctx.fillRect(0,0,160,236)}ctx.restore();
+  const cover=c.cover?await loadShareCover(c.cover):null;ctx.save();ctx.translate(W/2-r*.95,cy+r*.45);ctx.rotate(-8*Math.PI/180);ctx.fillStyle='#fff';shareRounded(ctx,-6,-6,172,248,16);ctx.fill();if(cover)ctx.drawImage(cover,0,0,160,236);else{ctx.fillStyle=c.type==='movie'?'#BFE7CB':'#F7E7A1';ctx.fillRect(0,0,160,236)}ctx.restore();
   shareStamp(ctx,W/2+r*.85,cy-r*.75,story?120:100,'완료',12);
   if(validRating(c.rating))sharePill(ctx,'★ '+Number(c.rating).toFixed(1),W/2+r*.35,cy+r*.55,{size:40,rotate:-6});
   const logs=new Set(c.logs.map(l=>l.date)).size,start=Model.firstExperienceDate(c),days=start?Math.max(1,Math.round((Date.parse(done+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/864e5)+1):0;

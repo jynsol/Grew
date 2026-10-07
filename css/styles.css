@@ -3912,10 +3912,23 @@ html, body { overflow-x:clip; }
 
 /* Books butter, films mint: the forest's own palette. Colour now only means book / film. */
 :root { --book-bg:#F7E7A1;--book-tint:#FBF0C6;--book-ink:#946B00;--movie-bg:#BFE7CB;--movie-tint:#DDF2E3;--movie-ink:#2A7D4E; }
-/* Tab bar keeps a colour per tab; 오늘 is sky so it never repeats the book butter */
-.tabs button[data-tab="today"].active { background:#CBE4FF;color:var(--sb-ink); }
 /* 최근 완료: white cards; only the small BOOK / MOVIE label carries colour */
 .sticker-recent-card .sticker-recent-art, .sticker-recent-card[data-type] .sticker-recent-art { background:#fff;box-shadow:inset 0 0 0 1px rgba(30,42,34,.06); }
 .sticker-recent-card .sticker-recent-type, .sticker-recent-card[data-type] .sticker-recent-type { height:20px;padding:0 7px;border-radius:6px;font:800 10px/1 var(--sb-label);font-stretch:118%;letter-spacing:.06em; }
 .sticker-recent-card i.sticker-recent-cover, .today-v2 .sticker-cover { background-color:var(--book-tint); }
 .sticker-recent-card[data-type="movie"] i.sticker-recent-cover, .today-v2[data-type="movie"] .sticker-cover { background-color:var(--movie-tint); }
+
+/* Four pastels only: butter, mint, sky, peach (lilac retired outside onboarding) */
+:root { --sb-sky:#CBE4FF; }
+.tabs button[data-tab="today"].active { background:var(--sb-sky); }
+.tabs button[data-tab="scrap"].active { background:var(--sb-peach); }
+.tabs button[data-tab="forest"].active { background:var(--sb-mint); }
+.tabs button[data-tab="my"].active { background:var(--sb-butter); }
+.my-profile { background:var(--sb-butter); }
+.my-profile-head .profile-avatar { background:#fff; }
+.bm-pack { background:var(--sb-peach); }
+.bm-shop-badge.is-shop { background:var(--sb-peach); }
+.forest-sound-choice.is-1 { background:var(--sb-sky); }
+.planted-cover, .finish-cover, .scrap-composer-body .content-row div.cover { background-color:var(--book-tint); }
+.sticker-recent-card[data-type="book"] i.sticker-recent-cover { background-color:var(--book-tint); }
+.sticker-recent-card[data-type="movie"] i.sticker-recent-cover { background-color:var(--movie-tint); }
