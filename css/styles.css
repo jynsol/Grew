@@ -4060,3 +4060,4 @@ html, body { overflow-x:clip; }
 .detail-info-tree span { color:rgba(30,42,34,.4); }
 .detail-page .detail-section h2 { margin:0;font:800 16px/1.2 var(--font-family);letter-spacing:-.02em;color:var(--sb-ink); }
 .detail-page .detail-section { margin-top:28px; }
+.detail-chip-rating { min-height:0;border:0;cursor:pointer; }

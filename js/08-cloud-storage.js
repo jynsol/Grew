@@ -594,7 +594,7 @@ function renderDetail(){
  }
  const logs=[...c.logs].sort((a,b)=>b.date.localeCompare(a.date)),stage=Model.stage(c),logDays=todayLogDates(c).size,days=todayDayCount(c);
  const genre=cleanGenreValue(c.genre)?launchGenre(c.type,c.genre,c):'';
- const chips=c.completed?'<span class="detail-chip is-ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+(validRating(c.rating)?'<span class="detail-chip"><b>★</b> '+c.rating+'</span>':''):
+ const chips=c.completed?'<span class="detail-chip is-ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+'<button type="button" class="detail-chip detail-chip-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 '+(validRating(c.rating)?c.rating+'점 · 수정':'남기기')+'"><b>★</b> '+(validRating(c.rating)?c.rating:'별점 남기기')+'</button>':
   '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'',c.type==='movie'?'기록 '+logDays+'회':''].filter(Boolean).join(' · ')+'</span>':'');
  const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'+ 메모 남기기')+'</span></button>';
  const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
@@ -605,7 +605,6 @@ function renderDetail(){
  return '<section class="detail-page" data-type="'+c.type+'"><div class="detail-panel">'+stickerCover(c,'detail-cover')+(stage>0?'<span class="detail-tree">'+stickerTree(c,stage)+'</span>':'')+'</div>'+
  '<div class="detail-head"><span class="detail-kicker"><span class="scrap-type is-'+c.type+'">'+(c.type==='movie'?'MOVIE':'BOOK')+'</span>'+(genre?esc(genre):'')+'</span><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'<p class="detail-creator">'+esc(c.creator||'제작자 미확인')+(c.publisher?' · '+esc(c.publisher):'')+'</p></div>'+
  '<div class="detail-chips">'+chips+'</div>'+
- (c.completed?'<button type="button" class="detail-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 수정"><span>내 별점</span>'+(validRating(c.rating)?averageStars(c.rating):'<span class="muted">아직 별점 없음</span>')+'<b aria-hidden="true">›</b></button>':'')+
  (c.review?'<div class="detail-section review-copy"><h2>나의 감상</h2><p>'+esc(c.review)+'</p></div>':'')+
  (logs.length?recordsHTML:'')+'<div class="detail-section"><h2>정보</h2>'+detailMetadata(c)+'</div>'+
  (introHTML?'<div class="detail-section">'+introHTML+'</div>':'')+(logs.length?'':recordsHTML)+renderLinkSources(c)+actions+'</section>';
