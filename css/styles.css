@@ -3843,3 +3843,18 @@ html, body { overflow-x:clip; }
 @keyframes stampSlamReal { 0% { transform:translateY(-30px) scale(1.45) rotate(-22deg);opacity:0; } 55% { transform:translateY(0) scale(.92) rotate(-8deg);opacity:1; } 75% { transform:scale(1.03) rotate(-11deg); } 100% { transform:scale(1) rotate(-10deg); } }
 .today-v2 .stamp-button.is-done .stamp-svg, .stamp-button.is-done .stamp-svg { color:var(--tv-accent,var(--sb-ink)); }
 .stamp-button:not(.is-done) .stamp-svg { color:#A3A39E; }
+/* 최근 완료 in the same card language as the new Today */
+.sticker-recent { margin:28px 16px 0;padding:0;gap:12px; }
+.sticker-recent>.row { align-items:center;padding:0 4px; }
+.page .sticker-recent h2 { font:800 16px/1 var(--font-family);letter-spacing:-.02em; }
+.sticker-recent>.row .textbtn { font:680 13px/1 var(--font-family);color:rgba(30,42,34,.6); }
+.sticker-recent-list { gap:10px; }
+.sticker-recent-card { gap:6px;padding:8px 8px 14px;border-radius:24px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.06); }
+.sticker-recent-card .sticker-recent-art, .sticker-recent-card[data-type] .sticker-recent-art { height:104px;margin-bottom:6px;border-radius:18px;background:linear-gradient(165deg,#F1EBFF 0%,#E4D9FC 52%,#F7E1EE 100%); }
+.sticker-recent-card[data-type="movie"] .sticker-recent-art { background:linear-gradient(165deg,#E6F7EC 0%,#CDEDD8 52%,#EEF6D9 100%); }
+.sticker-recent-card .sticker-recent-cover { left:12px;top:12px;width:44px;height:64px;border-radius:7px; }
+.sticker-recent-card .sticker-recent-type, .sticker-recent-card[data-type] .sticker-recent-type { display:inline-flex;align-self:flex-start;align-items:center;height:22px;margin:0 6px;padding:0 9px;border-radius:11px;font:700 11px/1 var(--font-family);font-stretch:100%;letter-spacing:0;background:#F1EBFF !important;color:#7B5BE0; }
+.sticker-recent-card[data-type="movie"] .sticker-recent-type { background:#E6F7EC !important;color:#22A565; }
+.sticker-recent-card strong { padding:0 8px;font:780 15px/1.3 var(--font-family); }
+.sticker-recent-card small { padding:0 8px;font:560 12px/1.2 var(--font-family);color:rgba(30,42,34,.55); }
+.today-v2 .tv-head { padding-top:4px; }

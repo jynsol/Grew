@@ -510,9 +510,8 @@ function todayBoard(c){
  const suffix=todayStageSuffix(c),sub=split?split[2]:c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
  // Today (Apple-style): coral date over a large title, a gradient hero card with the work and its
  // tree in a soft disc, then a white week card with the stamp. Stages are not a goal, so no progress ring.
- const longDate=(date.getUTCMonth()+1)+'월 '+date.getUTCDate()+'일 '+['일','월','화','수','목','금','토'][date.getUTCDay()]+'요일';
  return '<section class="sticker-today today-v2" data-type="'+c.type+'" data-stage="'+stage+'">'+
- '<header class="tv-head"><p class="tv-date">'+longDate+'</p><div class="sticker-top"><div class="sticker-titles"><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div></header>'+
+ '<header class="tv-head"><div class="sticker-top"><div class="sticker-titles"><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div></header>'+
  '<article class="today-panel tv-hero">'+
   '<div class="tv-hero-top"><span class="tv-tag">'+(c.type==='movie'?'지금 보는 영화':'지금 읽는 책')+'</span>'+
    (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+'</div>'+
