@@ -438,11 +438,10 @@ function todayDayCount(c){
  const first=Model.firstExperienceDate(c);if(!first)return 0;
  return Math.max(1,Math.round((Date.parse(now()+'T12:00:00Z')-Date.parse(first+'T12:00:00Z'))/864e5)+1);
 }
-function todayNextStep(c){
- const stage=Model.stage(c),loggedToday=c.logs.some(l=>l.date===now()),need=2-todayLogDates(c).size;
- if(stage===0)return c.type==='movie'?'감상을 시작하면 새싹':'읽기 시작하면 새싹';
- if(stage===1)return need>1?'두 번 기록하면 어린 나무':(loggedToday?'내일':'오늘')+' 기록하면 어린 나무';
- return c.type==='movie'?'끝까지 보면 숲의 나무':'다 읽으면 숲의 나무';
+function todayProgressNote(c){
+ const days=todayDayCount(c),verb=c.type==='movie'?'보는':'읽는';
+ if(!Model.stage(c)||!days)return {label:'READY',text:c.type==='movie'?'아직 보기 전이에요':'아직 읽기 전이에요'};
+ return {label:'DAY '+days,text:days+'일째 '+verb+' 중'};
 }
 function todayStamp(c){
  const stage=Model.stage(c),log=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
@@ -458,7 +457,7 @@ function todayStickerWeek(c){
 function todayBoard(c){
  const stage=Model.stage(c),others=state.items.filter(x=>!x.completed&&x.id!==c.id).length,date=new Date(now()+'T12:00:00Z');
  const dateLabel=String(date.getUTCMonth()+1).padStart(2,'0')+'.'+String(date.getUTCDate()).padStart(2,'0')+' '+['SUN','MON','TUE','WED','THU','FRI','SAT'][date.getUTCDay()];
- const days=todayDayCount(c),stageLabel=growthAppearance(stage).name+(stage>0&&days?' · '+days+'일째':'');
+ const note=todayProgressNote(c);
  const coverArt=c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'<span class="sticker-cover-blank" aria-hidden="true">'+icon(c.type)+'</span>';
  const completeLabel=stage===0?(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요'):(c.type==='movie'?'끝까지 봤어요':'다 읽었어요');
  return '<section class="sticker-today" data-type="'+c.type+'" data-stage="'+stage+'"><i class="sticker-block" aria-hidden="true"></i>'+
@@ -469,8 +468,8 @@ function todayBoard(c){
   '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button>'+
   (others?button('⇄ 다른 작품 '+others,'pick','sticker-switch','aria-label="다른 작품 고르기, '+others+'개"'):'')+
   '<div class="sticker-tree-disc">'+stickerTree(c,stage)+'</div>'+
-  '<span class="sticker-stage">'+esc(stageLabel)+'</span>'+
-  '<div class="sticker-next"><span>NEXT'+(stage<2?' +1':'')+'</span><strong>'+esc(todayNextStep(c))+'</strong></div>'+
+  '<span class="sticker-stage">'+esc(growthAppearance(stage).name)+'</span>'+
+  '<div class="sticker-next"><span>'+note.label+'</span><strong>'+esc(note.text)+'</strong></div>'+
  '</div>'+
  '<div class="sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(c.type==='movie'?button('보러 가기 ↗','external','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</div>'+
  '</section>';
