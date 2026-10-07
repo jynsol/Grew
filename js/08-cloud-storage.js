@@ -413,8 +413,14 @@ function streakDays(c,today=now()){
 
 function scrapAddButton(){return button(icon('plus')+'<span>스크랩</span>','add','heading-scrap','aria-label="스크랩 추가"')}
 function todayHeading(title='오늘',actions=''){return '<div class="page-heading"><h1 class="page-title">'+title+'</h1><div class="page-heading-actions">'+scrapAddButton()+actions+'</div></div>'}
+// The work in progress stays on Today: the most recently read one wins over unstarted scraps.
+let todayPickedId=null;
+function lastReadDate(c){return [c.startedAt,...(c.logs||[]).map(l=>l.date)].filter(Model.validDate).sort().at(-1)||''}
+function latestReading(exceptId){return state.items.filter(x=>!x.completed&&Model.stage(x)>0&&x.id!==exceptId).sort((a,b)=>lastReadDate(b).localeCompare(lastReadDate(a)))[0]||null}
 function renderTodayBase(){
- let c=selected();if(c?.completed)c=null;const active=state.items.find(x=>!x.completed&&Model.stage(x)>0);if(active&&!c)c=active;
+ let c=selected();if(c?.completed)c=null;
+ // An unstarted scrap only replaces the reading work when it was picked in this session.
+ if(!c||Model.stage(c)===0&&c.id!==todayPickedId)c=latestReading()||c;
  if(!state.onboarded&&!state.items.length)return '<section>'+todayHeading()+'<div class="center today-empty">'+growth(0)+'<h2>첫 작품을 담아보세요</h2><p class="creator">책과 영화를 기록할 수 있어요.</p><div class="space"></div>'+button('첫 스크랩 추가하기','add')+'</div></section>';
  if(!c){
   const candidates=state.items.filter(c=>!c.completed).sort((a,b)=>b.saves.length-a.saves.length||(b.saves.at(-1)?.at||0)-(a.saves.at(-1)?.at||0));

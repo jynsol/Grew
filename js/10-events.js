@@ -53,7 +53,7 @@ document.addEventListener('click',async e=>{
  if(a==='removeRemoteAlbum'){removeRemoteAlbum(Number(b.dataset.index));return}
  if(a==='addRemoteMovie'){addRemoteMovie(Number(b.dataset.index));return}
  if(a==='removeRemoteMovie'){removeRemoteMovie(Number(b.dataset.index));return}
- if(a==='choose'){if(c&&!c.completed){state.selected=c.id;state.onboarded=true;if(!persist())return;go('today')}return}
+ if(a==='choose'){if(c&&!c.completed){state.selected=c.id;todayPickedId=c.id;state.onboarded=true;if(!persist())return;go('today')}return}
  if(a==='pick'){pick();return}
  if(a==='readingList'){openReadingList(id);return}
  if(a==='cancelPick'){go('today');return}
@@ -315,7 +315,7 @@ document.addEventListener('submit',async e=>{
   const advance=f.dataset.advance==='yes';
   if(advance&&!c.completed){Model.complete(state,c.id,now());assignAutoSpecies(c,true);pendingForestArrival=c.id}
   if(advance){
-   const next=state.items.filter(item=>!item.completed).sort((a,b)=>b.saves.length-a.saves.length||(b.saves.at(-1)?.at||0)-(a.saves.at(-1)?.at||0))[0];
+   const next=latestReading(c.id)||state.items.filter(item=>!item.completed).sort((a,b)=>b.saves.length-a.saves.length||(b.saves.at(-1)?.at||0)-(a.saves.at(-1)?.at||0))[0];
    state.selected=next?.id||null;picking=false;sessionStorageSafe('candidate','0');
   }
   if(!commit(true))return;
