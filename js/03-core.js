@@ -451,19 +451,15 @@ function genreCandidates(c){return (GENRE_POOL[c.type]||[]).map(label=>[label,''
 function genreOptions(c){const selected=launchGenre(c.type,c.genre,c);return genreCandidates(c).map(([label])=>'<option value="'+esc(label)+'" '+(label===selected?'selected':'')+'>'+esc(label)+'</option>').join('')}
 function metadataFields(c){return '<label for="contentGenre">장르</label><select id="contentGenre">'+genreOptions(c)+'</select><span id="genreTreePreview" hidden></span><p class="muted tiny">직접 고른 장르는 자동으로 바뀌지 않아요.</p>'}
 document.addEventListener('change',e=>{if(e.target.id==='contentType'){$('contentGenre').innerHTML=genreOptions({type:e.target.value,genre:''});const isBook=e.target.value==='book';}if(['contentType','contentGenre'].includes(e.target.id))$('genreTreePreview').textContent='나무 · '+mappedForestCategoryLabel($('contentType').value,$('contentGenre').value)+' 계열'});
-// Work info as a few label / value rows (Apple "Information" style): date, length, tree only. The genre already sits next to the
-// BOOK / MOVIE tag, so it is not repeated here.
+// Work info as one quiet line (date · length); the values speak for themselves, no labels.
 function detailMetadata(c){
  const day=v=>{const m=String(v||'').match(/^(\d{4})-?(\d{2})-?(\d{2})/);return m?m[1]+'.'+m[2]+'.'+m[3]:esc(String(v).slice(0,10))};
- const rows=[];
- if(c.type==='movie'&&c.releaseDate)rows.push(['개봉일',day(c.releaseDate)]);
- if(c.type==='album'&&c.releaseDate)rows.push(['발매일',day(c.releaseDate)]);
- if(c.type==='book'&&c.publishedAt)rows.push(['출간일',day(c.publishedAt)]);
- if(c.runtime&&c.type!=='movie')rows.push(['러닝타임',esc(c.runtime)+'분']);
- if(c.length&&c.type==='book')rows.push(['페이지',esc(c.length)+'쪽']);
- const treeName=c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무';
- rows.push([c.completed?'나무':'자랄 나무','<button type="button" class="detail-info-tree" data-action="bmWorkTree" data-id="'+esc(c.id)+'">'+esc(treeName)+' <span aria-hidden="true">›</span></button>']);
- return '<dl class="detail-info">'+rows.map(([k,v])=>'<div><dt>'+k+'</dt><dd>'+v+'</dd></div>').join('')+'</dl>';
+ const bits=[];
+ if((c.type==='movie'||c.type==='album')&&c.releaseDate)bits.push(day(c.releaseDate));
+ if(c.type==='book'&&c.publishedAt)bits.push(day(c.publishedAt));
+ if(c.runtime&&c.type!=='movie')bits.push(esc(c.runtime)+'분');
+ if(c.length&&c.type==='book')bits.push(esc(c.length)+'쪽');
+ return bits.length?'<p class="detail-meta-line">'+bits.join(' · ')+'</p>':'';
 }
 function recentCompleted(){
  const items=state.items.filter(c=>c.completed).sort((a,b)=>(b.completed==='unknown'?'':b.completed).localeCompare(a.completed==='unknown'?'':a.completed)||(b.completedAt||0)-(a.completedAt||0)||b.id.localeCompare(a.id)).slice(0,2);
