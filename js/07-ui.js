@@ -641,8 +641,14 @@ function visitorPosition(cfg,boxes,scale){
   const r={left:x-52*scale, right:x+52*scale,top:y-65*scale,bottom:y+24*scale};
   // Feet stay well inside the grass top; only the head may rise past the back edge.
   const inside=([a,b],lim)=>Math.abs(a-360)/rx+Math.abs(b-286)/ry<lim;
-  if(!inside([r.left,r.bottom],.84)||!inside([r.right,r.bottom],.84)||!inside([x,r.top],1.08))continue;
-  if(boxes.some(b=>r.left<b.right+3&&r.right>b.left-3&&r.top<b.bottom+3&&r.bottom>b.top-3))continue;
+  if(!inside([x-34*scale,y+10*scale],.86)||!inside([x+34*scale,y+10*scale],.86)||!inside([x,y-60*scale],1.1))continue;
+  // Only trunks and their base block a spot; an animal may stand in front of a crown.
+  const feet={left:x-34*scale,right:x+34*scale,top:y-18*scale,bottom:y+14*scale};
+  // The visitor is slotted in at its own depth among the trees, so only trunk bases block it.
+  // ...but a tree in front may hide at most a third of it.
+  const body={left:x-30*scale,right:x+30*scale,top:y-55*scale,bottom:y},bodyArea=60*55*scale*scale;
+  if(boxes.some(b=>b.bottom>y&&Math.max(0,Math.min(body.right,b.right)-Math.max(body.left,b.left))*Math.max(0,Math.min(body.bottom,b.bottom)-Math.max(body.top,b.top))>bodyArea/3))continue;
+  if(boxes.some(b=>{const base=b.bottom-(b.bottom-b.top)*.3;return feet.left<b.right-(b.right-b.left)*.25&&feet.right>b.left+(b.right-b.left)*.25&&feet.top<b.bottom+4&&feet.bottom>base}))continue;
   candidates.push({x,y});if(candidates.length===40)break;
  }
  return candidates[Math.floor(Math.random()*candidates.length)]||null;
@@ -668,6 +674,13 @@ const FOREST_EXPANSION_STAGES=[
  {id:6,label:'깊은 숲',maxTrees:200,cols:20,rows:20,boardW:625,boardH:348,treeScale:.35},
  {id:7,label:'넓은 숲',maxTrees:300,cols:23,rows:23,boardW:620,boardH:370,treeScale:.32}
 ];
+// A month is one 4x4 plot (design 11a): one tree per cell, and the plot grows by a row
+// only when a month holds more than it can fit.
+function forestMonthConfig(n){
+ const cols=Math.max(4,Math.ceil(Math.sqrt(Math.max(0,n||0))));
+ return {id:'month'+cols,label:'',tier:1,month:true,cols,rows:cols,boardW:56*cols,boardH:31.5*cols,treeScale:+(.8*Math.pow(4/cols,.3)).toFixed(3),maxTrees:cols*cols,capacity:cols*cols,nextExpandAt:null,remainingToExpand:0};
+}
+function forestBoardConfig(n,grid){return grid==='month'?forestMonthConfig(n):forestLayoutConfig(n)}
 function forestLayoutConfig(n){
  const count=Math.max(0,n||0);
  let idx=FOREST_EXPANSION_STAGES.findIndex(s=>count<=s.maxTrees);
@@ -839,6 +852,7 @@ const snowShrub=(x,y,s=1,shape=0)=>{const crowns=['<ellipse cx="0" cy="-26" rx="
  // Landmarks use normalized ground coordinates, not optional/occupied tiles.
  // Even a fully occupied board keeps its well and rocks. Empty forests stay empty.
  if(cfg.tier===0)return [];
+ if(cfg.month)return emptySlots.map(project).map(p=>({y:p.y-40,art:'<ellipse data-empty-cell="true" pointer-events="none" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" rx="'+(cfg.boardW/cfg.cols*.2).toFixed(1)+'" ry="'+(cfg.boardH/cfg.rows*.2).toFixed(1)+'" fill="#5E8A4C" opacity=".22"/>'}));
  const anchor=(u,v)=>({x:360+u*cfg.boardW,y:286+v*cfg.boardH});
  const snow=theme==='snow',large=cfg.tier>=4;
  place(snow?'frozen-well':'well',(x,y)=>(snow?frozenWell:well)(x,y,1.12),anchor(-.18,.02),[-27,-33,27,22]);
@@ -983,7 +997,7 @@ function forestGroundArtwork(cfg, theme, cx = 360, cy = 286, floor = 'basic') {
 
 function forestSVG(items,theme='basic',animated=true,options={}){
  theme=(theme==='snow'||theme==='winter')?'snow':'basic';
- const n=items.length,cfg=forestLayoutConfig(n),origin=forestStageOrigin(cfg);
+ const n=items.length,cfg=forestBoardConfig(n,options.grid),origin=forestStageOrigin(cfg);
  const rawAll=[];for(let r=0;r<cfg.rows;r++)for(let c=0;c<cfg.cols;c++)rawAll.push({rx:c-r,ry:c+r});
  const minRX=Math.min(...rawAll.map(p=>p.rx)),maxRX=Math.max(...rawAll.map(p=>p.rx)),minRY=Math.min(...rawAll.map(p=>p.ry)),maxRY=Math.max(...rawAll.map(p=>p.ry));
  const cx=360,cy=286,marginX=44,marginY=34;
@@ -999,5 +1013,5 @@ function forestSVG(items,theme='basic',animated=true,options={}){
  const trees=points.map((p,i)=>{const hiddenKind=forestGrowthKey(p.c)?null:p.c?.hiddenTree,hiddenBoost=hiddenKind?hiddenTreeScale(hiddenKind,theme):1,sc=((p.scale||cfg.treeScale)*hiddenBoost).toFixed(3),shadowRx=((p.profile?.radius||24)*.70*hiddenBoost).toFixed(1),shadowRy=(Math.max(3.6,(p.profile?.radius||24)*.13*hiddenBoost)).toFixed(1),snowBase=theme==='snow'?'<ellipse cx="0" cy="13" rx="'+Math.max(9,(p.profile?.radius||24)*.5*hiddenBoost).toFixed(1)+'" ry="4.1" fill="#F8FBFC" opacity=".92"/>':'';return '<g data-tree="'+esc(p.c.id)+'" data-growth="'+(forestGrowthKey(p.c)||'mature')+'" role="button" tabindex="0" aria-label="'+esc(p.c.title+' · '+String(p.c.genre||category(p.c).label))+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+') scale('+sc+')"><ellipse cx="4" cy="10" rx="'+shadowRx+'" ry="'+shadowRy+'" fill="#708579" opacity="'+(illustratedTreeAsset(p.c,theme)?'0':'.11')+'"/>'+snowBase+treeHitArea(p.c,theme)+overlap.edges[i]+'<g class="tree-art">'+treeArt(p.c,theme)+'</g></g>'});
  const scene=[...trees.map((art,i)=>({y:points[i].y,art})),...decorations].sort((a,b)=>a.y-b.y).map(entry=>entry.art).join('');
  const visitor=n?forestVisitorArt(items,animated):'';
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 540" data-count="'+n+'" role="group" aria-label="'+n+'그루의 '+({basic:'기본',snow:'설산'}[theme])+' 숲"><defs>'+overlap.defs+'<filter id="forestTreeEdge" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="spread"/><feGaussianBlur in="spread" stdDeviation=".85" result="edge"/><feFlood flood-color="'+(theme==='snow'?'#BCCFD5':'#B9CE98')+'" flood-opacity=".72"/><feComposite in2="edge" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+groundArtwork.defs+'</defs><rect width="720" height="540" fill="transparent"/>'+(theme==='snow'?'<path d="M55 224 177 58 275 191 368 31 541 221 598 99 720 247" fill="#c4d4db"/><path d="M135 115L177 58 217 112 188 100 175 117 163 100Z M317 99L368 31 423 104 384 86 365 108 348 85Z" fill="#f8fbfc"/>':'')+'<g id="forest-world">'+groundArtwork.body+scene+visitor+'</g></svg>';
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 540" data-count="'+n+'"'+(options.grid?' data-grid="'+options.grid+'"':'')+' role="group" aria-label="'+n+'그루의 '+({basic:'기본',snow:'설산'}[theme])+' 숲"><defs>'+overlap.defs+'<filter id="forestTreeEdge" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="spread"/><feGaussianBlur in="spread" stdDeviation=".85" result="edge"/><feFlood flood-color="'+(theme==='snow'?'#BCCFD5':'#B9CE98')+'" flood-opacity=".72"/><feComposite in2="edge" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+groundArtwork.defs+'</defs><rect width="720" height="540" fill="transparent"/>'+(theme==='snow'?'<path d="M55 224 177 58 275 191 368 31 541 221 598 99 720 247" fill="#c4d4db"/><path d="M135 115L177 58 217 112 188 100 175 117 163 100Z M317 99L368 31 423 104 384 86 365 108 348 85Z" fill="#f8fbfc"/>':'')+'<g id="forest-world">'+groundArtwork.body+scene+visitor+'</g></svg>';
 }

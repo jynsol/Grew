@@ -3599,3 +3599,16 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 /* Baked onboarding art: one picture per slide, no live filters */
 .intro-stage>.intro-art { position:absolute;height:auto;max-width:none;pointer-events:none;user-select:none;-webkit-user-select:none; }
 .entry-sticker-art>.entry-art { position:absolute;left:-7.06%;top:-9.23%;width:114.12%;height:auto;max-width:none;pointer-events:none; }
+
+/* Month board fills the screen under the toggle; tools float over the ground (design 11a) */
+.page[data-view="forest"]:has(.forest-month.is-board) { padding-bottom:0;overflow:hidden; }
+.forest-month.is-board { display:flex;flex-direction:column;height:calc(100svh - 24px - env(safe-area-inset-top)); }
+.forest-month.is-board .forest-board { position:relative;flex:1;min-height:0;margin:6px calc(-1 * var(--page-gutter, 20px)) 0; }
+#page .forest-month.is-board .forest-viewport { position:absolute;inset:0;height:auto;aspect-ratio:auto;min-height:0;overflow:hidden;-webkit-mask-image:linear-gradient(transparent,#000 24px);mask-image:linear-gradient(transparent,#000 24px); }
+.forest-float { position:absolute;left:0;right:0;bottom:calc(86px + env(safe-area-inset-bottom));z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none; }
+.forest-float>* { pointer-events:auto; }
+.forest-float .forest-tools-row { margin:0; }
+.forest-float :is(.forest-empty,.forest-edit-hint) { padding:8px 14px;border-radius:99px;background:rgba(255,255,255,.92);box-shadow:var(--sb-card); }
+/* The sale sticker sits on the pack's top edge, fully visible */
+.bm-pack { overflow:visible;margin-top:24px; }
+.bm-pack-sale { right:14px;top:-14px;transform:rotate(6deg);box-shadow:0 6px 12px -8px rgba(30,42,34,.5); }

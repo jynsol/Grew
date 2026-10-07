@@ -2,14 +2,18 @@
 let forestViewportYear=null,forestViewportFrame=null;
 function forestCameraFrame(vp,world,bounds=world.getBBox()){
  const unit=Math.min(vp.clientWidth/720,vp.clientHeight/540)||1;
+ // Floating controls cover part of a full-bleed board: fit the plot into what is left and
+ // shift its centre by half the difference.
+ const tools=vp.closest('.forest-board')?.querySelector('.forest-tools-row'),vr=vp.getBoundingClientRect();
+ const insetTop=tools?18:0,insetBottom=tools?Math.max(0,vr.bottom-tools.getBoundingClientRect().top+10):0,shiftY=(insetTop-insetBottom)/2/unit;
  const padding=6,visibleW=vp.clientWidth/unit,visibleH=vp.clientHeight/unit;
- const fit=Math.min((vp.clientWidth-padding*2)/(Math.max(1,bounds.width)*unit),(vp.clientHeight-padding*2)/(Math.max(1,bounds.height)*unit));
- return {bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},unit,visibleW,visibleH,padding:padding/unit,fit,min:fit*.92,max:fit*2.4,cx:bounds.x+bounds.width/2,cy:bounds.y+bounds.height/2,tier:forestLayoutConfig(forestBoardCount(vp)).tier};
+ const fit=Math.min((vp.clientWidth-padding*2)/(Math.max(1,bounds.width)*unit),(vp.clientHeight-insetTop-insetBottom-padding*2)/(Math.max(1,bounds.height)*unit));
+ return {bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},unit,visibleW,visibleH,padding:padding/unit,fit,min:fit*.92,max:fit*2.4,cx:bounds.x+bounds.width/2,cy:bounds.y+bounds.height/2,tier:forestBoardConfig(forestBoardCount(vp),vp.querySelector('svg[data-grid]')?.dataset.grid).tier+(vp.querySelector('svg[data-grid]')?'m':''),shiftY};
 }
 // The board on screen may be one month, not the whole year: size everything from what was drawn.
 function forestBoardCount(vp){const n=vp?.querySelector('svg[data-count]')?.dataset.count;return n!=null?+n:forestItems(state,year).length;
 }
-function forestFittedState(frame){return {scale:frame.fit,x:(360-frame.cx)*frame.fit,y:(270-frame.cy)*frame.fit}}
+function forestFittedState(frame){return {scale:frame.fit,x:(360-frame.cx)*frame.fit,y:(270-frame.cy)*frame.fit+(frame.shiftY||0)}}
 function initializeForestViewport(frame){
  const previous=forestViewportFrame;
  if(forestViewportYear!==year+'|'+month||!previous||previous.tier!==frame.tier||zoomState.scale<=previous.fit*1.03){zoomState=forestFittedState(frame)}
@@ -97,7 +101,7 @@ function setupForest(){
  zoomTarget={...zoomState};
  const clampCamera=s=>{
   s.scale=Math.max(camera.min,Math.min(camera.max,s.scale));
-  const homeX=(360-camera.cx)*s.scale,homeY=(270-camera.cy)*s.scale;
+  const homeX=(360-camera.cx)*s.scale,homeY=(270-camera.cy)*s.scale+(camera.shiftY||0);
   const maxX=Math.max(0,(camera.bounds.width*s.scale-camera.visibleW+camera.padding*2)/2);
   const maxY=Math.max(0,(camera.bounds.height*s.scale-camera.visibleH+camera.padding*2)/2);
   s.x=Math.max(homeX-maxX,Math.min(homeX+maxX,s.x));
@@ -210,7 +214,7 @@ function setupForest(){
  apply();
  if(pendingForestArrival){const arrived=[...vp.querySelectorAll('[data-tree]')].find(g=>g.dataset.tree===pendingForestArrival);if(arrived){const pos=arrived.transform.baseVal.getItem(0).matrix;zoomState.scale=Math.min(camera.max,Math.max(zoomState.scale,camera.fit*1.15));zoomState.x=(360-pos.e)*zoomState.scale;zoomState.y=(290-pos.f)*zoomState.scale;apply();zoomTarget={...zoomState};showTip(arrived,'pin');arrived.querySelector('.tree-art')?.classList.add('forest-arrival');pendingForestArrival=null}}
  clearTimeout(window.__songrimVisitorTimer);
- const layer=world.querySelector('#forest-visitor-layer'),cfg=forestLayoutConfig(forestBoardCount(vp));
+ const layer=world.querySelector('#forest-visitor-layer'),cfg=forestBoardConfig(forestBoardCount(vp),vp.querySelector('svg[data-grid]')?.dataset.grid);
  let visitorElapsed=0,visitorTickAt=performance.now();
  const syncVisitorVisibility=()=>{layer?.classList.toggle('visitors-paused',document.hidden);visitorTickAt=performance.now()};
  document.addEventListener('visibilitychange',syncVisitorVisibility);syncVisitorVisibility();
@@ -222,10 +226,13 @@ function setupForest(){
    const b=treeArtElementBounds(g.querySelector('.tree-art')),m=g.transform.baseVal.consolidate().matrix;
    return {left:m.e+b.x*m.a,right:m.e+(b.x+b.width)*m.a,top:m.f+b.y*m.d,bottom:m.f+(b.y+b.height)*m.d};
   });
-  const scale=cfg.treeScale*1.05,pos=visitorPosition(cfg,boxes,scale);
+  const scale=cfg.treeScale*(cfg.month?1.3:1.05),pos=visitorPosition(cfg,boxes,scale);
   layer.innerHTML='';if(!pos)return;
   const chosen=nextForestVisitor();if(!chosen)return;
 
+  // Depth-sort the visitor with the trees: it goes just before the first tree standing in front of it.
+  const trees=[...world.querySelectorAll('[data-tree]')],front=trees.find(g=>g.transform.baseVal.consolidate().matrix.f>pos.y);
+  if(front)front.parentNode.insertBefore(layer,front);else if(trees.length)trees[trees.length-1].after(layer);
   layer.innerHTML='<g data-visitor="'+chosen.id+'" role="img" aria-label="'+chosen.name+'" transform="translate('+pos.x+' '+pos.y+') scale('+scale+')"><g class="forest-visitor">'+animatedVisitorArt(chosen.id)+'</g></g>';
   visitorElapsed=0;
  };
@@ -870,7 +877,7 @@ async function drawShareCard(kind,format,target){
  sharePill(ctx,'영화 ',W-110,top+90,{fill:'#C5E8CE',size:34,bold:films+'편',boldSize:48,rotate:5,align:'right'});
  const bandTop=top+(story?520:400),bandH=story?820:560;
  if(isYear){const scale=Math.min((W-80)/390,bandH/230);await shareIsland(ctx,bandTop+(bandH-230*scale)/2,(W-390*scale)/2,scale,items)}
- else{try{const board=items.map(x=>({...x,forestTile:''})),svg=await inlineSvgImages(shareCropSVG(selfContainedForestSVG(forestSVG(board,'basic',false,{preview:true,transient:true})))),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=await loadImage(url),iw=img.naturalWidth||720,ih=img.naturalHeight||540,s=Math.min((W+60)/iw,bandH/ih);ctx.drawImage(img,(W-iw*s)/2,bandTop+(bandH-ih*s)/2,iw*s,ih*s)}finally{URL.revokeObjectURL(url)}}catch{}}
+ else{try{const board=items.map(x=>({...x,forestTile:''})),svg=await inlineSvgImages(shareCropSVG(selfContainedForestSVG(forestSVG(board,'basic',false,{preview:true,transient:true,grid:'month'})))),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=await loadImage(url),iw=img.naturalWidth||720,ih=img.naturalHeight||540,s=Math.min((W+60)/iw,bandH/ih);ctx.drawImage(img,(W-iw*s)/2,bandTop+(bandH-ih*s)/2,iw*s,ih*s)}finally{URL.revokeObjectURL(url)}}catch{}}
  if(isYear){
   const byMonth=Array.from({length:12},(_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length),best=byMonth.indexOf(Math.max(...byMonth)),rated=done.filter(x=>validRating(x.rating)),avg=rated.length?(rated.reduce((n,x)=>n+Number(x.rating),0)/rated.length).toFixed(1):'';
   if(done.length)sharePill(ctx,'제일 울창한 달 ',72,bandTop+bandH-(story?40:10),{size:30,bold:(best+1)+'월 · '+byMonth[best]+'그루',boldSize:40,rotate:-4});
