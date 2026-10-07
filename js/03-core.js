@@ -458,7 +458,7 @@ function detailMetadata(c){
  if(c.type==='movie'&&c.releaseDate)meta.push('개봉일 '+esc(c.releaseDate.slice(0,10)));
  if(c.type==='album'&&c.releaseDate)meta.push('발매일 '+esc(c.releaseDate.slice(0,10)));
  if(c.type==='book'&&c.publishedAt)meta.push('발매일 '+esc(c.publishedAt.slice(0,10)));
- if(c.runtime)meta.push('러닝타임 '+esc(c.runtime)+'분');
+ if(c.runtime&&c.type!=='movie')meta.push('러닝타임 '+esc(c.runtime)+'분'); // films show minutes in the chip above
  if(c.trackCount)meta.push('곡 수 '+esc(c.trackCount)+'곡');
  if(c.length&&c.type==='book')meta.push('페이지 '+esc(c.length)+'쪽');
  const idLine=[];

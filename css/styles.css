@@ -4032,3 +4032,21 @@ html, body { overflow-x:clip; }
 .sheet :is(button,a,summary):focus:not(:focus-visible), .sheet .content-row:focus { outline:0; }
 /* Card-style rows keep their full outline (the old divider rule dropped the last bottom edge) */
 .sheet-back:not([data-kind="scrap-composer"]) .content-row:last-child { border-bottom:1px solid var(--line); }
+
+/* ── Work page (same rules as Today / Scrap) ─────────────────────────────── */
+.detail-page .detail-cover { transform:rotate(-4deg);filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff);box-shadow:none;border:0; }
+.detail-page .detail-tree { background:rgba(255,255,255,.85);border:0;box-shadow:none; }
+.detail-page .detail-tree .sticker-tree { filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff); }
+.detail-kicker { display:flex;align-items:center;gap:8px;font:620 12.5px/1 var(--font-family);color:rgba(30,42,34,.55); }
+/* Info section: flat, separated by a hairline instead of a grey box */
+.detail-page .detail-metrics { margin-top:6px;padding:16px 0 0;border-radius:0;background:none;box-shadow:none;border-top:1px solid rgba(30,42,34,.08); }
+.detail-page .content-meta-head strong { font:780 15px/1.2 var(--font-family);color:var(--sb-ink); }
+.detail-page .content-meta-line div { font:560 13px/1.6 var(--font-family);color:rgba(30,42,34,.55); }
+.detail-page .current-tree small { font:600 12px/1 var(--font-family);color:rgba(30,42,34,.5); }
+.detail-page .current-tree strong { font:780 14px/1 var(--font-family); }
+/* Bottom actions: flat faces, ink for the main action, coral tint once today is recorded */
+.detail-page .detail-action-secondary { background:#EEEEEA;box-shadow:none; }
+.detail-page .detail-action-primary, .detail-page[data-type="movie"] .detail-action-primary { background:var(--sb-ink);color:#fff;box-shadow:none; }
+.detail-page .detail-action-primary.is-done, .detail-page[data-type="movie"] .detail-action-primary.is-done { background:#FDECE8;color:#C2402F; }
+.detail-page:has(.detail-actions) { padding-bottom:110px; }
+.detail-page .detail-rating { background:#F0F0EC;box-shadow:none;border:0; }
