@@ -3997,3 +3997,27 @@ html, body { overflow-x:clip; }
 .scrap-row .sticker-cover-art::after { content:"";position:absolute;inset:0;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(30,42,34,.1);pointer-events:none; }
 /* Today cover: keep the tilt and white sticker edge, no shadow */
 .today-v2 .sticker-cover { filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff); }
+
+/* ── Forest (same rules as Today / Scrap) ─────────────────────────────────── */
+/* Faces instead of outlines for round buttons and tools */
+.forest-nav-btn { background:rgba(30,42,34,.06);box-shadow:none; }
+.forest-nav-btn:disabled { background:rgba(30,42,34,.03);box-shadow:none;color:rgba(30,42,34,.22); }
+.forest-tool { background:#EEEEEA;box-shadow:none; }
+.forest-tool.is-ink { background:var(--sb-ink); }
+/* Calendar: today is a grey face, recorded days a coral-tint stamp, finished days the work's colour */
+.fcal-day.is-today { box-shadow:none;background:#ECECE8;color:var(--sb-ink); }
+.fcal-stamp { width:30px;height:30px;border-radius:50%;background:#FDECE8;box-shadow:none;display:flex;align-items:center;justify-content:center; }
+.fcal-day.is-done[data-type="book"] { background:var(--book-bg); }
+.fcal-day.is-done[data-type="movie"] { background:var(--movie-bg); }
+.fcal-legend i, .fcal-legend i.is-logged { background:#FDECE8;box-shadow:none; }
+.fcal-legend i.is-done { background:var(--book-bg);box-shadow:none; }
+.fcal-legend i.is-done.is-movie { background:var(--movie-bg); }
+/* Finished-this-month list: plain rows with hairlines (no card per row), list covers */
+.fcal-cards { display:flex;flex-direction:column;gap:0;margin-top:10px; }
+.fcal-card { padding:12px 2px;border-radius:0;background:none;box-shadow:none;border-bottom:1px solid rgba(30,42,34,.08); }
+.fcal-card:last-child { border-bottom:0; }
+.fcal-card .sticker-cover-art { filter:none;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(30,42,34,.1); }
+/* Year: month tiles as quiet grey faces, the current month in sky, future months bare */
+.forest-month-card { background:#F0F0EC;box-shadow:none; }
+.forest-month-card.is-current { background:var(--sb-sky);box-shadow:none; }
+.forest-month-card.is-future { background:none;box-shadow:none; }

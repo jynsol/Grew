@@ -661,11 +661,11 @@ function forestCalendarHTML(period){
  for(let d=1;d<=days;d++){
   const date=period+'-'+String(d).padStart(2,'0'),done=state.items.filter(c=>c.completed===date),logged=state.items.some(c=>c.logs.some(l=>l.date===date));
   const label=date+(done.length?' · '+done.map(c=>c.title).join(', ')+' 완료':logged?' · 기록함':' · 기록 없음');
-  cells+='<button type="button" class="fcal-day'+(date===today?' is-today':'')+(done.length?' is-done':logged?' is-logged':'')+'" data-action="day" data-date="'+date+'" aria-label="'+esc(label)+'"'+(date>today?' disabled':'')+'><span class="fcal-num">'+d+'</span>'+(done.length?'<span class="fcal-tree">'+stickerTree(done[0],3)+'</span>':logged?'<span class="fcal-stamp">'+check+'</span>':'')+'</button>';
+  cells+='<button type="button" class="fcal-day'+(date===today?' is-today':'')+(done.length?' is-done':logged?' is-logged':'')+'"'+(done.length?' data-type="'+done[0].type+'"':'')+' data-action="day" data-date="'+date+'" aria-label="'+esc(label)+'"'+(date>today?' disabled':'')+'><span class="fcal-num">'+d+'</span>'+(done.length?'<span class="fcal-tree">'+stickerTree(done[0],3)+'</span>':logged?'<span class="fcal-stamp">'+check+'</span>':'')+'</button>';
  }
  const finished=state.items.filter(c=>c.completed&&c.completed.startsWith(period)).sort((a,b)=>b.completed.localeCompare(a.completed)||(b.completedAt||0)-(a.completedAt||0));
  const card=c=>{const dt=new Date(c.completed+'T12:00:00Z');return '<button type="button" class="fcal-card" data-action="detail" '+attr(c.id)+'>'+stickerCover(c)+'<span class="fcal-card-copy"><small>'+(dt.getUTCMonth()+1)+'월 '+dt.getUTCDate()+'일 '+FOREST_MONTH_NAMES[dt.getUTCDay()]+' · '+(c.type==='movie'?'다 봄':'다 읽음')+'</small><strong>'+esc(c.title)+'</strong><span>'+(validRating(c.rating)?'<b>★</b> '+c.rating+' · ':'')+esc(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요</span></span>'+stickerTree(c,3,'is-cut-sm')+'</button>'};
- return '<div class="fcal"><div class="fcal-grid">'+cells+'</div><div class="fcal-legend"><span><i class="is-logged"></i>기록한 날</span><span><i class="is-done"></i>다 읽은 날</span></div></div>'+(finished.length?'<div class="fcal-cards">'+finished.map(card).join('')+'</div>':'');
+ return '<div class="fcal"><div class="fcal-grid">'+cells+'</div><div class="fcal-legend"><span><i class="is-logged"></i>기록한 날</span><span><i class="is-done"></i>다 읽은 날</span><span><i class="is-done is-movie"></i>다 본 날</span></div></div>'+(finished.length?'<div class="fcal-cards">'+finished.map(card).join('')+'</div>':'');
 }
 // Year island: twelve 5×5 plots, three per row, laid out on one isometric block.
 // Each month plot is a 5×5 grid; trees take cells in a shuffled (but stable) order so they
