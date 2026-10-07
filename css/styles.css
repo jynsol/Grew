@@ -3909,3 +3909,13 @@ html, body { overflow-x:clip; }
 .detail-page[data-type="movie"] .detail-chip:not(.is-ink) { background:var(--movie-tint);color:var(--movie-ink); }
 .detail-page .detail-action-primary { background:var(--book-bg);color:var(--sb-ink); }
 .detail-page[data-type="movie"] .detail-action-primary { background:var(--movie-bg); }
+
+/* Books butter, films mint: the forest's own palette. Colour now only means book / film. */
+:root { --book-bg:#F7E7A1;--book-tint:#FBF0C6;--book-ink:#946B00;--movie-bg:#BFE7CB;--movie-tint:#DDF2E3;--movie-ink:#2A7D4E; }
+/* Tab bar: one white pill for the active tab, whatever the tab */
+.tabs button.active, .tabs button[data-tab].active { background:#fff;color:var(--sb-ink); }
+/* 최근 완료: white cards; only the small BOOK / MOVIE label carries colour */
+.sticker-recent-card .sticker-recent-art, .sticker-recent-card[data-type] .sticker-recent-art { background:#fff;box-shadow:inset 0 0 0 1px rgba(30,42,34,.06); }
+.sticker-recent-card .sticker-recent-type, .sticker-recent-card[data-type] .sticker-recent-type { height:20px;padding:0 7px;border-radius:6px;font:800 10px/1 var(--sb-label);font-stretch:118%;letter-spacing:.06em; }
+.sticker-recent-card i.sticker-recent-cover, .today-v2 .sticker-cover { background-color:var(--book-tint); }
+.sticker-recent-card[data-type="movie"] i.sticker-recent-cover, .today-v2[data-type="movie"] .sticker-cover { background-color:var(--movie-tint); }
