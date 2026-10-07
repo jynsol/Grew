@@ -2747,6 +2747,7 @@ h3 { font-weight:750;letter-spacing:-.025em; }
   --sb-lilac: #DCCFF4;
   --sb-lilac-soft: #ECE5FA;
   --sb-mint: #B9E0C2;
+  --sb-coral: #E85A47;
   --sb-muted: #6b6963;
   --sb-faint: #a29f96;
   --sb-label: "Archivo", var(--font-family);
@@ -2963,3 +2964,9 @@ body[data-view]:not([data-view="today"]):has(.page.entry-page), .page.entry-page
 .welcome-actions .textbtn { min-height:44px;background:none;border:0;font:700 14px/1 var(--font-family); }
 
 @media (max-height:760px) { .intro-shapes>.intro-low { display:none; } }
+
+/* Coral is the point colour: marks only, never small text (stars, ribbons, the stamp check, today's ring). */
+.stamp-button:not(.is-done) svg { color:var(--sb-coral); }
+.sticker-week li.is-today { border-color:var(--sb-coral); }
+.sticker-recent-card .rating-star { color:var(--sb-coral); }
+.record-done-stamp { border-color:var(--sb-coral); }
