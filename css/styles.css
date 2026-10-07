@@ -3714,3 +3714,10 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .stamp-button:not(.is-done) { background:#E7E7E3;color:#5E5E5A;box-shadow:0 0 0 1px rgba(30,42,34,.06),0 8px 16px -12px rgba(30,42,34,.35); }
 .stamp-button:not(.is-done) .stamp-ring { border-color:rgba(30,42,34,.22); }
 .stamp-button:not(.is-done) svg { color:#8E8E89; }
+/* The stamp keeps one fixed slot (the recorded stamp's size); the smaller grey stamp is centred
+   in it, so pressing it never reflows the week row or what sits below. */
+.sticker-actions>.stamp-button:not(.is-done) { margin:10px; }
+@media (max-width:414px) { .sticker-actions>.stamp-button:not(.is-done) { margin:8px; } }
+@media (max-width:360px) { .sticker-actions>.stamp-button:not(.is-done) { margin:6px; } }
+.scrap-page .type-tab::before { display:none !important; content:none; }
+.composer-toolbar .composer-type-tab::before { display:none !important;content:none; }
