@@ -4139,3 +4139,5 @@ html, body { overflow-x:clip; }
 .planted-stat b { font:800 28px/1 var(--font-family);letter-spacing:-.04em; }
 .planted-stat b small { margin-left:2px;font:750 13px/1 var(--font-family); }
 .planted-stat span { font:620 12px/1.2 var(--font-family);color:rgba(30,42,34,.55); }
+.planted-star { margin-right:3px;font-style:normal;font-size:.72em;color:var(--sb-coral);vertical-align:.12em; }
+.planted-stat { align-items:center; }
