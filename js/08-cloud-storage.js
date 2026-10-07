@@ -487,7 +487,7 @@ function openReadingList(currentId){
 }
 function todayStickerWeek(c){
  const streak=streakDays(c),names=['월','화','수','목','금','토','일'];
- return '<section class="sticker-week" aria-label="이번 주 기록"><h2>이번 주'+(streak?' · 연속 '+streak+'일':'')+'</h2><ol>'+weekDots(c).map((d,i)=>'<li class="'+(d.logged?'is-logged ':'')+(d.isToday?'is-today ':'')+(d.isFuture?'is-future':'')+'" aria-label="'+d.date+' '+names[i]+'요일'+(d.isToday?' · 오늘':'')+' · '+(d.logged?'기록함':d.isFuture?'예정':'기록 없음')+'"'+(d.isToday?' aria-current="date"':'')+'>'+names[i]+'</li>').join('')+'</ol></section>';
+ return '<section class="sticker-week" aria-label="이번 주 기록"><h2>이번 주'+(streak?'<span class="tv-streak">연속 '+streak+'일</span>':'')+'</h2><ol>'+weekDots(c).map((d,i)=>'<li class="'+(d.logged?'is-logged ':'')+(d.isToday?'is-today ':'')+(d.isFuture?'is-future':'')+'" aria-label="'+d.date+' '+names[i]+'요일'+(d.isToday?' · 오늘':'')+' · '+(d.logged?'기록함':d.isFuture?'예정':'기록 없음')+'"'+(d.isToday?' aria-current="date"':'')+'>'+names[i]+'</li>').join('')+'</ol></section>';
 }
 function todayBoard(c){
  const stage=Model.stage(c),readingItems=state.items.filter(x=>!x.completed&&x.id!==c.id&&Model.stage(x)>0),reading=readingItems.length,readingLabel=progressLabel(readingItems),others=state.items.some(x=>!x.completed&&x.id!==c.id),date=new Date(now()+'T12:00:00Z');
@@ -497,17 +497,20 @@ function todayBoard(c){
  // A trailing "(…)" in a book title reads as its subtitle, as in the design.
  const split=String(c.title).match(/^(.+?)\s*[(（]([^()（）]+)[)）]\s*$/),mainTitle=split?split[1]:c.title;
  const suffix=todayStageSuffix(c),sub=split?split[2]:c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
- return '<section class="sticker-today" data-type="'+c.type+'" data-stage="'+stage+'">'+
- '<div class="sticker-top"><div class="sticker-titles"><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div>'+
- '<div class="today-panel">'+
-  '<div class="today-panel-top"><span class="today-panel-date">'+dateLabel+'</span>'+
+ // Today (Apple-style): coral date over a large title, a gradient hero card with the work and its
+ // tree in a soft disc, then a white week card with the stamp. Stages are not a goal, so no progress ring.
+ const longDate=(date.getUTCMonth()+1)+'월 '+date.getUTCDate()+'일 '+['일','월','화','수','목','금','토'][date.getUTCDay()]+'요일';
+ return '<section class="sticker-today today-v2" data-type="'+c.type+'" data-stage="'+stage+'">'+
+ '<header class="tv-head"><p class="tv-date">'+longDate+'</p><div class="sticker-top"><div class="sticker-titles"><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div></header>'+
+ '<article class="today-panel tv-hero">'+
+  '<div class="tv-hero-top"><span class="tv-tag">'+(c.type==='movie'?'지금 보는 영화':'지금 읽는 책')+'</span>'+
    (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+'</div>'+
-  '<div class="today-panel-title"><span class="today-panel-kicker">오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+'">'+esc(mainTitle)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>'+
-  '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button>'+
-  '<div class="today-disc" aria-hidden="true"></div>'+stickerTree(c,stage,'today-tree')+
-  '<span class="today-stage"><i aria-hidden="true">'+stickerTree(c,stage)+'</i>'+esc(growthAppearance(stage).name)+(suffix?'<b aria-hidden="true">·</b><em>'+esc(suffix)+'</em>':'')+'</span>'+
- '</div>'+
- '<div class="sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(c.type==='movie'?button('보러 가기 ↗','external','textbtn',attr(c.id)):'')+(todayLogOf(c)?button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</div>'+
+  '<div class="tv-hero-main"><div class="today-panel-title"><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+'">'+esc(mainTitle)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+(c.creator?'<span class="today-panel-kicker">'+esc(c.creator)+'</span>':'')+(c.type==='movie'?button('보러 가기 ↗','external','tv-watch',attr(c.id)):'')+'</div>'+
+  '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button></div>'+
+  '<div class="tv-grow"><div class="tv-ring-wrap"><div class="today-disc" aria-hidden="true"></div>'+stickerTree(c,stage,'today-tree')+'</div>'+
+  '<span class="today-stage"><i aria-hidden="true">'+stickerTree(c,stage)+'</i>'+esc(growthAppearance(stage).name)+(suffix?'<b aria-hidden="true">·</b><em>'+esc(suffix)+'</em>':'')+'</span></div>'+
+ '</article>'+
+ '<article class="tv-week sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(todayLogOf(c)?button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</article>'+
  '</section>';
 }
 function recordActions(c,inDetail=false){
@@ -1764,7 +1767,7 @@ function recordDone(c,previousStage){
   const tree=document.querySelector('.today-panel .today-tree');
   if(tree){
    const prev=tree.cloneNode();prev.src=stickerTreeSrc(c,previousStage);prev.alt='';prev.classList.add('is-leaving');
-   if(previousStage<=1&&stage>1){prev.style.top='184px';prev.style.height='150px'}
+   if(previousStage<=1)prev.classList.add('is-small');
    tree.classList.add('is-arriving');tree.after(prev);setTimeout(()=>prev.remove(),1300);
    document.querySelector('.today-panel .today-stage')?.classList.add('is-pop');
   }
