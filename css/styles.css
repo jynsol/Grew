@@ -4027,3 +4027,6 @@ html, body { overflow-x:clip; }
   .sheet-back:not([data-kind="record-done"]):not([data-kind="planted"]) .sheet { border-radius:32px !important; }
   .sheet-back:not([data-kind="record-done"]):not([data-kind="planted"]) .sheet.collection-sheet { overflow:hidden auto; }
 }
+/* Sheet backdrop: dim and blur what is behind so it never reads as part of the sheet */
+.sheet-back { background:rgba(30,42,34,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px); }
+.sheet :is(button,a,summary):focus:not(:focus-visible), .sheet .content-row:focus { outline:0; }
