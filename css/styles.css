@@ -3732,3 +3732,29 @@ html, body { overflow-x:clip; }
 .app, #page { overflow-x:clip; }
 .forest-month.is-board .forest-board { width:100vw;margin-left:calc(50% - 50vw);margin-right:0;align-self:flex-start; }
 .tabs { left:0;right:0;margin-left:auto;margin-right:auto;transform:none; }
+
+/* ── Simple pass (Apple-like, a little colour) ─────────────────────────────
+   Shadows belong to trees and visitors only; UI uses flat fills and hairlines,
+   no white sticker borders. Onboarding keeps its sticker look. */
+:root { --sb-card:0 0 0 1px rgba(30,42,34,.08);--sb-shadow:0 0 0 1px rgba(30,42,34,.08);--sb-shadow-sm:0 0 0 1px rgba(30,42,34,.08); }
+.sticker-intro, .sticker-welcome, .page.entry-page { --sb-card:0 0 0 1px rgba(30,42,34,.07),0 6px 14px -8px rgba(30,42,34,.14);--sb-shadow:0 0 0 1px rgba(30,42,34,.07),0 1px 1px rgba(30,42,34,.06),0 10px 20px -8px rgba(30,42,34,.22);--sb-shadow-sm:0 0 0 1px rgba(30,42,34,.07),0 8px 16px -8px rgba(30,42,34,.25); }
+.tabs { box-shadow:none; }
+.sticker-cover, .sticker-recent-cover, .planted-cover, .finish-cover, .sticker-cover-art.detail-cover { border:0;box-shadow:0 0 0 1px rgba(30,42,34,.08); }
+.today-disc { border:0;box-shadow:none;background:rgba(255,255,255,.75); }
+.today-stage { border:0;box-shadow:none; }
+.detail-tree, .my-profile-head .profile-avatar, .planted-disc { border:0;box-shadow:none; }
+.planted-rating, .record-done-chip { border:0;box-shadow:none; }
+.stamp-button, .stamp-button.is-done { border:0;box-shadow:none; }
+.stamp-button:not(.is-done) { border:0;box-shadow:none;background:#ECECE8; }
+.forest-share { box-shadow:none; }
+.bm-pack-sale, .bm-soon { border:0;box-shadow:none; }
+.bm-stamp.is-filled { border:0;box-shadow:none; }
+.fcal-stamp { box-shadow:none; }
+.share-preview img { box-shadow:0 0 0 1px rgba(30,42,34,.08); }
+#forestSoundVolume::-webkit-slider-thumb { box-shadow:0 0 0 1px rgba(30,42,34,.15); }
+.sheet-back:not(:is([data-kind="record-done"],[data-kind="planted"],[data-kind="finish"],[data-kind="share"],[data-kind="scrap-composer"])) .sheet { box-shadow:none; }
+/* Week row: today is a light grey dot until recorded, then a plain green dot */
+.sticker-week li.is-today:not(.is-logged) { border:0;background:#ECECE8;color:var(--sb-ink);font-weight:680; }
+.sticker-week li.is-logged, .sticker-week li.is-today.is-logged { border:0;box-shadow:none;background:var(--sb-mint);color:var(--sb-ink); }
+/* Trees and visitors keep a soft shadow, without the white sticker outline */
+.sticker-tree.is-cut, .sticker-tree.is-cut-sm, .bm-codex-art .bm-img, .bm-visitor-art { filter:drop-shadow(0 5px 5px rgba(30,42,34,.18)); }
