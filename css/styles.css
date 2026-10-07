@@ -4132,3 +4132,10 @@ html, body { overflow-x:clip; }
 .planted-share { background:rgba(255,255,255,.65); }
 @media (prefers-reduced-motion:reduce) { .planted-rays, .planted-spark { animation:none; } }
 @media (max-height:740px) { .planted-stage { height:290px; } .planted-stage .planted-tree { width:200px;height:200px;margin-left:-100px; } .planted-sun { width:230px;height:230px;margin-left:-115px; } }
+/* Planted stats in the app's own pattern: a white hairline card (like the week card) and bold
+   numbers like Today's big count, no frosted glass */
+.planted-stats { margin:20px 22px 0;padding:16px 18px;border-radius:24px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.06);-webkit-backdrop-filter:none;backdrop-filter:none;gap:8px; }
+.planted-stat { align-items:flex-start;gap:5px;border-right:0; }
+.planted-stat b { font:800 28px/1 var(--font-family);letter-spacing:-.04em; }
+.planted-stat b small { margin-left:2px;font:750 13px/1 var(--font-family); }
+.planted-stat span { font:620 12px/1.2 var(--font-family);color:rgba(30,42,34,.55); }
