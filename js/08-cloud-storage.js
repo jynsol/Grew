@@ -372,6 +372,13 @@ function handleCoverError(event){
 }
 document.addEventListener('error',handleCoverError,true);
 function menu(c){return '<details class="more"><summary aria-label="콘텐츠 메뉴">⋯</summary><div class="more-menu">'+button('다른 스크랩으로 바꾸기','pick','')+button('콘텐츠 상세 보기','detail','',attr(c.id))+'</div></details>'}
+// Status bar tint follows the page colour (intro slides, cream sticker pages).
+const INTRO_THEME_COLORS=['#EADFFC','#FCF0C2','#D2EED8'];
+function syncThemeColor(){
+ const meta=document.querySelector('meta[name="theme-color"]');if(!meta)return;
+ const color=authRoute==='intro'?INTRO_THEME_COLORS[introductionStep]||'#FAF7F0':(authRoute!=='app'||view==='today')?'#FAF7F0':'#ffffff';
+ meta.setAttribute('content',color);document.documentElement.style.backgroundColor=color;
+}
 function render(){
  showStorageStatus();
  syncLinkImport();
@@ -379,7 +386,8 @@ function render(){
  syncNotifications();
  window.__songrimForestCleanup?.();window.__songrimForestCleanup=null;
  forestVisibilityObserver?.disconnect();forestVisibilityObserver=null;
- if(authRoute!=='app'){renderEntry();return}
+ if(authRoute!=='app'){renderEntry();syncThemeColor();return}
+ syncThemeColor();
  $('tabs').hidden=false;$('page').classList.remove('entry-page','taste-page','intro-page');$('page').dataset.view=view;$('head').dataset.view=view;document.body.dataset.view=view;
  const parentTab=view==='detail'?detailOrigin:view;
  const tab=['sound','notifications'].includes(parentTab)?'my':parentTab==='calendar'?'forest':parentTab;

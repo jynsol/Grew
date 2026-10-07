@@ -2880,9 +2880,9 @@ body[data-view="today"], body[data-view="today"] .app, .page[data-view="today"] 
 @media (prefers-reduced-motion:reduce) { .record-done-tree,.record-done-stamp { animation:none; } }
 
 /* Intro slides (redesign 5a) */
-body[data-view="intro"], body[data-view="intro"] .app { background:var(--sb-cream); }
+body[data-view="intro"], body[data-view="intro"] .app { background:transparent; }
 .page.intro-page, .head[hidden]+.page.intro-page { display:block;min-height:0;padding:0;max-width:none;background:none; }
-.sticker-intro { position:relative;min-height:max(100dvh,720px);overflow:hidden;color:var(--sb-ink);padding-top:env(safe-area-inset-top);box-sizing:border-box;background:linear-gradient(165deg,#EADFFC 0%,#DCCFF4 42%,#F7D6E6 100%); }
+.sticker-intro { position:relative;min-height:max(100dvh,660px);overflow:hidden;color:var(--sb-ink);padding-top:env(safe-area-inset-top);box-sizing:border-box;background:linear-gradient(165deg,#EADFFC 0%,#DCCFF4 42%,#F7D6E6 100%); }
 .sticker-intro[data-step="1"] { background:linear-gradient(170deg,#FCF0C2 0%,#F4E3A0 45%,#F8CDB3 100%); }
 .sticker-intro[data-step="2"] { background:linear-gradient(160deg,#D2EED8 0%,#B9E0C2 45%,#E5F2C2 100%); }
 .intro-shapes { position:absolute;inset:env(safe-area-inset-top) 0 0;pointer-events:none; }
@@ -2897,14 +2897,14 @@ body[data-view="intro"], body[data-view="intro"] .app { background:var(--sb-crea
 .intro-visitor { display:block;background:0 0/200% 200% no-repeat; }
 .intro-card { width:132px;height:176px;border-radius:18px;border:3px solid #fff;box-sizing:border-box;box-shadow:var(--sb-shadow);padding:12px;display:flex;flex-direction:column;gap:10px; }
 .intro-card span { font:800 10px/1 var(--sb-label);font-stretch:125%;letter-spacing:.06em; }
-.intro-card i { flex:1;border-radius:8px;background:repeating-linear-gradient(135deg,rgba(30,42,34,.08) 0 6px,transparent 6px 12px); }
+.intro-card svg { flex:1;width:100%;min-height:0; }
 .intro-chip { border:3px solid #fff;border-radius:99px;padding:8px 13px;font:800 13px/1 var(--font-family);color:var(--sb-ink);box-shadow:0 0 0 1px rgba(30,42,34,.07),0 10px 20px -8px rgba(30,42,34,.25);white-space:nowrap; }
 .intro-stamp { width:150px;height:150px;border-radius:50%;background:var(--sb-ink);border:3px solid #fff;box-sizing:border-box;box-shadow:var(--sb-shadow);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:800 16px/1.2 var(--font-family);text-align:center;transform:rotate(8deg); }
 .intro-stamp .stamp-ring { inset:9px; }
 .intro-days { left:30px;right:30px;top:236px;display:flex;justify-content:space-between; }
 .intro-days span { width:36px;height:36px;border-radius:50%;background:var(--sb-cream);border:2.5px solid #fff;box-sizing:border-box;box-shadow:0 0 0 1px rgba(30,42,34,.07),0 6px 12px -6px rgba(30,42,34,.25);display:flex;align-items:center;justify-content:center;font:800 12px/1 var(--font-family); }
 .intro-days span.is-done { background:var(--sb-lilac); }
-.intro-bottom { position:absolute;left:24px;right:24px;bottom:calc(44px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px; }
+.intro-bottom { position:absolute;left:24px;right:24px;bottom:calc(max(18px, env(safe-area-inset-bottom)) + 6px);display:flex;flex-direction:column;gap:16px; }
 .page .intro-bottom h1 { margin:0;font:900 36px/1.25 var(--font-family);letter-spacing:-.045em;color:var(--sb-ink); }
 .intro-bottom mark { display:inline-block;background:#fff;color:inherit;padding:0 10px;border-radius:12px;transform:rotate(var(--tilt,0deg));box-shadow:0 0 0 1px rgba(30,42,34,.07),0 8px 16px -8px rgba(30,42,34,.25); }
 .intro-bottom p { margin:0;font:500 16px/1.6 var(--font-family);color:#3b3a33; }
@@ -2961,3 +2961,5 @@ body[data-view]:not([data-view="today"]):has(.page.entry-page), .page.entry-page
 .welcome-copy p { margin:0;font:500 16px/1.6 var(--font-family);color:#3b3a33; }
 .welcome-actions { position:relative;margin-top:auto;padding:24px 24px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px; }
 .welcome-actions .textbtn { min-height:44px;background:none;border:0;font:700 14px/1 var(--font-family); }
+
+@media (max-height:760px) { .intro-shapes>.intro-low { display:none; } }
