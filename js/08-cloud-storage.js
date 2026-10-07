@@ -600,14 +600,15 @@ function renderDetail(){
  const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
  const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'보기 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
   button(c.type==='movie'?'다 봤어요':'다 읽었어요','complete','detail-action-secondary',attr(c.id))+(todayLog?button('오늘 기록했어요 · '+(todayLog.memo?'메모 수정':'메모'),'editLog','detail-action-primary is-done',attr(c.id)+' data-log="'+esc(todayLog.id)+'"'):button('<i aria-hidden="true"></i>오늘 '+verb,'record','detail-action-primary',attr(c.id))))+'</div>';
+ // Records lead when there are some; an empty record section drops to the bottom.
+ const recordsHTML='<div class="detail-section"><h2>기록</h2>'+(logs.length?'<div class="detail-logs">'+logs.slice(0,5).map(logRow).join('')+'</div>'+(logs.length>5?'<details class="collapse"><summary>지난 기록 '+(logs.length-5)+'개 더 보기</summary><div class="detail-logs">'+logs.slice(5).map(logRow).join('')+'</div></details>':''):'<p class="detail-empty">아직 기록이 없어요.</p>')+'</div>';
  return '<section class="detail-page" data-type="'+c.type+'"><div class="detail-panel">'+stickerCover(c,'detail-cover')+(stage>0?'<span class="detail-tree">'+stickerTree(c,stage)+'</span>':'')+'</div>'+
  '<div class="detail-head"><span class="detail-kicker"><span class="scrap-type is-'+c.type+'">'+(c.type==='movie'?'MOVIE':'BOOK')+'</span>'+(genre?esc(genre):'')+'</span><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'<p class="detail-creator">'+esc(c.creator||'제작자 미확인')+(c.publisher?' · '+esc(c.publisher):'')+'</p></div>'+
  '<div class="detail-chips">'+chips+'</div>'+
  (c.completed?'<button type="button" class="detail-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 수정"><span>내 별점</span>'+(validRating(c.rating)?averageStars(c.rating):'<span class="muted">아직 별점 없음</span>')+'<b aria-hidden="true">›</b></button>':'')+
  (c.review?'<div class="detail-section review-copy"><h2>나의 감상</h2><p>'+esc(c.review)+'</p></div>':'')+
- '<div class="detail-section"><h2>기록</h2>'+(logs.length?'<div class="detail-logs">'+logs.slice(0,5).map(logRow).join('')+'</div>'+(logs.length>5?'<details class="collapse"><summary>지난 기록 '+(logs.length-5)+'개 더 보기</summary><div class="detail-logs">'+logs.slice(5).map(logRow).join('')+'</div></details>':''):'<p class="detail-empty">아직 기록이 없어요.</p>')+'</div>'+
- '<div class="detail-section"><h2>정보</h2>'+detailMetadata(c)+'</div>'+
- (introHTML?'<div class="detail-section">'+introHTML+'</div>':'')+renderLinkSources(c)+actions+'</section>';
+ (logs.length?recordsHTML:'')+'<div class="detail-section"><h2>정보</h2>'+detailMetadata(c)+'</div>'+
+ (introHTML?'<div class="detail-section">'+introHTML+'</div>':'')+(logs.length?'':recordsHTML)+renderLinkSources(c)+actions+'</section>';
 }
 function forestGrowthKey(c){
  if(!c||!c.id||c._bmSample||!['book','movie'].includes(c.type)||c.completed)return '';
