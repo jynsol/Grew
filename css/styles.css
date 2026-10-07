@@ -4141,3 +4141,18 @@ html, body { overflow-x:clip; }
 .planted-stat span { font:620 12px/1.2 var(--font-family);color:rgba(30,42,34,.55); }
 .planted-star { margin-right:3px;font-style:normal;font-size:.72em;color:var(--sb-coral);vertical-align:.12em; }
 .planted-stat { align-items:center; }
+
+/* ── MY (same rules as Today / Scrap / Forest) ───────────────────────────── */
+.my-stats { gap:8px; }
+.my-stats div, .my-stats>div { height:auto;padding:14px 8px 12px;border-radius:18px;background:#fff;flex-direction:column;align-items:center;justify-content:center;gap:6px; }
+.my-stats strong { font:800 24px/1 var(--font-family);letter-spacing:-.04em;color:var(--sb-ink); }
+.my-stats span { font:620 12px/1 var(--font-family);color:rgba(30,42,34,.55); }
+/* Group labels are quiet grey captions so the rows lead */
+.page:not(.entry-page) .settings-group h2 { margin:0 0 8px 4px;font:620 12.5px/1 var(--font-family);color:rgba(30,42,34,.5); }
+.settings-group-head .save-status { color:rgba(30,42,34,.45); }
+.settings-card .menu-row.danger, .settings-card .menu-row.danger span { color:var(--sb-coral); }
+/* 숲의 소리: the chosen sound is a filled colour face with a coral check; the other is a grey face */
+.forest-sound-choice, .forest-sound-choice.is-1 { background:#F0F0EC;box-shadow:none;border:0; }
+.forest-sound-choice.selected { background:var(--sb-butter);box-shadow:none;border:0; }
+.forest-sound-choice.is-1.selected { background:var(--sb-sky); }
+.forest-sound-choice.selected .forest-sound-choice-check { background:#fff;color:var(--sb-coral); }
