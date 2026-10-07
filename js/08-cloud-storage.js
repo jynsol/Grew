@@ -524,7 +524,7 @@ function scrapStatusLabel(c){const status=Model.status(c);return status==='done'
 function scrapCard(c,choose=false){
  const status=Model.status(c),stage=Model.stage(c);
  return '<button type="button" class="scrap-row" data-type="'+c.type+'" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+' aria-label="'+esc(c.title)+' · '+scrapStatusLabel(c)+'">'+stickerCover(c)+
- '<span class="scrap-row-body"><strong>'+esc(c.title)+'</strong><small>'+typeName[c.type]+' · '+esc(c.creator||'제작자 미확인')+'</small><span class="scrap-status is-'+status+'">'+scrapStatusLabel(c)+(validRating(c.rating)?' · <b>★</b> '+c.rating:'')+'</span></span>'+
+ '<span class="scrap-row-body"><strong>'+esc(c.title)+'</strong><small><span class="type-tag is-'+c.type+'">'+typeName[c.type]+'</span>'+esc(c.creator||'제작자 미확인')+'</small><span class="scrap-row-marks"><span class="scrap-status is-'+status+'">'+(status==='done'?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>':'')+scrapStatusLabel(c)+'</span>'+(validRating(c.rating)?'<span class="scrap-rating"><b>★</b> '+c.rating+'</span>':'')+'</span></span>'+
  (stage>0?stickerTree(c,stage,'is-cut-sm'):'')+'</button>';
 }
 
@@ -577,7 +577,7 @@ function renderDetail(){
  }
  const logs=[...c.logs].sort((a,b)=>b.date.localeCompare(a.date)),stage=Model.stage(c),logDays=todayLogDates(c).size,days=todayDayCount(c);
  const genre=cleanGenreValue(c.genre)?launchGenre(c.type,c.genre,c):'';
- const chips=c.completed?'<span class="detail-chip is-ink">완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+(validRating(c.rating)?'<span class="detail-chip"><b>★</b> '+c.rating+'</span>':''):
+ const chips=c.completed?'<span class="detail-chip is-ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+(validRating(c.rating)?'<span class="detail-chip"><b>★</b> '+c.rating+'</span>':''):
   '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'','기록 '+logDays+'회'].filter(Boolean).join(' · ')+'</span>':'');
  const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'메모 없음')+'</span></button>';
  const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';

@@ -3469,3 +3469,20 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
 .tabs button[data-tab="forest"].active { background:var(--sb-mint); }
 .tabs button[data-tab="my"].active { background:var(--sb-peach); }
 .forest-board { margin:6px -8px 0; }
+
+/* Type colours are fixed app-wide: 책 lilac, 영화 mint. 완료 uses the stamp language (ink + coral check). */
+.type-tag { display:inline-flex;align-items:center;height:18px;margin-right:6px;padding:0 6px;border-radius:6px;font:680 11px/1 var(--font-family);color:var(--sb-ink);vertical-align:1px; }
+.type-tag.is-book { background:var(--sb-lilac); }
+.type-tag.is-movie { background:var(--sb-mint); }
+.scrap-row-marks { display:flex;align-items:center;gap:8px; }
+.scrap-status { display:inline-flex;align-items:center;gap:3px; }
+.scrap-status.is-done { background:var(--sb-ink);color:#fff;border-color:transparent; }
+.scrap-rating { font:620 12px/1 var(--font-family);color:var(--sb-muted); }
+.scrap-rating b { color:var(--sb-coral);font-weight:inherit; }
+.sticker-recent-card[data-type="movie"] .sticker-recent-art { background:var(--sb-mint); }
+.sticker-recent-card[data-type="book"] .sticker-recent-art { background:var(--sb-lilac); }
+.sticker-recent-type { display:inline-flex;align-self:flex-start;padding:4px 6px;border-radius:6px;font-stretch:115%;color:var(--sb-ink); }
+.sticker-recent-card[data-type="book"] .sticker-recent-type { background:var(--sb-lilac); }
+.sticker-recent-card[data-type="movie"] .sticker-recent-type { background:var(--sb-mint); }
+.detail-chip.is-ink svg { margin-right:2px; }
+.fcal-day.is-done { background:var(--sb-butter); }
