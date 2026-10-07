@@ -3670,3 +3670,9 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .sticker-titles { display:flex;flex-direction:column;gap:6px;min-width:0; }
 .sticker-titles .sticker-date { font-size:11px;color:var(--sb-muted); }
 .page .sticker-titles .page-title { margin:0;font:780 26px/1.1 var(--font-family);letter-spacing:-.03em;color:var(--sb-ink); }
+/* Today card: date on the top line, "오늘의 책 · 저자" right above the title */
+.today-panel-top>.today-panel-date { font:700 12px/1 var(--sb-label);font-stretch:125%;letter-spacing:.04em;color:var(--sb-ink); }
+.today-panel-title { top:48px;gap:6px; }
+.today-panel-title>.today-panel-kicker { font:600 12.5px/1.2 var(--font-family);color:var(--sb-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.page .sticker-top { padding-top:4px; }
+.forest-title-row .page-title+.forest-chips { margin-top:12px; }

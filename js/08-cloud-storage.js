@@ -500,11 +500,11 @@ function todayBoard(c){
  const split=String(c.title).match(/^(.+?)\s*[(（]([^()（）]+)[)）]\s*$/),mainTitle=split?split[1]:c.title;
  const suffix=todayStageSuffix(c),sub=split?split[2]:c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
  return '<section class="sticker-today" data-type="'+c.type+'" data-stage="'+stage+'">'+
- '<div class="sticker-top"><div class="sticker-titles"><span class="sticker-date">'+dateLabel+'</span><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div>'+
+ '<div class="sticker-top"><div class="sticker-titles"><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div>'+
  '<div class="today-panel">'+
-  '<div class="today-panel-top"><span>오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span>'+
+  '<div class="today-panel-top"><span class="today-panel-date">'+dateLabel+'</span>'+
    (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+'</div>'+
-  '<div class="today-panel-title"><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+'">'+esc(mainTitle)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>'+
+  '<div class="today-panel-title"><span class="today-panel-kicker">오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+'">'+esc(mainTitle)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>'+
   '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button>'+
   '<div class="today-disc" aria-hidden="true"></div>'+stickerTree(c,stage,'today-tree')+
   '<span class="today-stage"><i aria-hidden="true">'+stickerTree(c,stage)+'</i>'+esc(growthAppearance(stage).name)+(suffix?'<b aria-hidden="true">·</b><em>'+esc(suffix)+'</em>':'')+'</span>'+
@@ -656,10 +656,21 @@ function forestCalendarHTML(period){
 // Year island: twelve 5×5 plots, three per row, laid out on one isometric block.
 // Each month plot is a 5×5 grid; trees take cells in a shuffled (but stable) order so they
 // spread over the plot instead of filling it row by row.
-function islandCells(period){return Array.from({length:25},(_,i)=>i).sort((a,b)=>hash(period+'|'+a)-hash(period+'|'+b))}
+// Trees scatter over each month plot: every tree takes the most open of a dozen seeded random
+// spots inside the diamond, so the plot fills evenly without lining up in rows.
 function islandPlantings(period,items){
- const plot=(i=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}})(Number(period.slice(5))-1),cells=islandCells(period);
- return items.slice(0,25).map((c,k)=>{const cell=cells[k],gr=Math.floor(cell/5),gc=cell%5,jx=(hash(c.id+'x')%100/100-.5)*3,jy=(hash(c.id+'y')%100/100-.5)*1.6;return {x:plot.x+(gc-gr)*9+jx,y:plot.y-18+(gc+gr)*4.5+jy,src:stickerTreeSrc(c,c.completed?3:Model.stage(c))}}).sort((a,b)=>a.y-b.y);
+ const plot=(i=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}})(Number(period.slice(5))-1),placed=[];
+ const rand=key=>(hash(period+'|'+key)%100000)/100000;
+ return items.slice(0,25).map((c,k)=>{
+  let best=null,bestD=-1;
+  for(let t=0;t<14;t++){
+   const u=rand(k+'u'+t)*2-1,v=rand(k+'v'+t)*2-1;if(Math.abs(u)+Math.abs(v)>.8)continue;
+   const x=plot.x+u*45,y=plot.y+v*22.5,d=placed.length?Math.min(...placed.map(q=>Math.hypot(q.x-x,(q.y-y)*2))):99;
+   if(d>bestD){best={x,y};bestD=d}
+  }
+  best??={x:plot.x,y:plot.y};placed.push(best);
+  return {x:best.x,y:best.y,src:stickerTreeSrc(c,c.completed?3:Model.stage(c))};
+ });
 }
 function islandTufts(period,p){let out='';for(let i=0;i<5;i++){const a=hash(period+'t'+i)%1000/1000*1.6-.8,b=hash(period+'u'+i)%1000/1000*1.6-.8;if(Math.abs(a)+Math.abs(b)>.85)continue;const x=p.x+(a-b)*22,y=p.y+(a+b)*11;out+='<path d="M'+(x-2.4).toFixed(1)+' '+y.toFixed(1)+'L'+(x-.8).toFixed(1)+' '+(y-3).toFixed(1)+'L'+x.toFixed(1)+' '+(y-.9).toFixed(1)+'L'+(x+.8).toFixed(1)+' '+(y-3.3).toFixed(1)+'L'+(x+2.4).toFixed(1)+' '+y.toFixed(1)+'" fill="none" stroke="#6E9C58" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round" opacity=".75" pointer-events="none"/>'}return out}
 function forestYearIsland(y,type){
