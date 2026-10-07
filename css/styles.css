@@ -4022,3 +4022,8 @@ html, body { overflow-x:clip; }
 .forest-month-card.is-current { background:var(--sb-sky);box-shadow:none; }
 .forest-month-card.is-future { background:none;box-shadow:none; }
 .island-pin { filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff); }
+/* On wide screens sheets float in the middle, so every corner is rounded */
+@media (min-width:700px) {
+  .sheet-back:not([data-kind="record-done"]):not([data-kind="planted"]) .sheet { border-radius:32px !important; }
+  .sheet-back:not([data-kind="record-done"]):not([data-kind="planted"]) .sheet.collection-sheet { overflow:hidden auto; }
+}
