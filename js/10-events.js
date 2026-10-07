@@ -91,6 +91,9 @@ document.addEventListener('click',async e=>{
  // Clears every record day and the start mark: the work goes back to 시작 전 (undo from the toast).
  if(a==='resetRecords'){const before={logs:c.logs.map(l=>({...l})),startedAt:c.startedAt,importedProgress:c.importedProgress};confirmBox('기록을 모두 지울까요?','기록한 '+new Set(c.logs.map(l=>l.date)).size+'일과 메모가 지워지고 시작 전 상태로 돌아가요.',()=>{c.logs=[];c.startedAt='';c.importedProgress=false;if(todayPickedId===c.id)todayPickedId=null;if(!commit(true))return;toast('기록을 초기화했어요.',()=>{c.logs=before.logs;c.startedAt=before.startedAt;c.importedProgress=before.importedProgress;commit()})},'기록 초기화',true);return}
  if(a==='editMemo'){editMemo(id,b.dataset.log);return}
+ if(a==='addNote'){editNote(id);return}
+ if(a==='editNote'){editNote(id,b.dataset.note);return}
+ if(a==='deleteNote'){const noteId=b.dataset.note;c.notes=(c.notes||[]).filter(n=>n.id!==noteId);if(!commit(true))return;toast('메모를 삭제했어요.');return}
  if(a==='editLog'){editLog(id,b.dataset.log);return}
  if(a==='deleteLog'){const logId=b.dataset.log;confirmBox('이 기록을 삭제할까요?','선택한 날의 경험 기록만 삭제합니다.',()=>{c.logs=c.logs.filter(l=>l.id!==logId);if(!commit())return;toast('기록을 삭제했어요.')},'기록 삭제',true);return}
  if(a==='editInfo'){infoForm(c);return}
@@ -309,6 +312,7 @@ document.addEventListener('submit',async e=>{
  if(f.id==='profileForm'){saveProfile(f);return}
  if(f.id==='tasteForm'){state.profile.tastes=[...f.querySelectorAll('input:checked')].map(x=>x.value);if(!commit(true))return;toast('취향을 저장했어요.')}
  if(f.id==='recordDoneForm'){const l=get(f.dataset.id)?.logs.find(l=>l.id===f.dataset.log),memo=$('recordDoneMemo').value.trim();if(l&&memo!==l.memo){l.memo=memo;if(!commit(true))return;toast('메모를 저장했어요.')}else closeModal();return}
+ if(f.id==='noteForm'){const c=get(f.dataset.id);if(!c)return;const text=$('noteText').value.trim();c.notes=Array.isArray(c.notes)?c.notes:[];const n=c.notes.find(x=>x.id===f.dataset.note);if(n){if(text)n.text=text;else c.notes=c.notes.filter(x=>x!==n)}else if(text)c.notes.push({id:Model.uid(),date:now(),text});if(!commit(true))return;toast(text?'메모를 저장했어요.':'메모를 지웠어요.');return}
  if(f.id==='memoForm'){const l=get(f.dataset.id)?.logs.find(l=>l.id===f.dataset.log);if(l){l.memo=$('todayMemo').value.trim();if(!commit(true))return;toast('메모를 저장했어요.')}return}
  if(f.id==='logForm'){
   const c=get(f.dataset.id),l=c.logs.find(l=>l.id===f.dataset.log),date=$('logDate').value,page=$('logPage')?.value||'',memo=$('logMemo').value;

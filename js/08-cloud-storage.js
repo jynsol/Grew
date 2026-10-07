@@ -601,7 +601,10 @@ function renderDetail(){
  const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'보기 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
   button(c.type==='movie'?'다 봤어요':'다 읽었어요','complete','detail-action-secondary',attr(c.id))+(todayLog?button('오늘 기록했어요 · '+(todayLog.memo?'메모 수정':'메모'),'editLog','detail-action-primary is-done',attr(c.id)+' data-log="'+esc(todayLog.id)+'"'):button('<i aria-hidden="true"></i>오늘 '+verb,'record','detail-action-primary',attr(c.id))))+'</div>';
  // Records sit at the bottom: something to scroll down to, not the page's lead.
- const recordsHTML='<div class="detail-section"><h2>기록</h2>'+(logs.length?'<div class="detail-logs">'+logs.slice(0,5).map(logRow).join('')+'</div>'+(logs.length>5?'<details class="collapse"><summary>지난 기록 '+(logs.length-5)+'개 더 보기</summary><div class="detail-logs">'+logs.slice(5).map(logRow).join('')+'</div></details>':''):'<p class="detail-empty">아직 기록이 없어요.</p>')+'</div>';
+ // Memos, not reading dates: free notes plus any memo written on a record day, newest first.
+ const memos=[...(c.notes||[]).map(n=>({kind:'note',id:n.id,date:n.date,text:n.text})),...c.logs.filter(l=>String(l.memo||'').trim()).map(l=>({kind:'log',id:l.id,date:l.date,text:l.memo}))].sort((a,b)=>b.date.localeCompare(a.date));
+ const memoRow=m=>'<button type="button" class="detail-memo" data-action="'+(m.kind==='note'?'editNote':'editMemo')+'" '+attr(c.id)+(m.kind==='note'?' data-note="':' data-log="')+esc(m.id)+'"><span>'+esc(m.text)+'</span><small>'+esc(m.date.slice(2).replace(/-/g,'.'))+'</small></button>';
+ const recordsHTML='<div class="detail-section detail-memos"><div class="detail-memos-head"><h2>메모</h2>'+button('+ 메모 남기기','addNote','detail-memo-add',attr(c.id))+'</div>'+(memos.length?'<div class="detail-memo-list">'+memos.map(memoRow).join('')+'</div>':'<p class="detail-empty">아직 메모가 없어요.</p>')+'</div>';
  return '<section class="detail-page" data-type="'+c.type+'"><div class="detail-panel">'+stickerCover(c,'detail-cover')+(stage>0?'<span class="detail-tree">'+stickerTree(c,stage)+'</span>':'')+'</div>'+
  '<div class="detail-head"><span class="detail-kicker"><span class="scrap-type is-'+c.type+'">'+(c.type==='movie'?'MOVIE':'BOOK')+'</span>'+(genre?esc(genre):'')+'</span><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'<p class="detail-creator">'+esc(c.creator||'제작자 미확인')+(c.publisher?' · '+esc(c.publisher):'')+'</p></div>'+
  '<div class="detail-chips">'+chips+'</div>'+
@@ -1813,6 +1816,11 @@ function editLog(id,logId){
 }
 function themes(){openCollection('floors')}
 
+// Free memos on a work, not tied to a record day.
+function editNote(id,noteId=''){
+ const c=get(id);if(!c)return;const n=(c.notes||[]).find(x=>x.id===noteId);
+ showModal(n?'메모 수정':'메모 남기기','<form id="noteForm" data-id="'+esc(id)+'" data-note="'+esc(noteId)+'"><label for="noteText" class="sr-only">메모</label><textarea id="noteText" maxlength="4000" placeholder="기억하고 싶은 문장이나 생각">'+esc(n?.text||'')+'</textarea><button type="submit" class="primary">저장</button>'+(n?button('메모 삭제','deleteNote','textbtn',attr(id)+' data-note="'+esc(noteId)+'"'):'')+'</form>','memo');
+}
 function editMemo(id,logId){
  const l=get(id)?.logs.find(l=>l.id===logId);if(!l)return;
  showModal(l.memo?'메모 수정':'메모 남기기','<form id="memoForm" data-id="'+esc(id)+'" data-log="'+esc(logId)+'"><label for="todayMemo">오늘 읽으며 남기고 싶은 생각</label><textarea id="todayMemo" maxlength="4000" placeholder="짧은 생각이나 기억하고 싶은 문장">'+esc(l.memo)+'</textarea><button type="submit" class="primary">저장</button></form>','memo');
