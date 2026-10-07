@@ -905,17 +905,20 @@ function meadowGroundArtwork(cfg,cx=360,cy=286,floor='meadow'){
 // Basic floor (redesign 11a): a flat sticker block — green top, soil sides, grass tufts,
 // a white cut edge and a soft shadow, matching the forest tab's design.
 function stickerGroundArtwork(cfg,cx=360,cy=286){
- const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.max(18,rx*.2),f=n=>n.toFixed(1),unit=k=>(hash('ground|'+k)%10000)/10000;
+ const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.max(18,rx*.2),k=rx/189,f=n=>n.toFixed(1),unit=key=>(hash('ground|'+key)%10000)/10000;
  const top=`M${f(cx)} ${f(cy-ry)}L${f(cx+rx)} ${f(cy)}L${f(cx)} ${f(cy+ry)}L${f(cx-rx)} ${f(cy)}Z`;
  const left=`M${f(cx-rx)} ${f(cy)}L${f(cx)} ${f(cy+ry)}L${f(cx)} ${f(cy+ry+depth)}L${f(cx-rx)} ${f(cy+depth)}Z`;
  const right=`M${f(cx+rx)} ${f(cy)}L${f(cx)} ${f(cy+ry)}L${f(cx)} ${f(cy+ry+depth)}L${f(cx+rx)} ${f(cy+depth)}Z`;
  const outline=`M${f(cx)} ${f(cy-ry)}L${f(cx+rx)} ${f(cy)}L${f(cx+rx)} ${f(cy+depth)}L${f(cx)} ${f(cy+ry+depth)}L${f(cx-rx)} ${f(cy+depth)}L${f(cx-rx)} ${f(cy)}Z`;
- let specks='',tufts='';
- for(let i=0;i<Math.round(rx/5);i++){const side=i%2?1:-1,t=unit(i+'t'),d=.15+unit(i+'d')*.7,x=cx+side*rx*(1-t),y=cy+ry*t+depth*d;specks+=`<rect x="${f(x-1.6)}" y="${f(y-1.6)}" width="3.2" height="3.2" fill="#6F5239" opacity=".8"/>`}
- for(let i=0;i<Math.round(rx/6);i++){const a=unit(i+'a')*2-1,b=unit(i+'b')*2-1;if(Math.abs(a)+Math.abs(b)>.92)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2;tufts+=`<path d="M${f(x-4)} ${f(y)}L${f(x-1.3)} ${f(y-5)}L${f(x)} ${f(y-1.5)}L${f(x+1.3)} ${f(y-5.5)}L${f(x+4)} ${f(y)}" fill="none" stroke="#6E9C58" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
+ // Grass hangs over the soil in a jagged lip, lighter on the left face, darker on the right.
+ const lip=side=>{const steps=15,pts=[[cx+side*rx,cy],[cx,cy+ry]];pts.push([cx,cy+ry+(side<0?13.8:12.6)*k]);for(let n=1;n<steps;n++){const t=n/steps,x=cx+side*rx*t,y=cy+ry*(1-t)+(n%2?(2.4+unit(side+'l'+n)*1.6):(10+unit(side+'d'+n)*4))*k;pts.push([x,y])}pts.push([cx+side*rx,cy+6.6*k]);return pts.map(([x,y])=>f(x)+','+f(y)).join(' ')};
+ let specks='',tufts='',patches='';
+ for(let n=0;n<Math.round(rx/2.6);n++){const side=n%2?1:-1,t=unit(n+'t'),d=.3+unit(n+'d')*.62,x=cx+side*rx*(1-t),y=cy+ry*t+depth*d;specks+=`<rect x="${f(x-1.6*k)}" y="${f(y-1.6*k)}" width="${f(3.2*k)}" height="${f(3.2*k)}" fill="${unit(n+'c')>.72?'#C29E7A':'#6F5239'}" opacity=".8"/>`}
+ for(let a=1;a<5;a++)for(let b=1;b<5;b++){if(unit(a+','+b+'p')<.45)continue;const u=a/5*2-1,v=b/5*2-1,x=cx+(u-v)*rx/2,y=cy+(u+v)*ry/2;patches+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(9*k)}" ry="${f(4.5*k)}" fill="rgba(30,42,34,.14)"/>`}
+ for(let n=0;n<Math.round(rx/4.5);n++){const a=unit(n+'a')*2-1,b=unit(n+'b')*2-1;if(Math.abs(a)+Math.abs(b)>.9)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2,w=4*k;tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="#6E9C58" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
  const id='sticker-ground-'+Math.round(rx);
- const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>`;
- const body=`<g data-forest-ground="terrain" data-floor="basic" pointer-events="none"><path d="${outline}" transform="translate(0 12)" fill="rgba(30,42,34,.22)" filter="url(#${id}-shadow)"/><path d="${outline}" fill="#fff" stroke="#fff" stroke-width="7" stroke-linejoin="round"/><path d="${left}" fill="#A9825E"/><path d="${right}" fill="#8B6A4C"/>${specks}<path data-ground-surface="true" d="${top}" fill="#9FC888"/>${tufts}</g>`;
+ const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="${f(9*k)}"/></filter>`;
+ const body=`<g data-forest-ground="terrain" data-floor="basic" pointer-events="none"><path d="${outline}" transform="translate(0 ${f(12*k)})" fill="rgba(30,42,34,.24)" filter="url(#${id}-shadow)"/><path d="${outline}" fill="#fff" stroke="#fff" stroke-width="${f(7*k)}" stroke-linejoin="round"/><path d="${left}" fill="#A9825E"/><path d="${right}" fill="#8B6A4C"/>${specks}<polygon points="${lip(-1)}" fill="#7FAE68"/><polygon points="${lip(1)}" fill="#6C9A57"/><path data-ground-surface="true" d="${top}" fill="#9FC888"/>${patches}${tufts}</g>`;
  return {defs,body};
 }
 function forestGroundArtwork(cfg, theme, cx = 360, cy = 286, floor = 'basic') {
