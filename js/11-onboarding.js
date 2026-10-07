@@ -104,8 +104,16 @@ const INTRO_ART_PAD=30;
 function introArtLayer(step){
  if(window.INTRO_LIVE_ART)return INTRO_SLIDES[step].art();
  if(!introArtLayer.warm){introArtLayer.warm=true;[1,2,3].forEach(n=>{const i=new Image();i.decoding='async';i.src='./assets/images/onboarding/intro-'+n+'.webp?v=1'})}
- return '<img class="intro-art" src="./assets/images/onboarding/intro-'+(step+1)+'.webp?v=1" alt="" decoding="async" style="left:-'+INTRO_ART_PAD+'px;top:-'+INTRO_ART_PAD+'px;width:'+(390+INTRO_ART_PAD*2)+'px">';
+ return '<img class="intro-art" src="./assets/images/onboarding/intro-'+(step+1)+'.webp?v=1" alt="" decoding="async" style="left:0;top:-'+INTRO_ART_PAD+'px;width:390px">';
 }
+// The art stage is drawn for 390x470 (the picture carries 30px of extra height above and below); shrink it on short screens so it never runs under the title.
+function fitIntroStage(){
+ const stage=document.querySelector('.sticker-intro .intro-stage'),bottom=document.querySelector('.sticker-intro .intro-bottom');if(!stage||!bottom)return;
+ stage.style.transform='';stage.style.height='';
+ const room=bottom.getBoundingClientRect().top-12-stage.getBoundingClientRect().top,k=Math.max(.55,Math.min(1,room/470));
+ stage.style.height=Math.round(470*k)+'px';stage.style.transform=k<1?'scale('+k.toFixed(3)+')':'';
+}
+addEventListener('resize',()=>{if(authRoute==='intro')fitIntroStage()});
 function renderIntroduction(){
  const step=introductionStep,s=INTRO_SLIDES[step],last=step===2;
  return '<section class="sticker-intro" data-step="'+step+'"><div class="intro-shapes" aria-hidden="true">'+s.shapes+'</div>'+
@@ -142,6 +150,7 @@ function renderEntry(){
  if(authRoute==='ready')h='<div class="entry-hero center"><h1>취향이 자랄<br>준비가 됐어요.</h1><p>이제 하나씩, 나의 속도로 경험해요.</p></div>'+entryStickerArt()+'<div class="entry-bottom">'+button('나의 '+esc(APP_BRAND.ko)+' 시작하기','flowFinish','primary ink-button')+'</div>';
  $('page').innerHTML=h;
  if(['intro','welcome'].includes(authRoute)){$('head').hidden=true;$('head').innerHTML='';requestAnimationFrame(scrollPageTop)}
+ if(authRoute==='intro')fitIntroStage();
  if(authRoute==='taste')$('head').innerHTML=tasteMode==='add'?'<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit'):'<div class="brand">'+esc(APP_BRAND.ko)+'</div>'+button('그냥 시작하기','flowFinish','textbtn taste-exit');
  if(authRoute==='tasteType'&&tasteMode==='add')$('head').innerHTML='<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit');
 }

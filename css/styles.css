@@ -3612,3 +3612,12 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 /* The sale sticker sits on the pack's top edge, fully visible */
 .bm-pack { overflow:visible;margin-top:24px; }
 .bm-pack-sale { right:14px;top:-14px;transform:rotate(6deg);box-shadow:0 6px 12px -8px rgba(30,42,34,.5); }
+/* Intro art stage: fixed 390-wide drawing, centred, scaled by fitIntroStage() */
+.page .sticker-intro .intro-stage { width:390px;max-width:none;height:470px;margin-left:auto;margin-right:auto;transform-origin:top center; }
+@media (max-height:760px) { .page .sticker-intro .intro-stage { height:470px; } }
+/* Tab bar: four fixed icon slots; the active one only changes colour, never width */
+.tabs { width:280px;justify-content:space-around; }
+.tabs button, .tabs button.active { flex:none;width:58px;height:48px;padding:0;gap:0;border-radius:24px; }
+.tabs button svg, .tabs button.active svg { width:22px;height:22px; }
+.tabs button.active svg { stroke-width:2.1; }
+.tabs button .tab-label, .tabs button.active .tab-label { position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }

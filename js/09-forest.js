@@ -226,7 +226,8 @@ function setupForest(){
    const b=treeArtElementBounds(g.querySelector('.tree-art')),m=g.transform.baseVal.consolidate().matrix;
    return {left:m.e+b.x*m.a,right:m.e+(b.x+b.width)*m.a,top:m.f+b.y*m.d,bottom:m.f+(b.y+b.height)*m.d};
   });
-  const scale=cfg.treeScale*(cfg.month?1.3:1.05),pos=visitorPosition(cfg,boxes,scale);
+  const props=[...world.querySelectorAll('[data-decoration]')].map(g=>{const b=g.getBBox(),m=g.transform.baseVal.consolidate()?.matrix||{a:1,d:1,e:0,f:0};return {left:m.e+b.x*m.a,right:m.e+(b.x+b.width)*m.a,top:m.f+b.y*m.d,bottom:m.f+(b.y+b.height)*m.d}});
+  const scale=cfg.treeScale*(cfg.month?.9:1.05),pos=visitorPosition(cfg,boxes,scale,props);
   layer.innerHTML='';if(!pos)return;
   const chosen=nextForestVisitor();if(!chosen)return;
 

@@ -459,11 +459,12 @@ function todayStageSuffix(c){
  if(c.type==='movie'){const minutes=Number(c.runtime)||0;return minutes>0?minutes+'분':''}
  const days=todayDayCount(c);return Model.stage(c)&&days?days+'일째':'';
 }
+function todayLogOf(c){return c.logs.find(l=>l.date===now())}
 function todayStamp(c){
  const stage=Model.stage(c),log=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
  const ring='<i class="stamp-ring" aria-hidden="true"></i>',check='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
  if(stage===0)return button(ring+'<span>'+(c.type==='movie'?'감상<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button is-start',attr(c.id)+' aria-label="'+(c.type==='movie'?'감상 시작하기':'읽기 시작하기')+'"');
- if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+ring+check+'<span>오늘<br>기록 완료</span></div><div class="stamp-done-actions">'+button(log.memo?'메모 수정':'메모 남기기','editMemo','textbtn',attr(c.id)+' data-log="'+esc(log.id)+'"')+button('취소','undoLog','textbtn',attr(c.id))+'</div></div>';
+ if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+ring+check+'<span>오늘<br>기록 완료</span></div></div>';
  return button(ring+check+'<span>오늘<br>'+verb+'</span>','record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
 }
 // Long titles shrink until the whole title fits in two lines next to the cover stickers.
@@ -508,7 +509,7 @@ function todayBoard(c){
   '<div class="today-disc" aria-hidden="true"></div>'+stickerTree(c,stage,'today-tree')+
   '<span class="today-stage"><i aria-hidden="true">'+stickerTree(c,stage)+'</i>'+esc(growthAppearance(stage).name)+(suffix?'<b aria-hidden="true">·</b><em>'+esc(suffix)+'</em>':'')+'</span>'+
  '</div>'+
- '<div class="sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(c.type==='movie'?button('보러 가기 ↗','external','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</div>'+
+ '<div class="sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(c.type==='movie'?button('보러 가기 ↗','external','textbtn',attr(c.id)):'')+(todayLogOf(c)?button(todayLogOf(c).memo?'메모 수정':'메모 남기기','editMemo','textbtn',attr(c.id)+' data-log="'+esc(todayLogOf(c).id)+'"')+button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</div>'+
  '</section>';
 }
 function recordActions(c,inDetail=false){

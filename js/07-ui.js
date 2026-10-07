@@ -632,7 +632,7 @@ function nextForestVisitor(){
  lastForestVisitor=forestVisitorBag.shift()||'';
  return eligible.find(v=>v.id===lastForestVisitor);
 }
-function visitorPosition(cfg,boxes,scale){
+function visitorPosition(cfg,boxes,scale,props=[]){
  const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34;
  const candidates=[];
  // Include the entire animal and its animation travel in collision tests.
@@ -644,6 +644,8 @@ function visitorPosition(cfg,boxes,scale){
   if(!inside([x-34*scale,y+10*scale],.86)||!inside([x+34*scale,y+10*scale],.86)||!inside([x,y-60*scale],1.1))continue;
   // Only trunks and their base block a spot; an animal may stand in front of a crown.
   const feet={left:x-34*scale,right:x+34*scale,top:y-18*scale,bottom:y+14*scale};
+  // Wells, rocks, stumps and flowers are solid: the whole animal must stay clear of them.
+  if(props.some(b=>x+30*scale>b.left-4&&x-30*scale<b.right+4&&y-55*scale<b.bottom+4&&y+10*scale>b.top-4))continue;
   // The visitor is slotted in at its own depth among the trees, so only trunk bases block it.
   // ...but a tree in front may hide at most a third of it.
   const body={left:x-30*scale,right:x+30*scale,top:y-55*scale,bottom:y},bodyArea=60*55*scale*scale;
