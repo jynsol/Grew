@@ -583,7 +583,7 @@ function contentIntroText(c){
  if(c.type==='album')return String(c.albumDescription||c.contents||c.description||'').trim();
  return String(c.contents||'').trim();
 }
-function detailMenu(c){return '<details class="more detail-more"><summary aria-label="콘텐츠 관리">⋯</summary><div class="more-menu">'+button('기본 정보 수정','editInfo','',attr(c.id))+(c.completed?button('완료 취소','undoComplete','',attr(c.id)):'')+button('스크랩 삭제','delete','',attr(c.id))+'</div></details>'}
+function detailMenu(c){return '<details class="more detail-more"><summary aria-label="콘텐츠 관리">⋯</summary><div class="more-menu">'+button('기본 정보 수정','editInfo','',attr(c.id))+(c.completed?button('완료 취소','undoComplete','',attr(c.id)):Model.stage(c)>0?button('기록 초기화','resetRecords','',attr(c.id)):'')+button('스크랩 삭제','delete','',attr(c.id))+'</div></details>'}
 function renderDetail(){
  const c=candidatePreview||get(detailId);if(!c)return '<div class="empty">이 콘텐츠가 없어요.'+button('스크랩으로','toScrap','textbtn')+'</div>';
  if(c.type==='book'&&!detailIntroAttempts.has(detailIntroKey(c))&&(!c.contents||looksTruncatedIntro(c.contents)))setTimeout(()=>ensureDetailIntro(c),0);
