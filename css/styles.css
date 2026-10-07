@@ -3447,3 +3447,19 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
 .page .intro-next, .page .intro-next.is-start { width:auto;min-width:0;height:64px;padding:0 26px;border-radius:32px;border:3px solid #fff;background:var(--sb-ink);color:#fff;box-shadow:0 14px 24px -10px rgba(30,42,34,.5);display:flex;align-items:center;gap:8px;font:680 17px/1 var(--font-family);transform:none; }
 .page .intro-next span { color:var(--sb-butter);display:flex; }
 @media (max-height:760px) { .intro-stage { height:420px;transform:scale(.9);transform-origin:top center; } }
+
+/* Today actions fit narrow phones: the week row shrinks, the stamp scales. */
+.sticker-actions-left { flex:1 1 auto; }
+.sticker-week ol { width:100%;max-width:250px; }
+.sticker-week li { flex:1 1 0;width:auto;max-width:34px;height:auto;aspect-ratio:1; }
+.sticker-week li.is-today.is-logged { border:2px solid #fff;color:var(--sb-ink); }
+@media (max-width:414px) {
+  .stamp-button { width:112px;height:112px;font-size:15px; }
+  .stamp-button.is-done { width:100px;height:100px;font-size:14px; }
+  .stamp-button svg { width:22px;height:22px; }
+  .sticker-actions { padding-right:16px; }
+}
+@media (max-width:360px) {
+  .stamp-button { width:100px;height:100px;font-size:14px; }
+  .stamp-button.is-done { width:92px;height:92px;font-size:13px; }
+}
