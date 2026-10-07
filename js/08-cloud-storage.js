@@ -450,10 +450,8 @@ function stickerTree(c,stage=Model.stage(c),cls=''){
  const name=stage<3?growthAppearance(stage).name:(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무');
  return '<img class="sticker-tree '+cls+'" src="'+esc(stickerTreeSrc(c,stage))+'" alt="'+esc(name)+'" decoding="async">';
 }
-function todayDayCount(c){
- const first=Model.firstExperienceDate(c);if(!first)return 0;
- return Math.max(1,Math.round((Date.parse(now()+'T12:00:00Z')-Date.parse(first+'T12:00:00Z'))/864e5)+1);
-}
+// "N일째" counts the days actually recorded, not calendar days since the first one.
+function todayDayCount(c){return todayLogDates(c).size}
 // Books show the day count; a film is watched in one sitting, so it shows its running time.
 function todayStageSuffix(c){
  if(c.type==='movie'){const minutes=Number(c.runtime)||0;return minutes>0?minutes+'분':''}
@@ -581,7 +579,7 @@ function renderDetail(){
  const logs=[...c.logs].sort((a,b)=>b.date.localeCompare(a.date)),stage=Model.stage(c),logDays=todayLogDates(c).size,days=todayDayCount(c);
  const genre=cleanGenreValue(c.genre)?launchGenre(c.type,c.genre,c):'';
  const chips=c.completed?'<span class="detail-chip is-ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+(validRating(c.rating)?'<span class="detail-chip"><b>★</b> '+c.rating+'</span>':''):
-  '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'','기록 '+logDays+'회'].filter(Boolean).join(' · ')+'</span>':'');
+  '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'',c.type==='movie'?'기록 '+logDays+'회':''].filter(Boolean).join(' · ')+'</span>':'');
  const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'+ 메모 남기기')+'</span></button>';
  const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
  const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'감상 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
