@@ -4050,3 +4050,13 @@ html, body { overflow-x:clip; }
 .detail-page .detail-action-primary.is-done, .detail-page[data-type="movie"] .detail-action-primary.is-done { background:#FDECE8;color:#C2402F; }
 .detail-page:has(.detail-actions) { padding-bottom:110px; }
 .detail-page .detail-rating { background:#F0F0EC;box-shadow:none;border:0; }
+/* Work info: label / value rows with hairlines */
+.detail-info { margin:10px 0 0;padding:0; }
+.detail-info>div { display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:46px;border-bottom:1px solid rgba(30,42,34,.08); }
+.detail-info>div:last-child { border-bottom:0; }
+.detail-info dt { font:560 14px/1.3 var(--font-family);color:rgba(30,42,34,.55); }
+.detail-info dd { margin:0;min-width:0;text-align:right;font:650 14px/1.3 var(--font-family);color:var(--sb-ink);overflow-wrap:anywhere; }
+.detail-info-tree { min-height:0;padding:0;border:0;background:none;font:inherit;color:inherit;display:inline-flex;align-items:center;gap:4px; }
+.detail-info-tree span { color:rgba(30,42,34,.4); }
+.detail-page .detail-section h2 { margin:0;font:800 16px/1.2 var(--font-family);letter-spacing:-.02em;color:var(--sb-ink); }
+.detail-page .detail-section { margin-top:28px; }

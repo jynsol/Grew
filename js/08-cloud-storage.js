@@ -606,7 +606,7 @@ function renderDetail(){
  (c.completed?'<button type="button" class="detail-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 수정"><span>내 별점</span>'+(validRating(c.rating)?averageStars(c.rating):'<span class="muted">아직 별점 없음</span>')+'<b aria-hidden="true">›</b></button>':'')+
  (c.review?'<div class="detail-section review-copy"><h2>나의 감상</h2><p>'+esc(c.review)+'</p></div>':'')+
  '<div class="detail-section"><h2>기록</h2>'+(logs.length?'<div class="detail-logs">'+logs.slice(0,5).map(logRow).join('')+'</div>'+(logs.length>5?'<details class="collapse"><summary>지난 기록 '+(logs.length-5)+'개 더 보기</summary><div class="detail-logs">'+logs.slice(5).map(logRow).join('')+'</div></details>':''):'<p class="detail-empty">아직 기록이 없어요.</p>')+'</div>'+
- '<div class="detail-section">'+detailMetadata(c)+button('나무 모습 바꾸기','bmWorkTree','textbtn detail-tree-change',attr(c.id))+'</div>'+
+ '<div class="detail-section"><h2>정보</h2>'+detailMetadata(c)+'</div>'+
  (introHTML?'<div class="detail-section">'+introHTML+'</div>':'')+renderLinkSources(c)+actions+'</section>';
 }
 function forestGrowthKey(c){
