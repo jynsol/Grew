@@ -854,7 +854,7 @@ const snowShrub=(x,y,s=1,shape=0)=>{const crowns=['<ellipse cx="0" cy="-26" rx="
  // Landmarks use normalized ground coordinates, not optional/occupied tiles.
  // Even a fully occupied board keeps its well and rocks. Empty forests stay empty.
  if(cfg.tier===0)return [];
- if(cfg.month)return emptySlots.map(project).map(p=>({y:p.y-40,art:'<ellipse data-empty-cell="true" pointer-events="none" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" rx="'+(cfg.boardW/cfg.cols*.2).toFixed(1)+'" ry="'+(cfg.boardH/cfg.rows*.2).toFixed(1)+'" fill="#5E8A4C" opacity=".22"/>'}));
+ if(cfg.month)return emptySlots.map(project).map(p=>({y:p.y-40,art:'<ellipse data-empty-cell="true" pointer-events="none" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" rx="'+(cfg.boardW/cfg.cols*.09).toFixed(1)+'" ry="'+(cfg.boardH/cfg.rows*.09).toFixed(1)+'" fill="#C9E3B4" opacity=".9"/>'}));
  const anchor=(u,v)=>({x:360+u*cfg.boardW,y:286+v*cfg.boardH});
  const snow=theme==='snow',large=cfg.tier>=4;
  place(snow?'frozen-well':'well',(x,y)=>(snow?frozenWell:well)(x,y,1.12),anchor(-.18,.02),[-27,-33,27,22]);
@@ -932,8 +932,8 @@ function stickerGroundArtwork(cfg,cx=360,cy=286){
  const lip=side=>{const steps=15,pts=[[cx+side*rx,cy],[cx,cy+ry]];pts.push([cx,cy+ry+(side<0?13.8:12.6)*k]);for(let n=1;n<steps;n++){const t=n/steps,x=cx+side*rx*t,y=cy+ry*(1-t)+(n%2?(2.4+unit(side+'l'+n)*1.6):(10+unit(side+'d'+n)*4))*k;pts.push([x,y])}pts.push([cx+side*rx,cy+6.6*k]);return pts.map(([x,y])=>f(x)+','+f(y)).join(' ')};
  let specks='',tufts='',patches='';
  for(let n=0;n<Math.round(rx/2.6);n++){const side=n%2?1:-1,t=unit(n+'t'),d=.3+unit(n+'d')*.62,x=cx+side*rx*(1-t),y=cy+ry*t+depth*d;specks+=`<rect x="${f(x-1.6*k)}" y="${f(y-1.6*k)}" width="${f(3.2*k)}" height="${f(3.2*k)}" fill="${unit(n+'c')>.72?'#C29E7A':'#6F5239'}" opacity=".8"/>`}
- for(let a=1;a<5;a++)for(let b=1;b<5;b++){if(unit(a+','+b+'p')<.45)continue;const u=a/5*2-1,v=b/5*2-1,x=cx+(u-v)*rx/2,y=cy+(u+v)*ry/2;patches+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(9*k)}" ry="${f(4.5*k)}" fill="rgba(30,42,34,.14)"/>`}
- for(let n=0;n<Math.round(rx/4.5);n++){const a=unit(n+'a')*2-1,b=unit(n+'b')*2-1;if(Math.abs(a)+Math.abs(b)>.9)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2,w=4*k;tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="#6E9C58" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
+ if(!cfg.month)for(let a=1;a<5;a++)for(let b=1;b<5;b++){if(unit(a+','+b+'p')<.45)continue;const u=a/5*2-1,v=b/5*2-1,x=cx+(u-v)*rx/2,y=cy+(u+v)*ry/2;patches+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(9*k)}" ry="${f(4.5*k)}" fill="rgba(30,42,34,.14)"/>`}
+ for(let n=0;n<Math.round(rx/(cfg.month?14:4.5));n++){const a=unit(n+'a')*2-1,b=unit(n+'b')*2-1;if(Math.abs(a)+Math.abs(b)>.9)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2,w=4*k;tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="#6E9C58" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
  const id='sticker-ground-'+Math.round(rx);
  const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="${f(9*k)}"/></filter>`;
  const body=`<g data-forest-ground="terrain" data-floor="basic" pointer-events="none"><path d="${outline}" transform="translate(0 ${f(12*k)})" fill="rgba(30,42,34,.24)" filter="url(#${id}-shadow)"/><path d="${outline}" fill="#fff" stroke="#fff" stroke-width="${f(7*k)}" stroke-linejoin="round"/><path d="${left}" fill="#A9825E"/><path d="${right}" fill="#8B6A4C"/>${specks}<polygon points="${lip(-1)}" fill="#7FAE68"/><polygon points="${lip(1)}" fill="#6C9A57"/><path data-ground-surface="true" d="${top}" fill="#9FC888"/>${patches}${tufts}</g>`;

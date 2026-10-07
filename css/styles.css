@@ -3707,3 +3707,10 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 @media (max-width:414px) { .stamp-button:not(.is-done) { width:96px;height:96px;font-size:14px; } }
 @media (max-width:360px) { .stamp-button:not(.is-done) { width:88px;height:88px;font-size:13px; } }
 .stamp-burst { display:none; }
+/* Selected tree: warm ground glow instead of an outlined ring */
+.tree-ring, .tree-ring.hover { stroke:none;fill:url(#treeSelectGlow); }
+.tree-ring.hover { opacity:.6; }
+/* Before recording the stamp is all grey; it turns into the ink stamp once pressed */
+.stamp-button:not(.is-done) { background:#E7E7E3;color:#5E5E5A;box-shadow:0 0 0 1px rgba(30,42,34,.06),0 8px 16px -12px rgba(30,42,34,.35); }
+.stamp-button:not(.is-done) .stamp-ring { border-color:rgba(30,42,34,.22); }
+.stamp-button:not(.is-done) svg { color:#8E8E89; }

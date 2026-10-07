@@ -37,12 +37,15 @@ function setupForest(){
   vp.querySelectorAll('.tree-ring').forEach(r=>r.remove());
   vp.querySelectorAll('.is-focus').forEach(x=>x.classList.remove('is-focus'));
   if(!g)return;
-  const shadow=g.querySelector('ellipse'),rx=(parseFloat(shadow?.getAttribute('rx'))||22)*1.3+3;
+  // Selection is a soft warm glow on the ground under the tree, not an outlined ring.
+  const svg=vp.querySelector('svg');
+  if(svg&&!svg.querySelector('#treeSelectGlow'))(svg.querySelector('defs')||svg.insertBefore(document.createElementNS(SVG_NS,'defs'),svg.firstChild)).insertAdjacentHTML('beforeend','<radialGradient id="treeSelectGlow"><stop offset="0" stop-color="#FFF6CF" stop-opacity=".95"/><stop offset=".5" stop-color="#FFF6CF" stop-opacity=".55"/><stop offset="1" stop-color="#FFF6CF" stop-opacity="0"/></radialGradient>');
+  const shadow=g.querySelector('ellipse'),rx=(parseFloat(shadow?.getAttribute('rx'))||22)*2.1+6;
   const ring=document.createElementNS(SVG_NS,'ellipse');
   ring.setAttribute('class','tree-ring '+mode);
   ring.setAttribute('cx',shadow?.getAttribute('cx')||'0');ring.setAttribute('cy',shadow?.getAttribute('cy')||'10');
-  ring.setAttribute('rx',rx.toFixed(1));ring.setAttribute('ry',(rx*.44).toFixed(1));
-  ring.setAttribute('vector-effect','non-scaling-stroke');
+  ring.setAttribute('rx',rx.toFixed(1));ring.setAttribute('ry',(rx*.46).toFixed(1));
+  ring.setAttribute('fill','url(#treeSelectGlow)');
   if(shadow)shadow.after(ring);else g.prepend(ring);
   g.classList.add('is-focus');
  };
