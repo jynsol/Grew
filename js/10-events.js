@@ -55,6 +55,7 @@ document.addEventListener('click',async e=>{
  if(a==='removeRemoteMovie'){removeRemoteMovie(Number(b.dataset.index));return}
  if(a==='choose'){if(c&&!c.completed){state.selected=c.id;state.onboarded=true;if(!persist())return;go('today')}return}
  if(a==='pick'){pick();return}
+ if(a==='readingList'){openReadingList(id);return}
  if(a==='cancelPick'){go('today');return}
  if(a==='nextCandidate'){
   const pool=state.items.filter(item=>!item.completed).sort((a,b)=>b.saves.length-a.saves.length||(b.saves.at(-1)?.at||0)-(a.saves.at(-1)?.at||0));
