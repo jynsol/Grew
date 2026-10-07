@@ -343,7 +343,7 @@ function toast(message,undo){$('toast').classList.remove('planted');clearTimeout
 function dismissToast(){$('toast').classList.remove('planted');clearTimeout(toastTimer);$('toast').innerHTML='';undoAction=null}
 function commit(close=false){if(!persist())return false;if(close)closeModal();render();return true}
 function focusPageHeading(){requestAnimationFrame(()=>{if(modal)return;const heading=$('page').querySelector('h1');if(heading){heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true})}})}
-function go(next){if(next==='calendar'){forestMode='month';forestShow='calendar';next='forest'}clearTimeout(mainSearchRenderTimer);mainSearchRenderTimer=null;if(view==='detail'&&next!=='detail')candidatePreview=null;closeModal();if(next!=='forest')forestEditMode=false;if(view==='calendar')sessionStorageSafe('calendarScroll',String(window.scrollY));if(view==='scrap')sessionStorageSafe('scroll',String(window.scrollY));view=next;picking=false;render();window.scrollTo(0,0);if(next==='scrap')window.scrollTo(0,Number(sessionStorageSafe('scroll'))||0);if(next==='calendar')window.scrollTo(0,Number(sessionStorageSafe('calendarScroll'))||0);focusPageHeading()}
+function go(next){if(next==='calendar'){forestMode='month';forestShow='calendar';next='forest'}clearTimeout(mainSearchRenderTimer);mainSearchRenderTimer=null;if(view==='detail'&&next!=='detail')candidatePreview=null;closeModal();if(next!=='forest')forestEditMode=false;if(view==='calendar')sessionStorageSafe('calendarScroll',String(window.scrollY));if(view==='scrap')sessionStorageSafe('scroll',String(window.scrollY));view=next;picking=false;render();scrollPageTop();if(next==='scrap')window.scrollTo(0,Number(sessionStorageSafe('scroll'))||0);if(next==='calendar')window.scrollTo(0,Number(sessionStorageSafe('calendarScroll'))||0);focusPageHeading()}
 function sessionStorageSafe(k,v){try{if(v!==undefined)sessionStorage.setItem('sr3-'+k,v);return sessionStorage.getItem('sr3-'+k)}catch{return null}}
 function openDetail(id,origin=view){candidatePreview=null;detailId=id;detailOrigin=origin==='detail'?detailOrigin:origin;go('detail');const c=get(id);if(c?.type==='book'&&!cleanGenreValue(c.genre)&&c.genreSource!=='user'){enrichBookGenre(c).then(()=>{if(c.genre&&get(c.id)===c){ensureCompletedSpeciesAssignments();persist();if(view==='detail'&&detailId===id)render()}}).catch(()=>{})}}
 function openCandidateDetail(c){
@@ -359,7 +359,7 @@ function closeCandidateDetail(){
  const back=candidatePreviewReturn||'taste';
  candidatePreview=null;candidatePreviewReturn=null;
  authRoute=back;
- render();window.scrollTo(0,0);
+ render();scrollPageTop();
 }
 function cover(c,small=false){return c.cover?'<img class="cover '+c.type+'" data-cover-kind="'+c.type+'" src="'+esc(c.cover)+'" alt="'+esc(c.title)+' 표지" decoding="async">':'<div class="cover '+c.type+'" aria-label="'+esc(c.title)+' 표지 없음">'+icon(c.type)+'</div>'}
 function row(c,choose=false){return '<button class="content-row" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+'>'+cover(c)+'<div class="grow"><span class="badge">'+typeName[c.type]+'</span><div class="title">'+esc(c.title)+'</div><div class="creator">'+esc(c.creator||'제작자 미확인')+'</div><div class="content-row-meta"><span class="record-status '+Model.status(c)+'">'+statusName[Model.status(c)]+'</span>'+(validRating(c.rating)?'<span class="row-rating"><span class="rating-star" aria-hidden="true">★</span> '+c.rating+'</span>':'')+(c.saves.length>1?'<span>스크랩 '+c.saves.length+'회</span>':'')+'</div></div><span class="muted" aria-hidden="true">›</span></button>'}
@@ -651,15 +651,24 @@ function forestCalendarHTML(period){
  return '<div class="fcal"><div class="fcal-grid">'+cells+'</div><div class="fcal-legend"><span><i class="is-logged"></i>기록한 날</span><span><i class="is-done"></i>다 읽은 날</span></div></div>'+(finished.length?'<div class="fcal-cards">'+finished.map(card).join('')+'</div>':'');
 }
 // Year island: twelve 5×5 plots, three per row, laid out on one isometric block.
+// Each month plot is a 5×5 grid; trees take cells in a shuffled (but stable) order so they
+// spread over the plot instead of filling it row by row.
+function islandCells(period){return Array.from({length:25},(_,i)=>i).sort((a,b)=>hash(period+'|'+a)-hash(period+'|'+b))}
+function islandPlantings(period,items){
+ const plot=(i=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}})(Number(period.slice(5))-1),cells=islandCells(period);
+ return items.slice(0,25).map((c,k)=>{const cell=cells[k],gr=Math.floor(cell/5),gc=cell%5,jx=(hash(c.id+'x')%100/100-.5)*3,jy=(hash(c.id+'y')%100/100-.5)*1.6;return {x:plot.x+(gc-gr)*9+jx,y:plot.y-18+(gc+gr)*4.5+jy,src:stickerTreeSrc(c,c.completed?3:Model.stage(c))}}).sort((a,b)=>a.y-b.y);
+}
+function islandTufts(period,p){let out='';for(let i=0;i<5;i++){const a=hash(period+'t'+i)%1000/1000*1.6-.8,b=hash(period+'u'+i)%1000/1000*1.6-.8;if(Math.abs(a)+Math.abs(b)>.85)continue;const x=p.x+(a-b)*22,y=p.y+(a+b)*11;out+='<path d="M'+(x-2.4).toFixed(1)+' '+y.toFixed(1)+'L'+(x-.8).toFixed(1)+' '+(y-3).toFixed(1)+'L'+x.toFixed(1)+' '+(y-.9).toFixed(1)+'L'+(x+.8).toFixed(1)+' '+(y-3.3).toFixed(1)+'L'+(x+2.4).toFixed(1)+' '+y.toFixed(1)+'" fill="none" stroke="#6E9C58" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round" opacity=".75" pointer-events="none"/>'}return out}
 function forestYearIsland(y,type){
  const W=390,current=now().slice(0,7),parts=[],trees=[],labels=[];
  const plot=(i)=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}};
  const diamond=(cx,cy,hw,hh)=>[cx+','+(cy-hh),(cx+hw)+','+cy,cx+','+(cy+hh),(cx-hw)+','+cy].join(' ');
- parts.push('<polygon points="220,30 370,105 170,205 20,130" fill="#86B26F"/><polygon points="20,130 170,205 170,215 20,140" fill="#A9825E"/><polygon points="170,205 370,105 370,115 170,215" fill="#8B6A4C"/>');
+ parts.push('<polygon points="220,30 370,105 170,205 20,130" fill="#86B26F"/><polygon points="20,130 170,205 170,215 20,140" fill="#A9825E"/><polygon points="170,205 370,105 370,115 170,215" fill="#8B6A4C"/><polygon points="20,130 170,205 170,209 158,203.5 146,200 134,192.5 122,190 110,182.5 98,180 86,172.5 74,170 62,162.5 50,160 38,152.5 26,150 20,134" fill="#7FAE68"/><polygon points="370,105 170,205 170,208.5 182,201.5 194,199 206,191.5 218,189 230,181.5 242,179 254,171.5 266,169 278,161.5 290,159 302,151.5 314,149 326,141.5 338,139 350,131.5 362,129 370,109" fill="#6C9A57"/>');
  for(let i=0;i<12;i++){
   const period=y+'-'+String(i+1).padStart(2,'0'),p=plot(i),future=period>current,items=future?[]:forestMonthItems(period,type);
   parts.push('<g class="island-plot'+(future?' is-future':'')+'"'+(future?'':' data-action="forestMonthView" data-month="'+period+'" role="button" tabindex="0" aria-label="'+(i+1)+'월의 숲, '+items.length+'그루"')+'><polygon points="'+diamond(p.x,p.y,45,22.5)+'" fill="'+(future?'#CFE0C2':'#9FC888')+'"'+(period===current?' stroke="#1E2A22" stroke-width="2" stroke-linejoin="round"':'')+'/></g>');
-  items.slice(0,25).forEach((c,k)=>{const gr=Math.floor(k/5),gc=k%5,x=p.x+(gc-gr)*9,yy=p.y-18+(gc+gr)*4.5;trees.push({y:yy,html:'<image href="'+esc(stickerTreeSrc(c,c.completed?3:Model.stage(c)))+'" x="'+(x-11).toFixed(1)+'" y="'+(yy-18).toFixed(1)+'" width="22" height="22" pointer-events="none"/>'})});
+  islandPlantings(period,items).forEach(t=>trees.push({y:t.y,html:'<image href="'+esc(t.src)+'" x="'+(t.x-12).toFixed(1)+'" y="'+(t.y-21).toFixed(1)+'" width="24" height="24" pointer-events="none"/>'}));
+  if(!future)parts.push(islandTufts(period,p));
   if(period===current)labels.push('<g pointer-events="none"><rect x="'+(p.x-58)+'" y="'+(p.y-26)+'" width="30" height="18" rx="9" fill="#1E2A22"/><text x="'+(p.x-43)+'" y="'+(p.y-13.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">'+(i+1)+'월</text></g>');
  }
  trees.sort((a,b)=>a.y-b.y);
@@ -788,7 +797,7 @@ function showModal(title,html,kind='generic'){
 }
 function closeModal(){if(modal==='link')cancelLinkImport();if(modal==='profile'&&profileEdit){profileEdit.request++;profileEdit=null}clearTimeout(modalFocusTimer);document.querySelector('.app').inert=false;if(ocrBusy){ocrGeneration++;ocrBusy=false}if(modal==='scrap-composer')scrapFlowActive=false;modal=null;$('overlay').innerHTML='';document.body.style.overflow='';if(modalReturnFocus?.isConnected)modalReturnFocus.focus({preventScroll:true});modalReturnFocus=null;}
 function confirmBox(title,text,onConfirm,label='확인',danger=false){window.pendingConfirm=onConfirm;showModal(title,'<p>'+esc(text)+'</p>'+button(label,'confirm',danger?'primary danger':'primary')+button('취소','close','textbtn'),'confirm')}
-function pick(){clearTimeout(mainSearchRenderTimer);pickingFilters={q:'',type:'all',status:'all',sort:'recent'};picking=true;view='scrap';closeModal();render();window.scrollTo(0,0);focusPageHeading()}
+function pick(){clearTimeout(mainSearchRenderTimer);pickingFilters={q:'',type:'all',status:'all',sort:'recent'};picking=true;view='scrap';closeModal();render();scrollPageTop();focusPageHeading()}
 let scrapFlowActive=false;
 const scrapSessionAdds=new Map();
 let scrapComposerState={type:'book',queries:{book:'',album:'',movie:''},count:0};

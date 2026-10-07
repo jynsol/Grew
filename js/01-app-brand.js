@@ -31,3 +31,6 @@ window.initRatingPicker=function(){
  wrap.onkeydown=e=>{if(!['ArrowLeft','ArrowDown','ArrowRight','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();const step=['ArrowRight','ArrowUp'].includes(e.key)?.5:-.5;const v=e.key==='Home'?0:e.key==='End'?5:Math.max(0,Math.min(5,(Number(input.value)||0)+step));input.value=v||'';if(label)label.textContent=v?v.toFixed(1):'선택 안 함';draw(v)};
  draw(input.value);
 };
+
+// iOS Safari can scroll the body instead of the window; reset both when a screen changes.
+window.scrollPageTop=function(){window.scrollTo(0,0);if(document.scrollingElement)document.scrollingElement.scrollTop=0;document.documentElement.scrollTop=0;if(document.body)document.body.scrollTop=0};

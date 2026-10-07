@@ -19,7 +19,7 @@ document.addEventListener('click',async e=>{
  if(a==='toastUndo'){const fn=undoAction;undoAction=null;$('toast').innerHTML='';fn?.();return}
  if(a==='add'){addMenu();return}
  if(a==='scrapType'){openScrapComposer(b.dataset.type,null,false);return}
- if(a==='scrapDone'){scrapFlowActive=false;closeModal();render();window.scrollTo(0,0);return}
+ if(a==='scrapDone'){scrapFlowActive=false;closeModal();render();scrollPageTop();return}
  if(a==='manual'){infoForm();return}
  if(a==='linkAdd'){linkAdd();return}
  if(a==='photoAdd'){photoAdd();return}
@@ -61,15 +61,15 @@ document.addEventListener('click',async e=>{
   const pool=state.items.filter(item=>!item.completed).sort((a,b)=>b.saves.length-a.saves.length||(b.saves.at(-1)?.at||0)-(a.saves.at(-1)?.at||0));
   if(pool.length<2)return;
   const index=pool.findIndex(item=>item.id===b.dataset.id);
-  state.selected=pool[(index+1)%pool.length].id;if(!commit())return;window.scrollTo(0,0);return
+  state.selected=pool[(index+1)%pool.length].id;if(!commit())return;scrollPageTop();return
  }
  if(a==='detail'){openDetail(id);return}
  if(a==='back'){if(candidatePreview){closeCandidateDetail();return}go(['sound','notifications'].includes(view)?'my':['calendar','shop','codex'].includes(view)?'forest':detailOrigin);return}
  if(a==='toToday'){go('today');return}
  if(a==='toScrap'){go('scrap');return}
  if(a==='calendar'){forestMode='month';forestShow='calendar';go('forest');return}
- if(a==='forestYearView'){forestMode='year';forestEditMode=false;render();window.scrollTo(0,0);return}
- if(a==='forestMonthView'){if(/^\d{4}-\d{2}$/.test(b.dataset.month||''))month=b.dataset.month;forestMode='month';forestViewportYear=null;zoomState={scale:1,x:0,y:0};render();window.scrollTo(0,0);return}
+ if(a==='forestYearView'){forestMode='year';forestEditMode=false;render();scrollPageTop();return}
+ if(a==='forestMonthView'){if(/^\d{4}-\d{2}$/.test(b.dataset.month||''))month=b.dataset.month;forestMode='month';forestViewportYear=null;zoomState={scale:1,x:0,y:0};render();scrollPageTop();return}
  if(a==='forestShow'){forestShow=b.dataset.show==='calendar'?'calendar':'forest';forestEditMode=false;render();return}
  if(a==='forestType'){if(['all','book','movie'].includes(b.dataset.type))forestTypeFilter=b.dataset.type;render();return}
  if(a==='forestPrevMonth'||a==='forestNextMonth'){const [y,m]=month.split('-').map(Number),d=new Date(y,m-1+(a==='forestPrevMonth'?-1:1),1),next=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');if(next<=now().slice(0,7)){month=next;forestViewportYear=null;zoomState={scale:1,x:0,y:0};render()}return}

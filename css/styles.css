@@ -3524,3 +3524,16 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
 .scrap-composer-body .content-row:nth-child(5n+4) div.cover { background-color:#fff; }
 .scrap-composer-body .content-row:nth-child(5n+5) div.cover { background-color:var(--sb-butter); }
 .forest-sound-choice:not(.selected) .forest-sound-choice-check { display:none; }
+
+/* Welcome fits the visible screen; third intro slide board has its own ground. */
+.sticker-welcome { min-height:100dvh; }
+.welcome-stage { height:clamp(230px, 36dvh, 300px); }
+@media (max-height:800px) {
+  .welcome-stage .entry-sticker-art { transform:scale(.86);transform-origin:top center; }
+  .page .welcome-copy h1 { font-size:36px; }
+  .welcome-actions { gap:8px;padding-top:16px; }
+  .welcome-actions .primary, .welcome-actions .secondary { min-height:52px; }
+}
+.intro-board-wrap { filter:none;height:340px; }
+.intro-board { height:340px;overflow:visible; }
+.sticker-welcome .sticker-block { position:absolute;display:block;border-radius:56px;pointer-events:none; }

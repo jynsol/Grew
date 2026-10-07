@@ -831,9 +831,9 @@ async function shareIsland(ctx,y0,x0,scale,items){
  poly([[220,30],[370,105],[170,205],[20,130]],'#86B26F');poly([[20,130],[170,205],[170,215],[20,140]],'#A9825E');poly([[170,205],[370,105],[370,115],[170,215]],'#8B6A4C');
  const current=now().slice(0,7),trees=[];
  for(let i=0;i<12;i++){const period=year+'-'+String(i+1).padStart(2,'0'),p=plot(i);poly([[p.x,p.y-22.5],[p.x+45,p.y],[p.x,p.y+22.5],[p.x-45,p.y]],period>current?'#CFE0C2':'#9FC888');
-  items.filter(c=>forestMonthOf(c)===period).slice(0,25).forEach((c,k)=>{const gr=Math.floor(k/5),gc=k%5;trees.push({x:p.x+(gc-gr)*9,y:p.y-18+(gc+gr)*4.5,src:stickerTreeSrc(c,c.completed?3:Model.stage(c))})})}
+  islandPlantings(period,items.filter(c=>forestMonthOf(c)===period)).forEach(t=>trees.push(t))}
  trees.sort((a,b)=>a.y-b.y);const imgs=await Promise.all(trees.map(t=>shareAsset(t.src)));
- trees.forEach((t,k)=>{if(imgs[k]){const [x,y]=P(t.x-11,t.y-18);ctx.drawImage(imgs[k],x,y,22*scale,22*scale)}});
+ trees.forEach((t,k)=>{if(imgs[k]){const [x,y]=P(t.x-12,t.y-21);ctx.drawImage(imgs[k],x,y,24*scale,24*scale)}});
 }
 async function drawShareCard(kind,format,target){
  if(document.fonts?.ready)await document.fonts.ready;
@@ -906,7 +906,7 @@ async function nativeShare(){
  else toast('이 브라우저에서는 이미지 저장 후 공유해주세요.');
 }
 function exportBackup(){download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),'grew-backup-'+now()+'.json');toast('백업 파일을 다운로드했어요.')}
-function replaceData(s){state=s;ensureCompletedSpeciesAssignments();if(!persist())return;year=now().slice(0,4);month=now().slice(0,7);zoomState={scale:1,x:0,y:0};forestViewportYear=null;closeModal();view='today';render();window.scrollTo(0,0)}
+function replaceData(s){state=s;ensureCompletedSpeciesAssignments();if(!persist())return;year=now().slice(0,4);month=now().slice(0,7);zoomState={scale:1,x:0,y:0};forestViewportYear=null;closeModal();view='today';render();scrollPageTop()}
 // Automatic deletion of records based on source labels was retired.
 setTimeout(()=>repairMissingBookGenres(36),1200);
 async function resetAll(){

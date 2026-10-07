@@ -35,7 +35,7 @@ const INITIAL_TASTE_TARGET=5;
 try{const a=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(a&&typeof a==='object')authSession={signedIn:a.signedIn===true,finished:a.finished===true,name:String(a.name||''),method:String(a.method||'이메일')};}catch{}
 authRoute=authSession.signedIn?(authSession.finished?'app':'onboard'):'welcome';
 function saveSession(){try{localStorage.setItem(AUTH_KEY,JSON.stringify(authSession))}catch{toast('로그인 상태를 저장하지 못했어요.')}}
-function flowTo(route){closeModal();authRoute=route;render();window.scrollTo(0,0);if(route==='tasteType')void loadMusicClassicCatalog();focusPageHeading()}
+function flowTo(route){closeModal();authRoute=route;render();scrollPageTop();if(route==='tasteType')void loadMusicClassicCatalog();focusPageHeading()}
 function entrySteps(n){return '<div class="entry-steps" aria-label="3단계 중 '+n+'단계">'+[1,2,3].map(i=>'<span class="'+(i<=n?'on':'')+'"></span>').join('')+'</div>'}
 function entryNote(){return cloudPublicKey()?'':'<div class="entry-note">'+button('연결 설정','cloudSetup','textbtn')+'</div>'}
 function loginFields(){
@@ -69,8 +69,16 @@ const INTRO_CHECK=(size,w=3.4)=>'<svg width="'+size+'" height="'+size+'" viewBox
 const introSpark=(x,y,size,color,rot=0,cls='')=>'<i'+(cls?' class="'+cls+'"':'')+' style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;background:'+color+';clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);transform:rotate('+rot+'deg)"></i>';
 const introBurst=(x,y,size,color,points,inner,rot=0,extra='')=>'<i style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;background:'+color+';clip-path:'+introStar(points,inner)+';transform:rotate('+rot+'deg);'+extra+'"></i>';
 const introRing=(x,y,size,color)=>'<i class="intro-ring" style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;border-color:'+color+'"></i>';
-const INTRO_BOARD='<svg class="intro-board" viewBox="0 0 390 329" aria-hidden="true"><polygon points="195,84 384,178.5 195,273 6,178.5" fill="#8DBF72"/><polygon points="6,178.5 195,273 195,311 6,216.5" fill="#A9825E"/><polygon points="384,178.5 195,273 195,311 384,216.5" fill="#8B6A4C"/><polygon points="195,111 330,178.5 195,246 60,178.5" fill="#9FC888"/></svg>'+
- introSticker('trees/maple.webp','left:130px;top:80px;width:51px;height:51px;filter:none')+introSticker('trees/sprout.webp','left:214px;top:94px;width:35px;height:35px;filter:none')+introVisitor('rabbit','left:64px;top:115px;width:32px;height:32px;filter:none')+introSticker('forest/decor-flower-lilac.webp','left:220px;top:122px;width:24px;height:24px;filter:none')+introSticker('trees/maple.webp','left:130px;top:118px;width:51px;height:51px;filter:none')+introSticker('trees/sprout.webp','left:138px;top:169px;width:35px;height:35px;filter:none');
+// A small, full forest for the third slide: the forest tab's ground with trees on shuffled cells.
+function introBoardHTML(){
+ const ground=stickerGroundArtwork({boardW:290,boardH:121},195,178.5),cell=(u,v)=>({x:195+(u-v)*37.8,y:102.9+(u+v)*18.9});
+ const plants=[['trees/maple.webp',62],['trees/cherry.webp',60],['trees/ginkgo.webp',58],['trees/oak.webp',62],['trees/birch.webp',56],['trees/young.webp',50],['trees/sprout.webp',36],['trees/maple.webp',58],['trees/sprout.webp',34],['trees/cherry.webp',56],['trees/oak.webp',58],['trees/ginkgo.webp',54],['forest/decor-flower-lilac.webp',26],['forest/decor-flower-peach.webp',26]];
+ const cells=Array.from({length:25},(_,i)=>i).sort((a,b)=>hash('intro|'+a)-hash('intro|'+b));
+ const placed=plants.map(([src,size],k)=>{const c=cells[k],p=cell(c%5,Math.floor(c/5));return {src,size,x:p.x+(hash('ix'+k)%7-3),y:p.y+(hash('iy'+k)%5-2)}});
+ const rabbit=cell(cells[plants.length]%5,Math.floor(cells[plants.length]/5));
+ const items=[...placed.map(t=>({y:t.y,html:'<img class="intro-cut" src="./assets/images/'+t.src+'" alt="" style="left:'+(t.x-t.size/2).toFixed(1)+'px;top:'+(t.y-t.size*.9).toFixed(1)+'px;width:'+t.size+'px;height:'+t.size+'px;filter:none">'})),{y:rabbit.y,html:introVisitor('rabbit','left:'+(rabbit.x-17).toFixed(1)+'px;top:'+(rabbit.y-30).toFixed(1)+'px;width:34px;height:34px;filter:none')}].sort((a,b)=>a.y-b.y);
+ return '<svg class="intro-board" viewBox="0 0 390 340" aria-hidden="true"><defs>'+ground.defs+'</defs>'+ground.body+'</svg>'+items.map(t=>t.html).join('');
+}
 const INTRO_SLIDES=[
  {title:'마음에 든 작품,<br>가볍게 <mark style="--tilt:-2deg">스크랩.</mark>',copy:'읽고 싶은 책, 보고 싶은 영화를 한곳에 담아요.',label:'책과 영화 카드, 씨앗, 다람쥐 스티커',
   shapes:introBurst(130,66,290,'#F6E7A8',16,40,8)+introBurst(-50,336,170,'rgba(255,255,255,.28)',12,37,-10)+introSpark(20,64,24,'#1E2A22')+introSpark(340,86,18,'#E85A47',15)+introSpark(336,446,28,'#1E2A22',10,'intro-low')+introSpark(14,466,16,'#fff',0,'intro-low')+introRing(-20,96,88,'rgba(30,42,34,.55)')+introRing(300,366,64,'rgba(255,255,255,.9)'),
@@ -86,7 +94,7 @@ const INTRO_SLIDES=[
    introVisitor('rabbit','left:240px;top:354px;width:122px;height:122px;transform:rotate(7deg)')+introSticker('forest/decor-flower-lilac.webp','left:34px;top:378px;width:70px;height:70px;transform:rotate(-10deg)')},
  {title:'다 읽은 작품이<br>나의 <mark style="--tilt:-3deg;background:#F6E7A8">숲</mark>이 돼요.',copy:'완료한 책과 영화가 달마다 숲에 나무로 남아요.',label:'나무와 새싹이 자라는 숲 판, 여우 스티커',
   shapes:introBurst(40,58,310,'#F6E7A8',24,44,0,'opacity:.9')+introBurst(300,376,110,'rgba(255,255,255,.28)',10,36,18)+introSpark(14,76,22,'#1E2A22')+introSpark(350,96,18,'#fff')+introSpark(10,446,26,'#1E2A22',12,'intro-low')+introSpark(196,64,14,'#E85A47')+introRing(318,66,60,'rgba(30,42,34,.55)'),
-  stage:'<div class="intro-board-wrap">'+INTRO_BOARD+'</div>'+
+  stage:'<div class="intro-board-wrap">'+introBoardHTML()+'</div>'+
    '<span class="intro-chip" style="left:22px;top:44px;background:#F6E7A8;transform:rotate(-8deg);font-size:16px">+1 TREE</span><span class="intro-chip" style="left:226px;top:64px;background:#fff;transform:rotate(6deg)">'+Number(now().slice(5,7))+'월의 숲</span>'+
    introVisitor('fox','left:250px;top:330px;width:124px;height:124px;transform:rotate(-6deg)')+introSticker('forest/decor-flower-peach.webp','left:14px;top:348px;width:64px;height:64px;transform:rotate(10deg)')}
 ];
@@ -125,7 +133,7 @@ function renderEntry(){
  if(authRoute==='taste')h=renderTastePage();
  if(authRoute==='ready')h='<div class="entry-hero center"><h1>취향이 자랄<br>준비가 됐어요.</h1><p>이제 하나씩, 나의 속도로 경험해요.</p></div>'+entryStickerArt()+'<div class="entry-bottom">'+button('나의 '+esc(APP_BRAND.ko)+' 시작하기','flowFinish','primary ink-button')+'</div>';
  $('page').innerHTML=h;
- if(['intro','welcome'].includes(authRoute)){$('head').hidden=true;$('head').innerHTML=''}
+ if(['intro','welcome'].includes(authRoute)){$('head').hidden=true;$('head').innerHTML='';requestAnimationFrame(scrollPageTop)}
  if(authRoute==='taste')$('head').innerHTML=tasteMode==='add'?'<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit'):'<div class="brand">'+esc(APP_BRAND.ko)+'</div>'+button('그냥 시작하기','flowFinish','textbtn taste-exit');
  if(authRoute==='tasteType'&&tasteMode==='add')$('head').innerHTML='<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit');
 }
