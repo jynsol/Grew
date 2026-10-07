@@ -3699,3 +3699,11 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .stamp-button.is-done { width:128px;height:128px;font-size:15px; }
 @media (max-width:414px) { .stamp-button.is-done { width:112px;height:112px;font-size:15px; } }
 @media (max-width:360px) { .stamp-button.is-done { width:100px;height:100px;font-size:14px; } }
+/* Stamp before recording: a smaller white stamp waiting to be pressed; after: the big ink stamp */
+.stamp-button:not(.is-done) { width:108px;height:108px;background:#fff;color:var(--sb-ink);border:2px solid #fff;box-shadow:0 0 0 1.5px var(--sb-ink),0 10px 20px -12px rgba(30,42,34,.45); }
+.stamp-button:not(.is-done) .stamp-ring { border-color:rgba(30,42,34,.45); }
+.stamp-button:not(.is-done) svg { color:var(--sb-coral); }
+.stamp-button.is-done { opacity:1; }
+@media (max-width:414px) { .stamp-button:not(.is-done) { width:96px;height:96px;font-size:14px; } }
+@media (max-width:360px) { .stamp-button:not(.is-done) { width:88px;height:88px;font-size:13px; } }
+.stamp-burst { display:none; }

@@ -1761,7 +1761,7 @@ function recordDone(c,previousStage){
  const message=grew?josa(name(previousStage),'이','가')+' '+josa(name(stage),'으로','로')+' 자랐어요.':'오늘 기록했어요. 한 칸 더 자랐어요.';
  const stamp=view==='today'?document.querySelector('.stamp-done .stamp-button'):null;
  if(!stamp){toast(message);return}
- stamp.classList.add('is-slam');stamp.insertAdjacentHTML('beforeend','<i class="stamp-burst" aria-hidden="true"></i>');
+ stamp.classList.add('is-slam');
  if(grew){
   const tree=document.querySelector('.today-panel .today-tree');
   if(tree){
