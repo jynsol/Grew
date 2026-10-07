@@ -3991,3 +3991,7 @@ html, body { overflow-x:clip; }
 /* Scrap list sits straight on the page: no card around it, just hairlines between rows */
 .scrap-list { margin-top:8px;padding:0;border-radius:0;background:none;box-shadow:none; }
 .scrap-row { border-bottom:1px solid rgba(30,42,34,.08); }
+/* Type tabs without the outer box: the active one is a filled pill, others plain grey text */
+.scrap-page .type-tabs { padding:0;gap:2px;background:none;box-shadow:none; }
+.scrap-page .type-tab { padding:9px 14px;color:rgba(30,42,34,.5); }
+.scrap-page .type-tab.active { background:var(--sb-ink);color:#fff; }
