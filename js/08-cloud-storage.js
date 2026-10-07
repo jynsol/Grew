@@ -1813,7 +1813,7 @@ function plantedMoment(c){
   spark(14,18,14,0)+spark(80,58,10,.6)+spark(22,70,9,1.1)+spark(70,12,8,1.6)+spark(88,30,12,.3)+spark(8,46,7,1.9)+
   stickerTree(c,3,'planted-tree')+'<div class="planted-stamp-real" aria-hidden="true">'+stampSVG(c,true)+'</div>'+
   '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span></div>'+
- '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+'로 자랐어요</span></div>'+
+ '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+((code=>{const fin=code>=0&&code<=11171?code%28:0;return fin&&fin!==8?'으로':'로'})(tree.charCodeAt(tree.length-1)-0xAC00))+' 자랐어요</span></div>'+
  '<div class="planted-stats">'+stat(number,'번째','이달의 나무')+stat(logs||1,'일','함께한 기록')+stat(validRating(c.rating)?Number(c.rating).toFixed(1):'–','','별점')+'</div>'+
  '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+button(icon('share'),'shareWork','planted-share',attr(c.id)+' aria-label="'+esc(c.title)+' 공유하기"')+'</div>','planted');
 }
