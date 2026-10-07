@@ -44,34 +44,58 @@ function loginFields(){
 }
 
 let introductionStep=0;
-function entryForestArt(){
- return '<svg class="welcome-art" viewBox="0 0 360 290" role="img" aria-label="책과 영화의 경험이 자라난 작은 숲">'+
- '<circle cx="177" cy="151" r="115" fill="#e8eddf"/>'+
- '<circle cx="283" cy="55" r="27" fill="#f5f184"/>'+
- '<path d="M64 201 74 210 88 203 87 219 101 226 87 233 88 249 74 242 63 252 59 237 44 235 52 222 46 209 61 214Z" fill="#ddc7f4"/>'+
- '<ellipse cx="185" cy="230" rx="113" ry="17" fill="#d9e4c7"/>'+
- '<g transform="translate(116 196) scale(1.46)">'+speciesArt('fir','basic')+'</g>'+
- '<g transform="translate(244 214) scale(1.37)">'+speciesArt('birch','basic')+'</g>'+
- '<g transform="translate(180 229) scale(1.82)">'+speciesArt('oak','basic')+'</g>'+
- '<path d="M294 197v15m-7.5-7.5h15" stroke="#1b1d19" stroke-width="1.3" stroke-linecap="round"/>'+
- '</svg>';
+// Small sticker forest shared by the welcome and ready screens.
+function entryStickerArt(label='책과 영화로 자라난 작은 숲'){
+ return '<div class="entry-sticker-art" role="img" aria-label="'+esc(label)+'">'+
+ introSticker('trees/cherry.webp','left:4%;top:18px;width:46%;transform:rotate(-4deg)')+
+ introSticker('trees/oak.webp','right:2%;top:0;width:54%;transform:rotate(3deg)')+
+ introSticker('trees/sprout.webp','left:38%;top:132px;width:28%;transform:rotate(-6deg)')+
+ introVisitor('rabbit','right:6%;top:150px;width:96px;height:96px;transform:rotate(4deg)')+
+ introSticker('forest/decor-flower-peach.webp','left:6%;top:170px;width:56px;transform:rotate(8deg)')+'</div>';
 }
-function introArt(step){
- if(step===2)return entryForestArt();
- if(step===1)return '<svg viewBox="0 0 360 290" role="img" aria-label="한 번의 경험으로 자라는 새싹"><path d="M181 28 210 80 267 62 260 119 315 140 267 175 287 230 230 224 211 277 177 230 122 252 128 192 72 176 116 137 95 82 154 88Z" fill="#ddc7f4"/><g transform="translate(42 15) scale(.86)">'+growth(1).replace(/<svg[^>]*>|<\/svg>/g,'').replace(/<circle cx="160"[^>]*\/>/,'')+'</g><path d="m257 240 7 7 14-17" fill="none" stroke="#1b1d19" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
- return '<svg viewBox="0 0 360 290" role="img" aria-label="책과 영화를 스크랩하는 두 장의 카드"><circle cx="180" cy="146" r="115" fill="#e6eddd"/><g transform="translate(74 70) rotate(-9 60 75)"><rect width="114" height="154" rx="16" fill="#b9cba8"/><path d="M30 35h52v83H30zM41 35v83" fill="none" stroke="#40513a" stroke-width="2"/><path d="M51 58h19M51 70h14" stroke="#40513a" stroke-width="2"/></g><g transform="translate(173 77) rotate(9 58 75)"><rect width="114" height="154" rx="16" fill="#ece0bb"/><rect x="16" y="34" width="82" height="85" rx="8" fill="#fff9ea"/><path d="m48 57 27 19-27 19Z" fill="#857247"/></g></svg>';
-}
+// Intro slides (redesign 5a): cut-out stickers on a coloured page, one big title, one action.
+const INTRO_STAR4='polygon(50% 0,59% 41%,100% 50%,59% 59%,50% 100%,41% 59%,0 50%,41% 41%)';
+function introStar(points,inner){const pts=[];for(let i=0;i<points*2;i++){const r=i%2?inner:50,a=Math.PI*i/points-Math.PI/2;pts.push((50+r*Math.cos(a)).toFixed(1)+'% '+(50+r*Math.sin(a)).toFixed(1)+'%')}return 'polygon('+pts.join(',')+')'}
+function introSticker(src,style){return '<img class="intro-cut" src="./assets/images/'+src+'" alt="" style="'+style+'">'}
+function introVisitor(id,style){return '<i class="intro-cut intro-visitor" style="background-image:url(./assets/images/forest/visitor-'+id+'.webp);'+style+'"></i>'}
+const INTRO_SLIDES=[
+ {title:'마음에 든 순간,<br>가볍게 <mark style="--tilt:-2deg">스크랩.</mark>',copy:'읽고 싶은 책, 궁금했던 영화를 한곳에.',label:'책과 영화 카드, 씨앗, 다람쥐 스티커',
+  shapes:'<i style="right:10px;top:50px;width:236px;height:236px;background:#F4E3A0;clip-path:'+introStar(12,39)+';transform:rotate(8deg)"></i><i style="left:40px;top:416px;width:26px;height:26px;background:#1E2A22;clip-path:'+INTRO_STAR4+'"></i><i style="right:44px;top:32px;width:16px;height:16px;background:#fff;clip-path:'+INTRO_STAR4+'"></i><i class="intro-ring" style="left:22px;top:42px;width:84px;height:84px"></i>',
+  stage:'<div class="intro-card" style="left:28px;top:40px;background:#FAF7F0;transform:rotate(-9deg)"><span>BOOK</span><i></i></div><div class="intro-card" style="right:30px;top:76px;background:#B9E0C2;transform:rotate(8deg)"><span>MOVIE</span><i></i></div>'+
+   introSticker('forest/decor-flower-peach.webp','right:22px;top:228px;width:70px;height:70px;transform:rotate(8deg)')+introSticker('trees/seed.webp','left:136px;top:200px;width:120px;height:120px;transform:rotate(-6deg)')+
+   introVisitor('squirrel','left:18px;top:212px;width:120px;height:120px;transform:rotate(-4deg)')+'<span class="intro-chip" style="left:150px;top:40px;background:#1E2A22;color:#fff;transform:rotate(6deg)">+ 스크랩</span>'},
+ {title:'오늘은 하나만,<br><mark style="--tilt:2deg">천천히</mark> 경험해요.',copy:'담아둔 작품 하나를 골라 하루 한 번 도장을 찍어요.',label:'새싹, 오늘 읽었어요 도장, 요일 스티커와 토끼',
+  shapes:'<i style="left:26px;top:42px;width:220px;height:220px;border-radius:56px;background:#DCCFF4;transform:rotate(-10deg)"></i><i style="right:36px;top:376px;width:28px;height:28px;background:#1E2A22;clip-path:'+INTRO_STAR4+'"></i><i style="right:120px;top:56px;width:18px;height:18px;background:#fff;clip-path:'+INTRO_STAR4+'"></i><i style="left:250px;top:246px;width:34px;height:34px;border-radius:50%;background:#B9E0C2"></i>',
+  stage:introSticker('trees/sprout.webp','left:22px;top:30px;width:180px;height:180px;transform:rotate(-6deg)')+
+   '<div class="intro-stamp" style="right:30px;top:60px"><i class="stamp-ring"></i><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B9E0C2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>오늘<br>읽었어요</div>'+
+   '<span class="intro-chip" style="left:150px;top:24px;background:#fff;transform:rotate(-6deg)">하루 한 번</span>'+
+   '<div class="intro-days">'+['월','화','수','목','금','토','일'].map((d,i)=>'<span class="'+(i<3?'is-done':'')+'" style="transform:translateY('+[6,0,-4,-6,-4,0,6][i]+'px) rotate('+[-6,4,-3,5,-4,3,-5][i]+'deg)">'+d+'</span>').join('')+'</div>'+
+   introVisitor('rabbit','right:14px;top:290px;width:120px;height:120px;transform:rotate(4deg)')+introSticker('forest/decor-flower-lilac.webp','left:150px;top:300px;width:64px;height:64px;transform:rotate(-8deg)')},
+ {title:'좋아하는 것들이<br>나의 <mark style="--tilt:-3deg;background:#F4E3A0">숲</mark>이 돼요.',copy:'다 읽고 본 작품은 숲에 큰나무로 남아요.',label:'다섯 그루의 나무와 여우 스티커',
+  shapes:'<i style="left:60px;top:56px;width:270px;height:270px;border-radius:50%;background:#DCEFC4"></i><i style="left:24px;top:42px;width:60px;height:60px;background:#F4E3A0;clip-path:'+introStar(8,30)+';transform:rotate(12deg)"></i><i style="right:30px;top:386px;width:24px;height:24px;background:#1E2A22;clip-path:'+INTRO_STAR4+'"></i><i class="intro-ring" style="right:24px;top:42px;width:70px;height:70px"></i>',
+  stage:introSticker('trees/ginkgo.webp','left:6px;top:70px;width:150px;height:150px;transform:rotate(-4deg)')+introSticker('trees/cherry.webp','left:118px;top:24px;width:170px;height:170px;transform:rotate(2deg)')+
+   introSticker('trees/maple.webp','right:0;top:96px;width:140px;height:140px;transform:rotate(5deg)')+introSticker('trees/birch.webp','left:40px;top:200px;width:130px;height:130px;transform:rotate(-3deg)')+
+   introSticker('trees/oak.webp','left:150px;top:180px;width:160px;height:160px')+introVisitor('fox','right:10px;top:260px;width:118px;height:118px')+
+   '<span class="intro-chip" style="left:24px;top:30px;background:#F4E3A0;transform:rotate(-8deg)">+1 TREE</span>'}
+];
 function renderIntroduction(){
- const slides=[['마음에 든 순간,','가볍게 스크랩.','읽고 싶은 책, 궁금했던 영화. 흩어진 관심을 한곳에 모아요.'],['오늘은 하나만,','천천히 경험해요.','담아둔 작품 중 하나를 골라보세요. 읽고 본 경험이 쌓이며 새싹이 자라나요.'],['좋아하는 것들이','나의 숲이 돼요.','완료한 경험 하나가 나무 한 그루로. 나만의 취향이 담긴 숲을 만나보세요.']];
- const s=slides[introductionStep];
- return '<h1>'+s[0]+'<br>'+s[1]+'</h1><div class="intro-visual">'+introArt(introductionStep)+'</div><p class="intro-copy">'+s[2]+'</p><div class="intro-footer"><div class="intro-dots" aria-label="3단계 중 '+(introductionStep+1)+'단계">'+[0,1,2].map(i=>'<i class="'+(i===introductionStep?'on':'')+'"></i>').join('')+'</div>'+button((introductionStep===2?'시작하기':'다음')+' <span aria-hidden="true">↗</span>','introNext','intro-next')+'</div>';
+ const step=introductionStep,s=INTRO_SLIDES[step],last=step===2;
+ return '<section class="sticker-intro" data-step="'+step+'"><div class="intro-shapes" aria-hidden="true">'+s.shapes+'</div>'+
+ '<div class="intro-top"><span class="intro-wordmark">'+esc(APP_BRAND.en)+'</span>'+button('건너뛰기','introSkip','textbtn intro-skip')+'</div>'+
+ '<div class="intro-stage" role="img" aria-label="'+esc(s.label)+'">'+s.stage+'</div>'+
+ '<div class="intro-bottom"><span class="sr-only">3장 중 '+(step+1)+'번째</span><h1>'+s.title+'</h1><p>'+s.copy+'</p><div class="intro-footer"><div class="intro-dots" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i===step?'on':'')+'"></i>').join('')+'</div>'+
+ button(last?'시작하기 <span aria-hidden="true">↗</span>':'<span aria-hidden="true">↗</span>','introNext',last?'intro-next is-start':'intro-next',last?'':'aria-label="다음"')+'</div></div></section>';
 }
 function renderEntry(){
  $('head').hidden=false;
- $('tabs').hidden=true;$('page').dataset.view=authRoute;$('head').dataset.view=authRoute;$('page').classList.add('entry-page');$('page').classList.toggle('taste-page',authRoute==='taste');$('page').classList.toggle('intro-page',authRoute==='intro');
+ $('tabs').hidden=true;$('page').dataset.view=authRoute;document.body.dataset.view=authRoute;$('head').dataset.view=authRoute;$('page').classList.add('entry-page');$('page').classList.toggle('taste-page',authRoute==='taste');$('page').classList.toggle('intro-page',authRoute==='intro');
  $('head').innerHTML=!['welcome','onboard','taste','ready','intro'].includes(authRoute)?'<div class="row">'+button(icon('back'),'flowBack','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+esc(APP_BRAND.ko)+'</span></div>':'<div class="brand">'+icon('forest')+esc(APP_BRAND.ko)+'</div>';
  let h='';
- if(authRoute==='welcome')h='<section class="welcome-screen"><div class="welcome-content"><div class="welcome-wordmark"><strong>'+esc(APP_BRAND.ko)+'</strong><span>'+esc(APP_BRAND.en)+'</span></div><div class="welcome-tags" aria-hidden="true"><span>책</span><span>영화</span><span>나무</span><svg viewBox="0 0 24 24"><path d="m12 1 2.8 7.8L23 12l-8.2 3.1L12 23l-3-7.9L1 12l8-3.2Z"/></svg></div><h1>읽고, 보고,<br>키워요.</h1><p>'+esc(APP_BRAND.motto)+'</p><div class="welcome-art-slot">'+entryForestArt()+'</div></div><div class="welcome-sheet">'+button('시작하기','flowSignup','primary ink-button')+button('로그인','flowEmailLogin','secondary')+button(esc(APP_BRAND.ko)+' 알아보기 <span aria-hidden="true">↗</span>','introStart','textbtn')+'</div></section>';
+ if(authRoute==='welcome')h='<section class="sticker-welcome"><i class="sticker-block" aria-hidden="true"></i><div class="intro-shapes" aria-hidden="true"><i style="right:44px;top:470px;width:24px;height:24px;background:#1E2A22;clip-path:'+INTRO_STAR4+'"></i><i style="left:200px;top:60px;width:16px;height:16px;background:#fff;clip-path:'+INTRO_STAR4+'"></i><i class="intro-ring" style="right:28px;top:360px;width:72px;height:72px"></i></div>'+
+ '<div class="intro-top"><span class="intro-wordmark">'+esc(APP_BRAND.en)+'</span><span class="welcome-name">'+esc(APP_BRAND.ko)+'</span></div>'+
+ '<div class="welcome-stage">'+entryStickerArt()+'<span class="intro-chip" style="left:24px;top:6px;background:#fff;transform:rotate(-7deg)">책</span><span class="intro-chip" style="left:76px;top:0;background:#F4E3A0;transform:rotate(5deg)">영화</span><span class="intro-chip" style="right:18px;top:4px;background:#1E2A22;color:#fff;transform:rotate(-5deg)">+1 TREE</span></div>'+
+ '<div class="welcome-copy"><h1>읽고, 보고,<br><mark style="--tilt:-2deg;background:#B9E0C2">키워요.</mark></h1><p>'+esc(APP_BRAND.motto)+'</p></div>'+
+ '<div class="welcome-actions">'+button('시작하기','flowSignup','primary ink-button')+button('로그인','flowEmailLogin','secondary')+button(esc(APP_BRAND.ko)+' 알아보기 <span aria-hidden="true">↗</span>','introStart','textbtn')+'</div></section>';
  if(authRoute==='intro')h=renderIntroduction();
  if(authRoute==='signupOptions')h='<div class="entry-options-page"><div class="entry-options-title"><div class="entry-options-symbol">'+icon('forest')+'</div><h1>나의 숲을<br>시작해요.</h1><p>이메일로 나만의 숲을 시작해요.</p></div><div class="signup-benefits"><p>'+icon('scrap')+'<span>책과 영화를 한곳에 모아요.</span></p><p>'+icon('forest')+'<span>경험한 작품이 나무로 자라요.</span></p></div><div class="signup-methods">'+button('이메일로 가입하기','flowEmailSignup','primary ink-button')+'</div><p class="entry-login-link">이미 함께하고 있나요? '+button('로그인','flowEmailLogin','textbtn')+'</p></div>';
  if(authRoute==='login')h='<div class="entry-hero"><span class="section-eyebrow">WELCOME BACK</span><h1>다시 만나서<br>반가워요.</h1><p>당신의 숲이 기다리고 있어요.</p></div><form id="flowLoginForm">'+loginFields()+'<div id="flowError" class="entry-error" role="alert"></div><button class="primary ink-button" type="submit">로그인</button></form>'+button('비밀번호를 잊으셨나요?','flowRecover','textbtn')+'<p class="entry-login-link">아직 계정이 없나요? '+button('회원가입','flowSignup','textbtn')+'</p>'+entryNote();
@@ -86,9 +110,9 @@ function renderEntry(){
  if(authRoute==='tasteType'){const adding=tasteMode==='add';h=(adding?'':entrySteps(3))+'<div class="entry-hero"><h1>지금 마음이 가는<br>분야는 뭔가요?</h1><p>선택한 분야의 작품을 보여드릴게요.</p></div><div class="taste-type-grid">'+[['book','책','새로운 페이지를 넘기는 시간'],['movie','영화','또 다른 세계를 만나는 시간']].map(([type,label,desc])=>button(icon(type)+'<span class="grow">'+label+'<small>'+desc+'</small></span><span aria-hidden="true">↗</span>','chooseTasteType','taste-type-option','data-type="'+type+'"')).join('')+'</div>';}
  if(authRoute==='onboard')h=entrySteps(3)+'<div class="entry-hero"><h1>'+esc(state.profile.name)+'님,<br>어떤 걸 좋아하세요?</h1><p>관심 있는 작품이나 이미 본 작품을 추가해보세요.</p></div>'+button('직접 고르기','flowTaste')+button('저장해 둔 스크린샷 가져오기','photoAdd','secondary')+'<div class="flow-account"><strong>지금 모인 콘텐츠 '+state.items.length+'개</strong><small>가져온 콘텐츠는 스크랩에서 이어서 볼 수 있어요.</small></div>'+button(state.items.length?'이 콘텐츠로 시작하기':'취향 선택은 나중에 할게요','flowReady','textbtn');
  if(authRoute==='taste')h=renderTastePage();
- if(authRoute==='ready')h='<div class="entry-hero center"><h1>취향이 자랄<br>준비가 됐어요.</h1><p>이제 하나씩, 나의 속도로 경험해요.</p></div>'+entryForestArt()+'<div class="entry-bottom">'+button('나의 '+esc(APP_BRAND.ko)+' 시작하기','flowFinish','primary ink-button')+'</div>';
+ if(authRoute==='ready')h='<div class="entry-hero center"><h1>취향이 자랄<br>준비가 됐어요.</h1><p>이제 하나씩, 나의 속도로 경험해요.</p></div>'+entryStickerArt()+'<div class="entry-bottom">'+button('나의 '+esc(APP_BRAND.ko)+' 시작하기','flowFinish','primary ink-button')+'</div>';
  $('page').innerHTML=h;
- if(authRoute==='intro')$('head').innerHTML='<span class="intro-count">0'+(introductionStep+1)+' / 03</span>'+button('건너뛰기','introSkip','textbtn');
+ if(['intro','welcome'].includes(authRoute)){$('head').hidden=true;$('head').innerHTML=''}
  if(authRoute==='taste')$('head').innerHTML=tasteMode==='add'?'<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit'):'<div class="brand">'+esc(APP_BRAND.ko)+'</div>'+button('그냥 시작하기','flowFinish','textbtn taste-exit');
  if(authRoute==='tasteType'&&tasteMode==='add')$('head').innerHTML='<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit');
 }
