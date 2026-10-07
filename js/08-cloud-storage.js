@@ -509,7 +509,7 @@ function todayBoard(c){
   '<div class="today-disc" aria-hidden="true"></div>'+stickerTree(c,stage,'today-tree')+
   '<span class="today-stage"><i aria-hidden="true">'+stickerTree(c,stage)+'</i>'+esc(growthAppearance(stage).name)+(suffix?'<b aria-hidden="true">·</b><em>'+esc(suffix)+'</em>':'')+'</span>'+
  '</div>'+
- '<div class="sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(c.type==='movie'?button('보러 가기 ↗','external','textbtn',attr(c.id)):'')+(todayLogOf(c)?button(todayLogOf(c).memo?'메모 수정':'메모 남기기','editMemo','textbtn',attr(c.id)+' data-log="'+esc(todayLogOf(c).id)+'"')+button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</div>'+
+ '<div class="sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(c.type==='movie'?button('보러 가기 ↗','external','textbtn',attr(c.id)):'')+(todayLogOf(c)?button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</div>'+
  '</section>';
 }
 function recordActions(c,inDetail=false){
@@ -582,7 +582,7 @@ function renderDetail(){
  const genre=cleanGenreValue(c.genre)?launchGenre(c.type,c.genre,c):'';
  const chips=c.completed?'<span class="detail-chip is-ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+(validRating(c.rating)?'<span class="detail-chip"><b>★</b> '+c.rating+'</span>':''):
   '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'','기록 '+logDays+'회'].filter(Boolean).join(' · ')+'</span>':'');
- const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'메모 없음')+'</span></button>';
+ const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'+ 메모 남기기')+'</span></button>';
  const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
  const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'감상 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
   button(c.type==='movie'?'끝까지 봤어요':'다 읽었어요','complete','detail-action-secondary',attr(c.id))+(todayLog?button('오늘 기록했어요 · '+(todayLog.memo?'메모 수정':'메모'),'editLog','detail-action-primary is-done',attr(c.id)+' data-log="'+esc(todayLog.id)+'"'):button('<i aria-hidden="true"></i>오늘 '+verb,'record','detail-action-primary',attr(c.id))))+'</div>';

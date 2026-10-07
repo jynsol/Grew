@@ -3676,3 +3676,9 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .today-panel-title>.today-panel-kicker { font:600 12.5px/1.2 var(--font-family);color:var(--sb-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 .page .sticker-top { padding-top:4px; }
 .forest-title-row .page-title+.forest-chips { margin-top:12px; }
+/* Tab titles share one size, weight and baseline (오늘 · 나의 스크랩 · n월의 숲 · 마이) */
+.page .sticker-top { padding:0 20px; }
+.page .sticker-titles .page-title, .forest-top .page-title { font:780 26px/1.1 var(--font-family);letter-spacing:-.03em; }
+.page .sticker-top { align-items:center; }
+.page .sticker-top { margin-top:2px; }
+.detail-log span.is-empty { color:var(--sb-muted);font-weight:620; }
