@@ -343,7 +343,7 @@ function toast(message,undo){$('toast').classList.remove('planted');clearTimeout
 function dismissToast(){$('toast').classList.remove('planted');clearTimeout(toastTimer);$('toast').innerHTML='';undoAction=null}
 function commit(close=false){if(!persist())return false;if(close)closeModal();render();return true}
 function focusPageHeading(){requestAnimationFrame(()=>{if(modal)return;const heading=$('page').querySelector('h1');if(heading){heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true})}})}
-function go(next){clearTimeout(mainSearchRenderTimer);mainSearchRenderTimer=null;if(view==='detail'&&next!=='detail')candidatePreview=null;closeModal();if(next!=='forest')forestEditMode=false;if(view==='calendar')sessionStorageSafe('calendarScroll',String(window.scrollY));if(view==='scrap')sessionStorageSafe('scroll',String(window.scrollY));view=next;picking=false;render();window.scrollTo(0,0);if(next==='scrap')window.scrollTo(0,Number(sessionStorageSafe('scroll'))||0);if(next==='calendar')window.scrollTo(0,Number(sessionStorageSafe('calendarScroll'))||0);focusPageHeading()}
+function go(next){if(next==='calendar'){forestMode='month';forestShow='calendar';next='forest'}clearTimeout(mainSearchRenderTimer);mainSearchRenderTimer=null;if(view==='detail'&&next!=='detail')candidatePreview=null;closeModal();if(next!=='forest')forestEditMode=false;if(view==='calendar')sessionStorageSafe('calendarScroll',String(window.scrollY));if(view==='scrap')sessionStorageSafe('scroll',String(window.scrollY));view=next;picking=false;render();window.scrollTo(0,0);if(next==='scrap')window.scrollTo(0,Number(sessionStorageSafe('scroll'))||0);if(next==='calendar')window.scrollTo(0,Number(sessionStorageSafe('calendarScroll'))||0);focusPageHeading()}
 function sessionStorageSafe(k,v){try{if(v!==undefined)sessionStorage.setItem('sr3-'+k,v);return sessionStorage.getItem('sr3-'+k)}catch{return null}}
 function openDetail(id,origin=view){candidatePreview=null;detailId=id;detailOrigin=origin==='detail'?detailOrigin:origin;go('detail');const c=get(id);if(c?.type==='book'&&!cleanGenreValue(c.genre)&&c.genreSource!=='user'){enrichBookGenre(c).then(()=>{if(c.genre&&get(c.id)===c){ensureCompletedSpeciesAssignments();persist();if(view==='detail'&&detailId===id)render()}}).catch(()=>{})}}
 function openCandidateDetail(c){
@@ -609,25 +609,70 @@ function forestItemOrder(c){
 function forestItems(data,period){
  return data.items.filter(c=>['book','movie'].includes(c.type)&&Model.stage(c)>0&&forestRecordYear(c)===String(period)).sort((a,b)=>forestItemOrder(a)-forestItemOrder(b)||a.id.localeCompare(b.id));
 }
+// Forest tab (redesign 11a): this month's board is the main view; the year is an island of
+// twelve month plots; the calendar is the same month seen as stamps.
+let forestMode='month',forestShow='forest',forestTypeFilter='all';
+function forestMonthOf(c){if(c.completed)return c.completed==='unknown'?'':c.completed.slice(0,7);return now().slice(0,7)}
+function forestMonthItems(period,type='all'){return state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&Model.stage(c)>0&&forestMonthOf(c)===period).sort((a,b)=>forestItemOrder(a)-forestItemOrder(b)||a.id.localeCompare(b.id))}
+function forestTypeChips(items,extra=''){const done=items.filter(c=>c.completed),b=done.filter(c=>c.type==='book').length,m=done.filter(c=>c.type==='movie').length;return '<div class="forest-chips"><span class="forest-chip is-book">책 <b>'+b+'권</b></span><span class="forest-chip is-movie">영화 <b>'+m+'편</b></span>'+extra+'</div>'}
+function forestNav(prevAction,nextAction,prevLabel,nextLabel,canNext){return '<div class="forest-nav">'+button('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>',prevAction,'forest-nav-btn','aria-label="'+prevLabel+'"')+button('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>',nextAction,'forest-nav-btn','aria-label="'+nextLabel+'"'+(canNext?'':' disabled'))+'</div>'}
 function renderForest(){
- const items=forestItems(state,year),completedItems=items.filter(c=>c.completed),growingCount=items.length-completedItems.length,stats=Model.stats(completedItems),theme='basic',snow=false;
- const expansion=forestExpansionMeta(items.length),collection=collectionCounts();
- const periods=[...new Set([now().slice(0,4),...state.items.filter(c=>['book','movie'].includes(c.type)&&Model.stage(c)>0).map(forestRecordYear)])].sort().reverse();
- const periodPicker=inlinePicker(year+'년','year',periods.map(y=>[y,y+'년']),year);
- const types='<div class="forest-metrics" aria-label="완료한 작품 수">'+[['book','책'],['movie','영화']].map(([type,label])=>'<div class="forest-metric"><span>'+icon(type)+label+'</span><strong>'+stats[type]+'</strong></div>').join('')+'</div>';
- const total='<div class="forest-total"><h2>'+items.length.toLocaleString()+'<span>그루</span></h2>'+(items.length?'<p class="forest-area">자라는 중 '+growingCount+' · 완료 '+stats.n+'</p>':'')+'</div>';
- const next=items.length&&expansion.nextAt?'<div class="forest-next"><p>다음 확장까지 '+expansion.remaining+'그루</p></div>':'';
- const controls='<div class="forest-header-actions page-heading-actions">'+periodPicker+(items.length?button(icon('share'),'shareForest','iconbtn','aria-label="숲 공유하기"'):'')+'</div>';
- const toolbar='<div class="forest-tools">'+(forestEditMode?button('바닥 바꾸기','bmDecorateFloors','textbtn'):'<span class="bm-floor-label">'+(bmFloorId()==='meadow'?'꽃이끼 정원':'기본 숲')+' · 완료 '+stats.n+'</span>')+'<div class="forest-tool-actions">'+button(forestEditMode?icon('check'):icon('palette'),'forestEdit','iconbtn forest-edit-control','aria-label="'+(forestEditMode?'꾸미기 완료':'숲 꾸미기')+'" aria-pressed="'+forestEditMode+'"')+button(icon('store'),'bmOpenShop','iconbtn','aria-label="상점"')+'</div></div>';
- return '<section class="forest-page-section"><div class="forest-landscape '+(snow?'is-snow':'')+'"><div class="page-heading forest-heading"><h1 class="page-title">나의 숲</h1>'+controls+'</div>'+
- '<div class="forest-garden '+(snow?'is-snow':'')+'"><div class="forest-scene"><div class="forest-viewport '+(forestEditMode?'editing':'')+'" id="forestViewport" data-theme="'+(snow?'snow':'basic')+'" tabindex="0" aria-label="'+(forestEditMode?'꾸미기 중. 바꿀 나무를 선택하세요.':items.length+'그루의 숲. 새싹과 나무를 선택해 기록을 볼 수 있습니다.')+'">'+forestSVG(items,theme)+'</div></div>'+toolbar+'</div>'+
- (forestEditMode?'<p class="forest-edit-hint">바꿀 나무를 선택하세요</p>':'')+(items.length?'':'<p class="forest-empty">경험을 시작하면 새싹이 자라요</p>')+
- '<div class="forest-overview">'+total+types+'</div></div>'+
- (items.length>FOREST_VISIBLE_LIMIT?'<p class="forest-limit-note">최근 '+FOREST_VISIBLE_LIMIT+'그루 표시</p>':'')+
- '<div class="forest-records"><div class="forest-insight-heading"><h2>기록 요약</h2>'+button('월간 기록 <span aria-hidden="true">›</span>','calendar','textbtn')+'</div>'+forestSummary(completedItems)+'</div>'+
- '<div class="forest-library-link">'+button(icon('forest')+'<span>도감</span><small>나무 '+collection.trees+'/'+collection.totalTrees+' · 방문객 '+collection.visitors+'/'+collection.totalVisitors+'</small><span aria-hidden="true">›</span>','bmCodex','menu-row')+'</div>'+
- (state.items.find(c=>!c.completed&&Model.stage(c)>0)?'<div class="forest-continuing"><h2>이어가는 작품</h2>'+row(state.items.find(c=>!c.completed&&Model.stage(c)>0))+'</div>':'')+
- (!items.length?'<div class="forest-actions">'+button(icon('plus')+'스크랩 추가','add','primary')+'</div>':'')+'</section>';
+ if(!/^\d{4}-\d{2}$/.test(month)||month>now().slice(0,7))month=now().slice(0,7);
+ year=month.slice(0,4);
+ return forestMode==='year'?renderForestYear():renderForestMonth();
+}
+function renderForestMonth(){
+ const m=Number(month.slice(5)),items=forestMonthItems(month),reading=items.filter(c=>!c.completed).length;
+ const shareIcon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>';
+ const head='<div class="forest-top">'+button(esc(year)+' 올해의 숲 <span aria-hidden="true">›</span>','forestYearView','forest-year-link')+button(shareIcon,'shareMonth','forest-share','aria-label="'+m+'월의 숲 공유하기"')+'</div>'+
+  '<div class="forest-title-row"><div><h1 class="page-title">'+m+'월의 숲</h1>'+forestTypeChips(items,reading?'<span class="forest-reading">'+(items.some(c=>!c.completed&&c.type==='book')?'읽는':'보는')+' 중 '+reading+'</span>':'')+'</div>'+forestNav('forestPrevMonth','forestNextMonth','지난달','다음 달',month<now().slice(0,7))+'</div>';
+ const toggle='<div class="forest-toggle" role="group" aria-label="보기 방식">'+button(icon('forest')+'숲으로 보기','forestShow',forestShow==='forest'?'active':'','data-show="forest" aria-pressed="'+(forestShow==='forest')+'"')+button(icon('today')+'달력으로 보기','forestShow',forestShow==='calendar'?'active':'','data-show="calendar" aria-pressed="'+(forestShow==='calendar')+'"')+'</div>';
+ if(forestShow==='calendar')return '<section class="forest-page-section forest-month">'+head+toggle+forestCalendarHTML(month)+'</section>';
+ const board=items.map(c=>({...c,forestTile:''}));
+ const tools='<div class="forest-tools-row">'+button('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'+(forestEditMode?'꾸미기 완료':'꾸미기'),'forestEdit','forest-tool is-ink','aria-pressed="'+forestEditMode+'"')+button('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9 5.5 4h13L20 9"/><path d="M4 9h16v2a3 3 0 0 1-5.3 2 3 3 0 0 1-5.4 0A3 3 0 0 1 4 11z"/><path d="M5 13v7h14v-7"/></svg>상점','bmOpenShop','forest-tool')+button('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>도감','bmCodex','forest-tool')+'</div>';
+ return '<section class="forest-page-section forest-month">'+head+toggle+
+ '<div class="forest-board"><div class="forest-viewport '+(forestEditMode?'editing':'')+'" id="forestViewport" data-theme="basic" tabindex="0" aria-label="'+(forestEditMode?'꾸미기 중. 바꿀 나무를 선택하세요.':m+'월의 숲, '+items.length+'그루. 나무를 선택해 기록을 볼 수 있습니다.')+'">'+forestSVG(board,'basic',true,{transient:true})+'</div></div>'+
+ (forestEditMode?'<p class="forest-edit-hint">바꿀 나무를 선택하세요</p>':items.length?'':'<p class="forest-empty">'+(month===now().slice(0,7)?'이번 달 첫 기록을 남기면 새싹이 자라요':'이 달에는 심은 나무가 없어요')+'</p>')+tools+'</section>';
+}
+const FOREST_MONTH_NAMES=['일','월','화','수','목','금','토'];
+function forestCalendarHTML(period){
+ const [y,m]=period.split('-').map(Number),start=new Date(y,m-1,1).getDay(),days=new Date(y,m,0).getDate(),today=now();
+ const check='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+ let cells=FOREST_MONTH_NAMES.map((d,i)=>'<span class="fcal-weekday'+(i===0?' is-sun':'')+'">'+d+'</span>').join('')+'<span></span>'.repeat(start);
+ for(let d=1;d<=days;d++){
+  const date=period+'-'+String(d).padStart(2,'0'),done=state.items.filter(c=>c.completed===date),logged=state.items.some(c=>c.logs.some(l=>l.date===date));
+  const label=date+(done.length?' · '+done.map(c=>c.title).join(', ')+' 완료':logged?' · 기록함':' · 기록 없음');
+  cells+='<button type="button" class="fcal-day'+(date===today?' is-today':'')+(done.length?' is-done':logged?' is-logged':'')+'" data-action="day" data-date="'+date+'" aria-label="'+esc(label)+'"'+(date>today?' disabled':'')+'><span class="fcal-num">'+d+'</span>'+(done.length?'<span class="fcal-tree">'+stickerTree(done[0],3)+'</span>':logged?'<span class="fcal-stamp">'+check+'</span>':'')+'</button>';
+ }
+ const finished=state.items.filter(c=>c.completed&&c.completed.startsWith(period)).sort((a,b)=>b.completed.localeCompare(a.completed)||(b.completedAt||0)-(a.completedAt||0));
+ const card=c=>{const dt=new Date(c.completed+'T12:00:00Z');return '<button type="button" class="fcal-card" data-action="detail" '+attr(c.id)+'>'+stickerCover(c)+'<span class="fcal-card-copy"><small>'+(dt.getUTCMonth()+1)+'월 '+dt.getUTCDate()+'일 '+FOREST_MONTH_NAMES[dt.getUTCDay()]+' · '+(c.type==='movie'?'다 봄':'다 읽음')+'</small><strong>'+esc(c.title)+'</strong><span>'+(validRating(c.rating)?'<b>★</b> '+c.rating+' · ':'')+esc(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요</span></span>'+stickerTree(c,3,'is-cut-sm')+'</button>'};
+ return '<div class="fcal"><div class="fcal-grid">'+cells+'</div><div class="fcal-legend"><span><i class="is-logged"></i>기록한 날</span><span><i class="is-done"></i>다 읽은 날</span></div></div>'+(finished.length?'<div class="fcal-cards">'+finished.map(card).join('')+'</div>':'');
+}
+// Year island: twelve 5×5 plots, three per row, laid out on one isometric block.
+function forestYearIsland(y,type){
+ const W=390,current=now().slice(0,7),parts=[],trees=[],labels=[];
+ const plot=(i)=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}};
+ const diamond=(cx,cy,hw,hh)=>[cx+','+(cy-hh),(cx+hw)+','+cy,cx+','+(cy+hh),(cx-hw)+','+cy].join(' ');
+ parts.push('<polygon points="220,30 370,105 170,205 20,130" fill="#86B26F"/><polygon points="20,130 170,205 170,215 20,140" fill="#A9825E"/><polygon points="170,205 370,105 370,115 170,215" fill="#8B6A4C"/>');
+ for(let i=0;i<12;i++){
+  const period=y+'-'+String(i+1).padStart(2,'0'),p=plot(i),future=period>current,items=future?[]:forestMonthItems(period,type);
+  parts.push('<g class="island-plot'+(future?' is-future':'')+'"'+(future?'':' data-action="forestMonthView" data-month="'+period+'" role="button" tabindex="0" aria-label="'+(i+1)+'월의 숲, '+items.length+'그루"')+'><polygon points="'+diamond(p.x,p.y,45,22.5)+'" fill="'+(future?'#CFE0C2':'#9FC888')+'"'+(period===current?' stroke="#1E2A22" stroke-width="2" stroke-linejoin="round"':'')+'/></g>');
+  items.slice(0,25).forEach((c,k)=>{const gr=Math.floor(k/5),gc=k%5,x=p.x+(gc-gr)*9,yy=p.y-18+(gc+gr)*4.5;trees.push({y:yy,html:'<image href="'+esc(stickerTreeSrc(c,c.completed?3:Model.stage(c)))+'" x="'+(x-11).toFixed(1)+'" y="'+(yy-18).toFixed(1)+'" width="22" height="22" pointer-events="none"/>'})});
+  if(period===current)labels.push('<g pointer-events="none"><rect x="'+(p.x-58)+'" y="'+(p.y-26)+'" width="30" height="18" rx="9" fill="#1E2A22"/><text x="'+(p.x-43)+'" y="'+(p.y-13.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">'+(i+1)+'월</text></g>');
+ }
+ trees.sort((a,b)=>a.y-b.y);
+ return '<svg class="forest-island" viewBox="0 0 '+W+' 230" role="group" aria-label="'+y+'년의 숲">'+parts.join('')+trees.map(t=>t.html).join('')+labels.join('')+'</svg>';
+}
+function renderForestYear(){
+ const type=forestTypeFilter,current=now().slice(0,7),all=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&Model.stage(c)>0&&(c.completed?forestRecordYear(c)===year:year===current.slice(0,4)));
+ const years=[...new Set([current.slice(0,4),...state.items.filter(c=>c.completed&&c.completed!=='unknown').map(c=>c.completed.slice(0,4))])].sort();
+ const filters='<div class="forest-type-filter" role="group" aria-label="종류">'+[['all','전체'],['book','책'],['movie','영화']].map(([k,l])=>button(l,'forestType',k===type?'active':'','data-type="'+k+'" aria-pressed="'+(k===type)+'"')).join('')+'</div>';
+ const head='<div class="forest-top">'+button('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>'+Number(month.slice(5))+'월의 숲','forestMonthView','forest-back','data-month="'+month+'"')+filters+'</div>'+
+  '<div class="forest-title-row"><div><span class="forest-year-label">'+esc(year)+'</span><h1 class="page-title">올해의 숲</h1>'+forestTypeChips(all,'<span class="forest-reading">'+all.length+'그루</span>')+'</div>'+forestNav('forestPrevYear','forestNextYear','지난해','다음 해',year<current.slice(0,4)&&years.includes(String(Number(year)+1))||year<current.slice(0,4))+'</div>';
+ const cards=Array.from({length:12},(_,i)=>{const period=year+'-'+String(i+1).padStart(2,'0'),future=period>current,items=future?[]:forestMonthItems(period,type),done=items.filter(c=>c.completed),b=done.filter(c=>c.type==='book').length,m=done.filter(c=>c.type==='movie').length;
+  return future?'<div class="forest-month-card is-future"><strong>'+(i+1)+'월</strong><small>—</small></div>':button('<strong>'+(i+1)+'월<b>'+items.length+'</b></strong><small>책 '+b+' · 영화 '+m+'</small>','forestMonthView','forest-month-card'+(period===current?' is-current':''),'data-month="'+period+'"')}).join('');
+ return '<section class="forest-page-section forest-year">'+head+'<div class="forest-island-wrap">'+forestYearIsland(year,type)+'</div><div class="forest-month-grid">'+cards+'</div>'+
+ (all.length?'<div class="forest-year-share">'+button('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>올해의 숲 자랑하기','shareForest','primary')+'</div>':'')+'</section>';
 }
 
 function calendarHTML(period){

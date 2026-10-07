@@ -13,7 +13,7 @@ document.addEventListener('click',async e=>{
   if(scrapFlowActive&&modal!=='scrap-composer'&&['link','photo','info','review'].includes(modal)){openScrapComposer(scrapComposerState.type,null,false);return}
   closeModal();return
  }
- if(a==='completionForest'){const c=get(b.dataset.id);if(c)year=forestRecordYear(c);zoomState={scale:1,x:0,y:0};forestViewportYear=null;go('forest');return}
+ if(a==='completionForest'){const c=get(b.dataset.id);if(c){year=forestRecordYear(c);if(c.completed&&c.completed!=='unknown')month=c.completed.slice(0,7)}forestMode='month';forestShow='forest';zoomState={scale:1,x:0,y:0};forestViewportYear=null;go('forest');return}
  if(a==='completionNext'){go('today');return}
  if(a==='confirm'){const fn=window.pendingConfirm;window.pendingConfirm=null;closeModal();fn?.();return}
  if(a==='toastUndo'){const fn=undoAction;undoAction=null;$('toast').innerHTML='';fn?.();return}
@@ -67,7 +67,13 @@ document.addEventListener('click',async e=>{
  if(a==='back'){if(candidatePreview){closeCandidateDetail();return}go(['sound','notifications'].includes(view)?'my':view==='calendar'?'forest':detailOrigin);return}
  if(a==='toToday'){go('today');return}
  if(a==='toScrap'){go('scrap');return}
- if(a==='calendar'){go('calendar');return}
+ if(a==='calendar'){forestMode='month';forestShow='calendar';go('forest');return}
+ if(a==='forestYearView'){forestMode='year';forestEditMode=false;render();window.scrollTo(0,0);return}
+ if(a==='forestMonthView'){if(/^\d{4}-\d{2}$/.test(b.dataset.month||''))month=b.dataset.month;forestMode='month';forestViewportYear=null;zoomState={scale:1,x:0,y:0};render();window.scrollTo(0,0);return}
+ if(a==='forestShow'){forestShow=b.dataset.show==='calendar'?'calendar':'forest';forestEditMode=false;render();return}
+ if(a==='forestType'){if(['all','book','movie'].includes(b.dataset.type))forestTypeFilter=b.dataset.type;render();return}
+ if(a==='forestPrevMonth'||a==='forestNextMonth'){const [y,m]=month.split('-').map(Number),d=new Date(y,m-1+(a==='forestPrevMonth'?-1:1),1),next=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');if(next<=now().slice(0,7)){month=next;forestViewportYear=null;zoomState={scale:1,x:0,y:0};render()}return}
+ if(a==='forestPrevYear'||a==='forestNextYear'){const y=Number(year)+(a==='forestPrevYear'?-1:1);if(String(y)<=now().slice(0,4)){year=String(y);month=y===Number(now().slice(0,4))?now().slice(0,7):y+'-12';render()}return}
  if(a==='scrapFilters'){openScrapFilters();return}
  if(a==='scrapFilterDraftReset'){const form=$('scrapFilterForm');if(form){const status=form.querySelector('input[name="status"][value="all"]');if(status)status.checked=true;form.querySelector('input[name="sort"][value="recent"]').checked=true}return}
  if(a==='clearScrapStatus'){if(updateScrapFilters({status:'all'}))document.querySelector('[data-action="scrapFilters"]')?.focus();return}

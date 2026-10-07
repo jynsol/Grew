@@ -969,7 +969,7 @@ function forestSVG(items,theme='basic',animated=true,options={}){
  const project=s=>{const c=s.c??(s.gx-origin.x),r=s.r??(s.gy-origin.y),rx=s.rx??(c-r),ry=s.ry??(c+r);return {x:cx+((rx-(minRX+maxRX)/2)/(Math.max(1,maxRX-minRX)))*cfg.boardW,y:cy+((ry-(minRY+maxRY)/2)/(Math.max(1,maxRY-minRY)))*cfg.boardH,gx:s.gx,gy:s.gy,edge:s.edge||0,key:s.key}};
  const sortedItems=[...items].sort((a,b)=>(forestItemOrder(a)-forestItemOrder(b))||a.id.localeCompare(b.id));
  const visibleItems=sortedItems.slice(-FOREST_VISIBLE_LIMIT);
- const layout=forestPlacements(visibleItems,cfg);if(layout.changed&&!options.preview)persist();
+ const layout=forestPlacements(visibleItems,cfg);if(layout.changed&&!options.preview&&!options.transient)persist();
  const points=layout.placements.map(p=>({...project(p.slot),c:p.item,profile:p.profile,scale:p.scale})).sort((a,b)=>a.y-b.y||a.c.id.localeCompare(b.c.id));
  const groundArtwork=forestGroundArtwork(cfg,theme,cx,cy,options.floor||bmFloorId());
  const decorations=forestDecorations(cfg,project,theme,layout.emptySlots,layout.featureSlots,forestTreeObstacles(points,cfg,theme));
