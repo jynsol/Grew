@@ -313,13 +313,13 @@ document.addEventListener('submit',async e=>{
   const returnView=view,returnScroll=window.scrollY;
   c.rating=validRating($('ratingValue').value);c.review=$('reviewMemo').value.trim();
   const advance=f.dataset.advance==='yes';
-  if(advance&&!c.completed){Model.complete(state,c.id,now());assignAutoSpecies(c,true);pendingForestArrival=c.id}
+  if(advance&&!c.completed){const picked=$('finishDate')?.value;Model.complete(state,c.id,Model.validDate(picked)&&picked<=now()?picked:now());assignAutoSpecies(c,true);pendingForestArrival=c.id}
   if(advance){
    const next=latestReading(c.id)||state.items.filter(item=>!item.completed).sort((a,b)=>b.saves.length-a.saves.length||(b.saves.at(-1)?.at||0)-(a.saves.at(-1)?.at||0))[0];
    state.selected=next?.id||null;picking=false;sessionStorageSafe('candidate','0');
   }
   if(!commit(true))return;
-  if(advance){showModal('이만큼 자랐어요','<div class="center completion-tree">'+growth(3,c)+'<p>'+esc(c.title)+'</p></div>'+button('내 숲 보기','completionForest','primary',attr(c.id))+button('다음 선택','completionNext','textbtn'),'completion-celebration');return}
+  if(advance){plantedMoment(c);return}
   toast(advance?(returnView==='today'&&state.selected?'나무가 심어졌어요. 다음 콘텐츠를 준비했어요.':state.selected?'나무가 심어졌어요.':'나무가 심어졌어요. 모아둔 콘텐츠를 모두 경험했어요.'):'평점과 감상을 저장했어요.');
  }
  

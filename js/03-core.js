@@ -604,7 +604,15 @@ function bmAction(a,b){
 }
 
 
-function ratingPrompt(c,advance=false){showModal('이 경험은 어땠나요?','<p class="creator">'+esc(c.title)+(advance&&!c.completed?' · 저장하면 나의 숲에 다 자란 나무로 남아요.':'')+'</p><form id="ratingForm" data-id="'+esc(c.id)+'" data-advance="'+(advance?'yes':'no')+'"><div class="rating"><div class="rating-half-stars" data-rating-picker></div></div><input type="hidden" id="ratingValue" value="'+(c.rating||'')+'"><p id="ratingText" class="summary">'+(c.rating?c.rating+'점':'평점과 메모는 각각 선택이에요.')+'</p><label for="reviewMemo">감상·메모 · 선택</label><textarea id="reviewMemo" maxlength="4000" placeholder="어떤 장면이나 생각이 남았나요?">'+esc(c.review||'')+'</textarea><div class="space"></div><button class="primary" type="submit">'+(advance?'완료하고 나무 키우기':'평점·감상 저장')+'</button>'+button(advance&&!c.completed?'취소하고 돌아가기':'나중에 남기기','close','textbtn')+button('평점만 지우기','clearRating','textbtn',attr(c.id))+'</form>','rating')}
+function ratingPrompt(c,advance=false){
+ const finishing=advance&&!c.completed,done=c.completed&&c.completed!=='unknown'?c.completed:now();
+ const cover='<span class="finish-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span>';
+ showModal(finishing?(c.type==='movie'?'끝까지 봤어요':'다 읽었어요'):'평점과 감상','<form id="ratingForm" class="finish-form" data-id="'+esc(c.id)+'" data-advance="'+(advance?'yes':'no')+'"><div class="finish-head">'+cover+'<div><span>'+(c.completed||finishing?'FINISHED · '+done.slice(5).replace('-','.'):'')+'</span><strong>'+esc(c.title)+'</strong></div></div>'+
+ '<div class="finish-rating"><span>어땠어요?</span><div class="rating"><div class="rating-half-stars" data-rating-picker></div></div><input type="hidden" id="ratingValue" value="'+(c.rating||'')+'"><p id="ratingText">'+(c.rating?Number(c.rating).toFixed(1):'선택 안 함')+'</p></div>'+
+ '<label class="sr-only" for="reviewMemo">한 줄 감상 · 선택</label><textarea id="reviewMemo" maxlength="4000" placeholder="한 줄 감상 · 선택">'+esc(c.review||'')+'</textarea>'+
+ (finishing?'<label class="finish-date"><span>완료일</span><input id="finishDate" type="date" max="'+now()+'" value="'+now()+'"></label>':'')+
+ '<div class="finish-actions"><button class="primary" type="submit">'+(finishing?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2-6 8h3l-5 7h6v5h4v-5h6l-5-7h3z"/></svg>숲에 심기':'평점·감상 저장')+'</button>'+
+ (c.rating?button('평점만 지우기','clearRating','textbtn',attr(c.id)):'')+'</div></form>','finish')}
 
 function profilePhotoSource(value){
  return typeof value==='string'&&value.length<=300000&&/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(value)?value:'';

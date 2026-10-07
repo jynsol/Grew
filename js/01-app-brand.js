@@ -22,12 +22,12 @@ window.initRatingPicker=function(){
        const half=e.clientX-r.left<r.width/2;
        const nv=(i-.5)+(half?0:0.5);
        input.value=nv;
-       label.textContent=nv+'점';
+       label.textContent=nv.toFixed(1);
        draw(nv);
      };
      wrap.appendChild(s);
    }
  };
- wrap.onkeydown=e=>{if(!['ArrowLeft','ArrowDown','ArrowRight','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();const step=['ArrowRight','ArrowUp'].includes(e.key)?.5:-.5;const v=e.key==='Home'?0:e.key==='End'?5:Math.max(0,Math.min(5,(Number(input.value)||0)+step));input.value=v||'';if(label)label.textContent=v?v+'점':'선택 안 함';draw(v)};
+ wrap.onkeydown=e=>{if(!['ArrowLeft','ArrowDown','ArrowRight','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();const step=['ArrowRight','ArrowUp'].includes(e.key)?.5:-.5;const v=e.key==='Home'?0:e.key==='End'?5:Math.max(0,Math.min(5,(Number(input.value)||0)+step));input.value=v||'';if(label)label.textContent=v?v.toFixed(1):'선택 안 함';draw(v)};
  draw(input.value);
 };

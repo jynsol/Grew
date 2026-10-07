@@ -376,7 +376,7 @@ function menu(c){return '<details class="more"><summary aria-label="콘텐츠 �
 const INTRO_THEME_COLORS=['#EADFFC','#FCF0C2','#D2EED8'];
 function syncThemeColor(){
  const meta=document.querySelector('meta[name="theme-color"]');if(!meta)return;
- const color=authRoute==='intro'?INTRO_THEME_COLORS[introductionStep]||'#FAF7F0':(authRoute!=='app'||view==='today')?'#FAF7F0':'#ffffff';
+ const color=authRoute==='intro'?INTRO_THEME_COLORS[introductionStep]||'#FAF7F0':authRoute!=='app'?'#FAF7F0':'#F8F8F6';
  meta.setAttribute('content',color);document.documentElement.style.backgroundColor=color;
 }
 function render(){
@@ -391,7 +391,7 @@ function render(){
  $('tabs').hidden=false;$('page').classList.remove('entry-page','taste-page','intro-page');$('page').dataset.view=view;$('head').dataset.view=view;document.body.dataset.view=view;
  const parentTab=view==='detail'?detailOrigin:view;
  const tab=['sound','notifications'].includes(parentTab)?'my':parentTab==='calendar'?'forest':parentTab;
- $('tabs').innerHTML=['today','scrap','forest','my'].map((t,i)=>'<button class="'+(tab===t?'active':'')+'" data-action="tab" data-tab="'+t+'" aria-current="'+(tab===t?'page':'false')+'">'+icon(t)+'<span class="tab-label">'+['오늘','스크랩','나의 숲','마이'][i]+'</span></button>').join('');
+ $('tabs').innerHTML=['today','scrap','forest','my'].map((t,i)=>'<button class="'+(tab===t?'active':'')+'" data-action="tab" data-tab="'+t+'" aria-current="'+(tab===t?'page':'false')+'">'+icon(t)+'<span class="tab-label">'+['오늘','스크랩','숲','마이'][i]+'</span></button>').join('');
  $('head').hidden=!['detail','calendar','sound','notifications'].includes(view);
  $('head').innerHTML=!$('head').hidden?'<div class="row">'+button(icon('back'),'back','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+(['sound','notifications'].includes(view)?'설정':view==='calendar'?'나의 숲 · 월간 기록':'콘텐츠 상세')+'</span></div>':'';
  $('page').innerHTML=({today:renderToday,scrap:renderScrap,forest:renderForest,calendar:renderCalendar,my:renderMy,sound:renderForestSoundSettings,notifications:renderNotificationSettings,detail:renderDetail}[view]||renderToday)();
@@ -453,28 +453,27 @@ function todayDayCount(c){
  const first=Model.firstExperienceDate(c);if(!first)return 0;
  return Math.max(1,Math.round((Date.parse(now()+'T12:00:00Z')-Date.parse(first+'T12:00:00Z'))/864e5)+1);
 }
-function todayProgressNote(c){
- // A film is usually watched in one sitting, so its note shows the running time instead of a day count.
- if(c.type==='movie'){const minutes=Number(c.runtime)||0;return minutes>0?{label:'RUNTIME',text:minutes+'분짜리 영화예요'}:{label:'MOVIE',text:'한 번에 보기 좋은 영화'}}
- const days=todayDayCount(c);
- if(!Model.stage(c)||!days)return {label:'READY',text:'아직 읽기 전이에요'};
- return {label:'DAY '+days,text:days+'일째 읽는 중'};
+// Books show the day count; a film is watched in one sitting, so it shows its running time.
+function todayStageSuffix(c){
+ if(c.type==='movie'){const minutes=Number(c.runtime)||0;return minutes>0?minutes+'분':''}
+ const days=todayDayCount(c);return Model.stage(c)&&days?days+'일째':'';
 }
 function todayStamp(c){
  const stage=Model.stage(c),log=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
- const ring='<i class="stamp-ring" aria-hidden="true"></i>',check='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
- if(stage===0)return button(ring+'<span>'+(c.type==='movie'?'감상<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button',attr(c.id)+' aria-label="'+(c.type==='movie'?'감상 시작하기':'읽기 시작하기')+'"');
+ const ring='<i class="stamp-ring" aria-hidden="true"></i>',check='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+ if(stage===0)return button(ring+'<span>'+(c.type==='movie'?'감상<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button is-start',attr(c.id)+' aria-label="'+(c.type==='movie'?'감상 시작하기':'읽기 시작하기')+'"');
  if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+ring+check+'<span>오늘<br>기록 완료</span></div><div class="stamp-done-actions">'+button(log.memo?'메모 수정':'메모 남기기','editMemo','textbtn',attr(c.id)+' data-log="'+esc(log.id)+'"')+button('취소','undoLog','textbtn',attr(c.id))+'</div></div>';
  return button(ring+check+'<span>오늘<br>'+verb+'</span>','record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
 }
 // Long titles shrink until the whole title fits in two lines next to the cover stickers.
+// Long titles shrink until the whole title fits in two lines beside the cover.
 function fitTodayTitle(){
- const el=document.querySelector('.sticker-title h1 button');if(!el)return;
- el.classList.add('is-fitting');el.classList.remove('is-long');let size=40;
- const apply=()=>{el.style.fontSize=size+'px';el.style.letterSpacing=size>=34?'':size>=26?'-.035em':'-.02em'};
- const fits=(lines=2)=>el.scrollWidth<=el.clientWidth+1&&el.scrollHeight<=size*1.12*lines+2;
+ const el=document.querySelector('.today-panel-title h1 button');if(!el)return;
+ el.classList.add('is-fitting');el.classList.remove('is-long');let size=25;
+ const apply=()=>{el.style.fontSize=size+'px';el.style.letterSpacing=size>=21?'':'-.025em'};
+ const fits=(lines=2)=>el.scrollWidth<=el.clientWidth+1&&el.scrollHeight<=size*1.2*lines+2;
  apply();
- while(size>20&&!fits()){size-=2;apply()}
+ while(size>17&&!fits()){size--;apply()}
  // Very long titles get up to four lines at the smallest size rather than an ellipsis.
  if(!fits())el.classList.add('is-long');
  el.classList.remove('is-fitting');
@@ -493,19 +492,18 @@ function todayStickerWeek(c){
 function todayBoard(c){
  const stage=Model.stage(c),readingItems=state.items.filter(x=>!x.completed&&x.id!==c.id&&Model.stage(x)>0),reading=readingItems.length,readingLabel=progressLabel(readingItems),others=state.items.some(x=>!x.completed&&x.id!==c.id),date=new Date(now()+'T12:00:00Z');
  const dateLabel=String(date.getUTCMonth()+1).padStart(2,'0')+'.'+String(date.getUTCDate()).padStart(2,'0')+' '+['SUN','MON','TUE','WED','THU','FRI','SAT'][date.getUTCDay()];
- const note=todayProgressNote(c);
- const coverArt=c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'<span class="sticker-cover-blank" aria-hidden="true">'+icon(c.type)+'</span>';
+ const coverArt=c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'<span class="sticker-cover-blank" aria-hidden="true"></span>';
  const completeLabel=stage===0?(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요'):(c.type==='movie'?'끝까지 봤어요':'다 읽었어요');
- return '<section class="sticker-today" data-type="'+c.type+'" data-stage="'+stage+'"><i class="sticker-block" aria-hidden="true"></i>'+
+ const suffix=todayStageSuffix(c),sub=c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
+ return '<section class="sticker-today" data-type="'+c.type+'" data-stage="'+stage+'">'+
  '<div class="sticker-top"><span class="sticker-date">'+dateLabel+'</span><div class="page-heading-actions">'+scrapAddButton()+menu(c)+'</div></div>'+
- '<div class="sticker-board">'+
-  '<div class="sticker-title"><span>오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+'>'+esc(c.title)+'</button></h1></div>'+
-  (reading?'<i class="sticker-cover-back" aria-hidden="true"></i>':'')+
+ '<div class="today-panel">'+
+  '<div class="today-panel-top"><span>오늘의 '+typeName[c.type]+(c.creator?' · '+esc(c.creator):'')+'</span>'+
+   (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+'</div>'+
+  '<div class="today-panel-title"><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+'>'+esc(c.title)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>'+
   '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button>'+
-  (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+
-  '<div class="sticker-tree-disc">'+stickerTree(c,stage)+'</div>'+
-  '<span class="sticker-stage">'+esc(growthAppearance(stage).name)+'</span>'+
-  '<div class="sticker-next"><span>'+note.label+'</span><strong>'+esc(note.text)+'</strong></div>'+
+  '<div class="today-disc" aria-hidden="true"></div>'+stickerTree(c,stage,'today-tree')+
+  '<span class="today-stage"><i aria-hidden="true">'+stickerTree(c,stage)+'</i>'+esc(growthAppearance(stage).name)+(suffix?'<b aria-hidden="true">·</b><em>'+esc(suffix)+'</em>':'')+'</span>'+
  '</div>'+
  '<div class="sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(c.type==='movie'?button('보러 가기 ↗','external','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</div>'+
  '</section>';
@@ -716,7 +714,7 @@ function showModal(title,html,kind='generic'){
  dismissToast();modal=kind;const composer=kind==='scrap-composer',collection=kind==='collection';
  $('overlay').innerHTML='<div class="sheet-back '+(composer?'scrap-composer-back':collection?'collection-back':'')+'" data-kind="'+esc(kind)+'" data-action="backdrop"><section class="sheet '+(composer?'scrap-composer-sheet':collection?'collection-sheet':'')+'" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="sheet-head"><h2 id="sheetTitle" tabindex="-1">'+esc(title)+'</h2>'+button(icon('close'),'close','iconbtn','aria-label="닫기"')+'</div>'+html+'</section></div>';
  document.querySelector('.app').inert=true;
- document.body.style.overflow='hidden';modalFocusTimer=setTimeout(()=>{const sheet=$('overlay').querySelector('.sheet');const target=['scrap-filters','scrap-composer'].includes(kind)?sheet?.querySelector('#sheetTitle'):kind==='confirm'?sheet?.querySelector('[data-action="close"]'):(sheet?.querySelector('input:not([type=hidden]):not([type=file]):not([hidden]):not(:disabled),textarea:not(:disabled),select:not(:disabled)')||sheet?.querySelector('button:not([data-action="close"])')||sheet?.querySelector('button'));target?.focus()},35);;window.initRatingPicker?.();
+ document.body.style.overflow='hidden';modalFocusTimer=setTimeout(()=>{const sheet=$('overlay').querySelector('.sheet');const target=['scrap-filters','scrap-composer','record-done','planted','finish'].includes(kind)?sheet?.querySelector('#sheetTitle'):kind==='confirm'?sheet?.querySelector('[data-action="close"]'):(sheet?.querySelector('input:not([type=hidden]):not([type=file]):not([hidden]):not(:disabled),textarea:not(:disabled),select:not(:disabled)')||sheet?.querySelector('button:not([data-action="close"])')||sheet?.querySelector('button'));target?.focus()},35);;window.initRatingPicker?.();
 }
 function closeModal(){if(modal==='link')cancelLinkImport();if(modal==='profile'&&profileEdit){profileEdit.request++;profileEdit=null}clearTimeout(modalFocusTimer);document.querySelector('.app').inert=false;if(ocrBusy){ocrGeneration++;ocrBusy=false}if(modal==='scrap-composer')scrapFlowActive=false;modal=null;$('overlay').innerHTML='';document.body.style.overflow='';if(modalReturnFocus?.isConnected)modalReturnFocus.focus({preventScroll:true});modalReturnFocus=null;}
 function confirmBox(title,text,onConfirm,label='확인',danger=false){window.pendingConfirm=onConfirm;showModal(title,'<p>'+esc(text)+'</p>'+button(label,'confirm',danger?'primary danger':'primary')+button('취소','close','textbtn'),'confirm')}
@@ -1666,13 +1664,31 @@ function record(id){
 // After-record sheet (redesign 5a): one stamp, then an optional one-line memo.
 function recordDone(c,previousStage){
  const stage=Model.stage(c),grew=stage>previousStage,log=c.logs.find(l=>l.date===now());if(!log)return;
- const streak=streakDays(c),d=now(),name=n=>growthAppearance(n).name,josa=(word,a,b)=>{const code=word.charCodeAt(word.length-1)-0xAC00;return word+(code>=0&&code<=11171&&code%28?a:b)};
- const title=grew?josa(name(previousStage),'이','가')+'<br>'+josa(name(stage),'이','가')+' 됐어요.':'오늘도<br>한 칸 자랐어요.';
- const hint=stage<2?'한 번 더 기록하면 어린 나무 · '+(c.type==='movie'?'끝까지 보면':'다 읽으면')+' 숲의 나무':(c.type==='movie'?'끝까지 보면':'다 읽으면')+' 숲에 나무로 남아요';
- showModal(title.replace('<br>',' '),'<p class="record-done-kicker">'+(streak?'연속 '+streak+'일':'오늘 기록')+(grew?' · 한 단계 성장':'')+'</p><h3 class="record-done-title" aria-hidden="true">'+title+'</h3>'+
- '<div class="record-done-board"><div class="record-done-tree">'+stickerTree(c,stage)+'</div>'+(grew?'<div class="record-done-prev">'+stickerTree(c,previousStage)+'</div>':'')+
- '<div class="record-done-stamp" aria-hidden="true"><span>'+d.slice(5).replace('-','.')+'</span><strong>'+(c.type==='movie'?'봤음':'읽음')+'</strong></div></div>'+
- '<form id="recordDoneForm" class="record-done-form" data-id="'+esc(c.id)+'" data-log="'+esc(log.id)+'"><label class="sr-only" for="recordDoneMemo">한 줄 남기기 · 선택</label><textarea id="recordDoneMemo" maxlength="4000" rows="2" placeholder="한 줄 남기기 · 선택">'+esc(log.memo)+'</textarea><button type="submit" class="primary">좋아요</button><p class="record-done-hint">'+esc(hint)+'</p></form>','record-done');
+ const streak=streakDays(c),days=todayDayCount(c),name=n=>growthAppearance(n).name,josa=(word,a,b)=>{const code=word.charCodeAt(word.length-1)-0xAC00;return word+(code>=0&&code<=11171&&code%28?a:b)};
+ const title=grew?josa(name(previousStage),'이','가')+'<br>'+name(stage)+(/[가-힣]/.test(name(stage).slice(-1))&&(name(stage).charCodeAt(name(stage).length-1)-0xAC00)%28?'으로':'로')+' 자랐어요.':'오늘도<br>한 칸 자랐어요.';
+ const kicker=[c.type==='book'&&days?'DAY '+days:'',streak?'연속 '+streak+'일':'오늘 기록'].filter(Boolean).join(' · ');
+ const month=Number(now().slice(5,7)),finish=c.type==='movie'?'끝까지 보면':'다 읽으면';
+ const check='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+ showModal(title.replace('<br>',' '),'<p class="moment-kicker">'+esc(kicker)+'</p><h3 class="moment-title" aria-hidden="true">'+title+'</h3>'+
+ '<div class="record-done-panel"><div class="record-done-disc">'+stickerTree(c,stage)+'</div>'+
+ '<div class="record-done-growth">'+(grew?'<span class="record-done-prev">'+stickerTree(c,previousStage)+'</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>':'')+'<span class="record-done-chip">'+esc(name(stage))+'</span></div>'+
+ '<div class="moment-stamp record-done-stamp" aria-hidden="true"><i class="stamp-ring"></i>'+check+'<span>'+(c.type==='movie'?'봤음':'읽음')+'</span></div>'+
+ '<img class="record-done-flower is-lilac" src="./assets/images/forest/decor-flower-lilac.webp" alt=""><img class="record-done-flower is-peach" src="./assets/images/forest/decor-flower-peach.webp" alt=""></div>'+
+ '<form id="recordDoneForm" class="record-done-form" data-id="'+esc(c.id)+'" data-log="'+esc(log.id)+'"><label class="sr-only" for="recordDoneMemo">오늘의 한 줄 · 선택</label><textarea id="recordDoneMemo" maxlength="4000" rows="2" placeholder="오늘의 한 줄 · 선택">'+esc(log.memo)+'</textarea><button type="submit" class="primary">좋아요</button><p class="record-done-hint">'+finish+' '+month+'월의 숲에 심어져요</p></form>','record-done');
+}
+// Planted (redesign 13a): the finished work's tree, its stamp and a way into this month's forest.
+function plantedMoment(c){
+ const done=c.completed&&c.completed!=='unknown'?c.completed:now(),month=Number(done.slice(5,7)),months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+ const number=state.items.filter(x=>x.completed&&x.completed!=='unknown'&&x.completed.slice(0,7)===done.slice(0,7)).length;
+ const logs=new Set(c.logs.map(l=>l.date)).size,start=Model.firstExperienceDate(c),days=start?Math.max(1,Math.round((Date.parse(done+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/864e5)+1):0;
+ const tree=c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무',meta=[days?days+'일':'',logs?'기록 '+logs+'회':'',tree].filter(Boolean).join(' · ');
+ const check='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+ showModal('큰 나무를 숲에 심었어요','<p class="moment-kicker">'+months[month-1]+' FOREST · NO.'+Math.max(1,number)+'</p><h3 class="moment-title" aria-hidden="true">큰 나무를<br>숲에 심었어요.</h3>'+
+ '<div class="planted-stage"><div class="planted-disc">'+stickerTree(c,3)+'</div><div class="moment-stamp planted-stamp" aria-hidden="true"><i class="stamp-ring"></i>'+check+'<span>완료</span></div>'+
+ (validRating(c.rating)?'<span class="planted-rating"><b>★</b>'+Number(c.rating).toFixed(1)+'</span>':'')+
+ '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span></div>'+
+ '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(meta)+'</span></div>'+
+ '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+button(icon('share'),'shareMonth','planted-share','aria-label="'+month+'월 기록 공유하기"')+'</div>','planted');
 }
 function complete(id){const c=get(id);if(!c||c.completed)return;ratingPrompt(c,true)}
 function editLog(id,logId){
