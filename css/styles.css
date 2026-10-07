@@ -3656,3 +3656,12 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .bm-pack-buy { font-size:14px; }
 .settings-card .menu-row>span:not(.menu-row-value) { font-size:inherit;color:var(--sb-ink); }
 .settings-card .menu-row>.menu-row-value { font-size:12.5px; }
+/* Title shares the top row with share; 올해의 숲 joins the tools row */
+.forest-top .page-title { margin:0;font:780 28px/1.1 var(--font-family);letter-spacing:-.04em;color:var(--sb-ink); }
+.forest-title-row { margin-top:6px;align-items:center; }
+.forest-title-row .forest-chips { margin-top:0; }
+.forest-tools-row { gap:6px; }
+.forest-tool { padding:0 13px;gap:6px; }
+.forest-tool svg { width:16px;height:16px; }
+.forest-tools-row.is-static { margin-top:16px; }
+@media (max-width:374px) { .forest-tool { padding:0 10px;font-size:12px; } }
