@@ -853,7 +853,7 @@ async function shareIsland(ctx,y0,x0,scale,items){
  for(let i=0;i<12;i++){const period=year+'-'+String(i+1).padStart(2,'0'),p=plot(i);poly([[p.x,p.y-22.5],[p.x+45,p.y],[p.x,p.y+22.5],[p.x-45,p.y]],period>current?'#CFE0C2':'#9FC888');
   islandPlantings(period,items.filter(c=>forestMonthOf(c)===period)).forEach(t=>trees.push(t))}
  trees.sort((a,b)=>a.y-b.y);const imgs=await Promise.all(trees.map(t=>shareAsset(t.src)));
- trees.forEach((t,k)=>{if(imgs[k]){const [x,y]=P(t.x-12,t.y-21);ctx.drawImage(imgs[k],x,y,24*scale,24*scale)}});
+ trees.forEach((t,k)=>{if(imgs[k]){const z=t.size||24,[x,y]=P(t.x-z/2,t.y-z*.875);ctx.drawImage(imgs[k],x,y,z*scale,z*scale)}});
 }
 async function drawShareCard(kind,format,target){
  if(document.fonts?.ready)await document.fonts.ready;

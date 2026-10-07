@@ -589,7 +589,8 @@ function treeArt(c,theme){
 }
 
 function treeVisualProfile(c){
- const growthKey=forestGrowthKey(c);if(growthKey)return {species:contentSpecies(c),shape:growthKey,radius:growthKey==='sprout'?16:23,scaleBias:growthKey==='sprout'?.5:1};
+ const growthKey=forestGrowthKey(c);// Growing works stay visibly smaller than finished trees: a sprout is tiny, a young tree about 60%.
+ if(growthKey)return {species:contentSpecies(c),shape:growthKey,radius:growthKey==='sprout'?14:18,scaleBias:growthKey==='sprout'?.42:.6};
  if(typeof c==='object'&&c&&(c.hiddenTree==='A'||c.hiddenTree==='B'))return {species:contentSpecies(c),shape:'hidden',radius:c.hiddenTree==='A'?38:40,scaleBias:1};
  const sp=(typeof c==='object'&&c)?contentSpecies(c):TREE_SPECIES.find(t=>t.id===String(c||''))||TREE_SPECIES[0];
  const byId={birch:{radius:20,bias:.98},oak:{radius:31,bias:1.06},cherry:{radius:27,bias:1.0},zelkova:{radius:32,bias:1.04},ginkgo:{radius:22,bias:.97},metasequoia:{radius:17,bias:1.17},maple:{radius:27,bias:1.0},willow:{radius:26,bias:1.02},magnolia:{radius:25,bias:.99},crape:{radius:25,bias:.98},pine:{radius:30,bias:1.04},cedar:{radius:18,bias:1.16},hackberry:{radius:32,bias:1.04},fringe:{radius:24,bias:.98},fir:{radius:19,bias:1.13},cypress:{radius:16,bias:1.14},yew:{radius:20,bias:1.0},juniper:{radius:29,bias:1.03},paulownia:{radius:22,bias:.98},evergreen:{radius:27,bias:1.03}}; const base=byId[sp.id]||{radius:24,bias:1};
