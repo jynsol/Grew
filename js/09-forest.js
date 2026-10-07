@@ -188,8 +188,11 @@ function setupForest(){
  const up=e=>{
   const p=pointers.get(e.pointerId);pointers.delete(e.pointerId);prev=null;
   if(!p||p.moved||pointers.size>0)return;
-  if(!forestEditMode&&p.treeId&&forestGrowthKey(get(p.treeId))){hideTip();suppressClick=true;openDetail(p.treeId);setTimeout(()=>suppressClick=false,0);return}
-  if(forestEditMode){if(p.treeId){hideTip();suppressClick=true;openTreePicker(p.treeId);setTimeout(()=>suppressClick=false,0)}return}
+  // A touch tap is followed by a synthetic click at the same spot. Opening a sheet or page on
+  // pointerup let that click land on whatever just appeared (the sheet backdrop or a tree card),
+  // so the action runs once the click has been swallowed (or shortly after, if none comes).
+  if(!forestEditMode&&p.treeId&&forestGrowthKey(get(p.treeId))){hideTip();deferTap(()=>openDetail(p.treeId));return}
+  if(forestEditMode){if(p.treeId){hideTip();deferTap(()=>openTreePicker(p.treeId))}return}
   if(!p.tree){hideTip();return}
   if(sel?.mode==='pin'&&sel.g===p.tree)hideTip();else showTip(p.tree,'pin');
  };
@@ -200,7 +203,10 @@ function setupForest(){
   const delta=Math.max(-64,Math.min(64,e.deltaY*unit));
   zoomAt(zoomTarget.scale*Math.exp(-delta*.001),svgPoint(e.clientX,e.clientY));
  },{passive:false});
- vp.addEventListener('click',e=>{if(suppressClick||(!forestEditMode&&e.target.closest?.('[data-tree]'))){e.preventDefault();e.stopPropagation(); return}});
+ let pendingTap=null,pendingTapTimer=0;
+ const runPendingTap=()=>{clearTimeout(pendingTapTimer);const run=pendingTap;pendingTap=null;suppressClick=false;run?.()};
+ const deferTap=fn=>{suppressClick=true;pendingTap=fn;clearTimeout(pendingTapTimer);pendingTapTimer=setTimeout(runPendingTap,350)};
+ vp.addEventListener('click',e=>{if(suppressClick||(!forestEditMode&&e.target.closest?.('[data-tree]'))){e.preventDefault();e.stopPropagation();if(pendingTap)setTimeout(runPendingTap,0);return}});
  vp.addEventListener('dblclick',e=>{if(e.target.closest?.('[data-tree]')||tip.contains(e.target))return;fitForest()});
  vp.addEventListener('keydown',e=>{
   const tree=e.target.closest?.('[data-tree]');
