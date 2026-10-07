@@ -88,8 +88,8 @@ document.addEventListener('click',async e=>{
  if(a==='complete'){complete(id);return}
  if(a==='undoComplete'){Model.undoComplete(state,id);if(!commit(true))return;toast('완료를 취소했어요. 이전 경험 기록은 남아 있어요.');return}
  if(a==='undoLog'){const removed=c.logs.find(l=>l.date===now());c.logs=c.logs.filter(l=>l.date!==now());if(!commit())return;toast('오늘 기록을 취소했어요.',()=>{if(removed&&!c.logs.some(l=>l.date===removed.date)){c.logs.push(removed);commit()}});return}
- // Clears every record day and the start mark: the work goes back to 담아둠 (undo from the toast).
- if(a==='resetRecords'){const before={logs:c.logs.map(l=>({...l})),startedAt:c.startedAt,importedProgress:c.importedProgress};confirmBox('기록을 모두 지울까요?','기록한 '+new Set(c.logs.map(l=>l.date)).size+'일과 메모가 지워지고 담아둔 상태로 돌아가요.',()=>{c.logs=[];c.startedAt='';c.importedProgress=false;if(todayPickedId===c.id)todayPickedId=null;if(!commit(true))return;toast('기록을 초기화했어요.',()=>{c.logs=before.logs;c.startedAt=before.startedAt;c.importedProgress=before.importedProgress;commit()})},'기록 초기화',true);return}
+ // Clears every record day and the start mark: the work goes back to 시작 전 (undo from the toast).
+ if(a==='resetRecords'){const before={logs:c.logs.map(l=>({...l})),startedAt:c.startedAt,importedProgress:c.importedProgress};confirmBox('기록을 모두 지울까요?','기록한 '+new Set(c.logs.map(l=>l.date)).size+'일과 메모가 지워지고 시작 전 상태로 돌아가요.',()=>{c.logs=[];c.startedAt='';c.importedProgress=false;if(todayPickedId===c.id)todayPickedId=null;if(!commit(true))return;toast('기록을 초기화했어요.',()=>{c.logs=before.logs;c.startedAt=before.startedAt;c.importedProgress=before.importedProgress;commit()})},'기록 초기화',true);return}
  if(a==='editMemo'){editMemo(id,b.dataset.log);return}
  if(a==='editLog'){editLog(id,b.dataset.log);return}
  if(a==='deleteLog'){const logId=b.dataset.log;confirmBox('이 기록을 삭제할까요?','선택한 날의 경험 기록만 삭제합니다.',()=>{c.logs=c.logs.filter(l=>l.id!==logId);if(!commit())return;toast('기록을 삭제했어요.')},'기록 삭제',true);return}

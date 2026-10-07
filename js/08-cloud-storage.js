@@ -322,7 +322,7 @@ function cloudSetupModal(message=''){
 
 const KEY='songrim.prototype.v3';
 let forestEditMode=false,forestVisibilityObserver=null;
-const typeName={book:'책',movie:'영화'},statusName={all:'전체',saved:'담아둠',active:'진행 중',done:'완료'};
+const typeName={book:'책',movie:'영화'},statusName={all:'전체',saved:'시작 전',active:'감상 중',done:'완료'};
 let pendingForestArrival=null;
 let state=Model.empty(),view='today',detailId=null,detailOrigin='scrap',picking=false,year=String(new Date().getFullYear()),month=Model.today().slice(0,7),modal=null,zoomState={scale:1,x:0,y:0},storageOK=true,toastTimer,undoAction=null,shareBlob=null,shareURL=null,photoFiles=[],ocrGeneration=0,ocrBusy=false,candidates=[],authMode=false,candidatePreview=null,candidatePreviewReturn=null;
 const $=id=>document.getElementById(id);
@@ -492,7 +492,7 @@ function fitTodayTitle(){
 }
 addEventListener('resize',()=>{if(view==='today')fitTodayTitle()});
 // Books are read and films are watched; a mixed list uses the app's shared status name.
-function progressLabel(items){const types=new Set(items.map(x=>x.type));return types.size>1?statusName.active:types.has('movie')?'보는 중':'읽는 중'}
+function progressLabel(){return statusName.active}
 function openReadingList(currentId){
  const list=state.items.filter(x=>!x.completed&&Model.stage(x)>0&&x.id!==currentId).sort((a,b)=>Math.max(0,...b.logs.map(l=>Date.parse(l.date)||0))-Math.max(0,...a.logs.map(l=>Date.parse(l.date)||0)));
  showModal(progressLabel(list)+'인 작품','<div class="content-list">'+list.map(x=>row(x,true)).join('')+'</div>'+button('다른 스크랩에서 고르기','pick','secondary'),'reading');
@@ -537,7 +537,7 @@ function recordActions(c,inDetail=false){
 
 // Scrap rows (redesign 11a): cover, title, type · creator, status chip, the work's tree sticker.
 function stickerCover(c,cls=''){return '<span class="sticker-cover-art '+cls+'" data-type="'+c.type+'">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async" data-cover-kind="'+c.type+'">':'')+'</span>'}
-function scrapStatusLabel(c){const status=Model.status(c);return status==='done'?'완료':status==='active'?(c.type==='movie'?'보는 중':'읽는 중'):'담아둠'}
+function scrapStatusLabel(c){const status=Model.status(c);return status==='done'?'완료':status==='active'?statusName.active:statusName.saved}
 function scrapCard(c,choose=false){
  const status=Model.status(c),stage=Model.stage(c);
  return '<button type="button" class="scrap-row" data-type="'+c.type+'" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+' aria-label="'+esc(c.title)+' · '+scrapStatusLabel(c)+'">'+stickerCover(c)+
