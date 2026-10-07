@@ -1753,20 +1753,25 @@ function record(id){
  const c=get(id);if(!c||c.completed)return;
  const previousStage=Model.stage(c);if(Model.log(state,id,now())){state.selected=id;if(!commit())return;if(previousStage===0)pendingForestArrival=c.id;recordDone(c,previousStage)}else toast('오늘 기록이 이미 있어요.');
 }
-// After-record sheet (redesign 5a): one stamp, then an optional one-line memo.
+// After recording, Today itself plays the moment: the stamp slams down and, when the stage
+// changes, the old tree shrinks away while the new one pops up in the same disc.
 function recordDone(c,previousStage){
- const stage=Model.stage(c),grew=stage>previousStage,log=c.logs.find(l=>l.date===now());if(!log)return;
- const streak=streakDays(c),days=todayDayCount(c),name=n=>growthAppearance(n).name,josa=(word,a,b)=>{const code=word.charCodeAt(word.length-1)-0xAC00;return word+(code>=0&&code<=11171&&code%28?a:b)};
- const title=grew?josa(name(previousStage),'이','가')+'<br>'+name(stage)+(/[가-힣]/.test(name(stage).slice(-1))&&(name(stage).charCodeAt(name(stage).length-1)-0xAC00)%28?'으로':'로')+' 자랐어요.':'오늘도<br>한 칸 자랐어요.';
- const kicker=[c.type==='book'&&days?'DAY '+days:'',streak?'연속 '+streak+'일':'오늘 기록'].filter(Boolean).join(' · ');
- const month=Number(now().slice(5,7)),finish=c.type==='movie'?'끝까지 보면':'다 읽으면';
- const check='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
- showModal(title.replace('<br>',' '),'<p class="moment-kicker">'+esc(kicker)+'</p><h3 class="moment-title" aria-hidden="true">'+title+'</h3>'+
- '<div class="record-done-panel"><div class="record-done-disc">'+stickerTree(c,stage)+'</div>'+
- '<div class="record-done-growth">'+(grew?'<span class="record-done-prev">'+stickerTree(c,previousStage)+'</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>':'')+'<span class="record-done-chip">'+esc(name(stage))+'</span></div>'+
- '<div class="moment-stamp record-done-stamp" aria-hidden="true"><i class="stamp-ring"></i>'+check+'<span>'+(c.type==='movie'?'봤음':'읽음')+'</span></div>'+
- '<img class="record-done-flower is-lilac" src="./assets/images/forest/decor-flower-lilac.webp" alt=""><img class="record-done-flower is-peach" src="./assets/images/forest/decor-flower-peach.webp" alt=""></div>'+
- '<form id="recordDoneForm" class="record-done-form" data-id="'+esc(c.id)+'" data-log="'+esc(log.id)+'"><label class="sr-only" for="recordDoneMemo">오늘의 한 줄 · 선택</label><textarea id="recordDoneMemo" maxlength="4000" rows="2" placeholder="오늘의 한 줄 · 선택">'+esc(log.memo)+'</textarea><button type="submit" class="primary">좋아요</button><p class="record-done-hint">'+finish+' '+month+'월의 숲에 심어져요</p></form>','record-done');
+ const stage=Model.stage(c),grew=stage>previousStage,name=n=>growthAppearance(n).name;
+ const josa=(word,a,b)=>{const code=word.charCodeAt(word.length-1)-0xAC00;return word+(code>=0&&code<=11171&&code%28?a:b)};
+ const message=grew?josa(name(previousStage),'이','가')+' '+josa(name(stage),'으로','로')+' 자랐어요.':'오늘 기록했어요. 한 칸 더 자랐어요.';
+ const stamp=view==='today'?document.querySelector('.stamp-done .stamp-button'):null;
+ if(!stamp){toast(message);return}
+ stamp.classList.add('is-slam');stamp.insertAdjacentHTML('beforeend','<i class="stamp-burst" aria-hidden="true"></i>');
+ if(grew){
+  const tree=document.querySelector('.today-panel .today-tree');
+  if(tree){
+   const prev=tree.cloneNode();prev.src=stickerTreeSrc(c,previousStage);prev.alt='';prev.classList.add('is-leaving');
+   if(previousStage<=1&&stage>1){prev.style.top='184px';prev.style.height='150px'}
+   tree.classList.add('is-arriving');tree.after(prev);setTimeout(()=>prev.remove(),1300);
+   document.querySelector('.today-panel .today-stage')?.classList.add('is-pop');
+  }
+ }
+ setTimeout(()=>toast(message),grew?900:450);
 }
 // Planted (redesign 13a): the finished work's tree, its stamp and a way into this month's forest.
 function plantedMoment(c){
