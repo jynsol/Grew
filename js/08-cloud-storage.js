@@ -439,9 +439,11 @@ function todayDayCount(c){
  return Math.max(1,Math.round((Date.parse(now()+'T12:00:00Z')-Date.parse(first+'T12:00:00Z'))/864e5)+1);
 }
 function todayProgressNote(c){
- const days=todayDayCount(c),verb=c.type==='movie'?'보는':'읽는';
- if(!Model.stage(c)||!days)return {label:'READY',text:c.type==='movie'?'아직 보기 전이에요':'아직 읽기 전이에요'};
- return {label:'DAY '+days,text:days+'일째 '+verb+' 중'};
+ // A film is usually watched in one sitting, so its note shows the running time instead of a day count.
+ if(c.type==='movie'){const minutes=Number(c.runtime)||0;return minutes>0?{label:'RUNTIME',text:minutes+'분짜리 영화예요'}:{label:'MOVIE',text:'한 번에 보기 좋은 영화'}}
+ const days=todayDayCount(c);
+ if(!Model.stage(c)||!days)return {label:'READY',text:'아직 읽기 전이에요'};
+ return {label:'DAY '+days,text:days+'일째 읽는 중'};
 }
 function todayStamp(c){
  const stage=Model.stage(c),log=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
