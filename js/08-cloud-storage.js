@@ -393,7 +393,8 @@ function render(){
  const tab=['sound','notifications'].includes(parentTab)?'my':parentTab==='calendar'?'forest':parentTab;
  $('tabs').innerHTML=['today','scrap','forest','my'].map((t,i)=>'<button class="'+(tab===t?'active':'')+'" data-action="tab" data-tab="'+t+'" aria-current="'+(tab===t?'page':'false')+'">'+icon(t)+'<span class="tab-label">'+['오늘','스크랩','숲','마이'][i]+'</span></button>').join('');
  $('head').hidden=!['detail','calendar','sound','notifications'].includes(view);
- $('head').innerHTML=!$('head').hidden?'<div class="row">'+button(icon('back'),'back','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+(['sound','notifications'].includes(view)?'설정':view==='calendar'?'나의 숲 · 월간 기록':'콘텐츠 상세')+'</span></div>':'';
+ $('head').innerHTML=!$('head').hidden?'<div class="row">'+button(icon('back'),'back','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+(['sound','notifications'].includes(view)?'설정':view==='calendar'?'나의 숲 · 월간 기록':({today:'오늘',scrap:'스크랩',forest:'숲',calendar:'숲',my:'마이'}[detailOrigin]||'스크랩'))+'</span></div>'+(view==='detail'&&!candidatePreview&&get(detailId)?detailMenu(get(detailId)):''):'';
+ $('tabs').hidden=view==='detail';
  $('page').innerHTML=({today:renderToday,scrap:renderScrap,forest:renderForest,calendar:renderCalendar,my:renderMy,sound:renderForestSoundSettings,notifications:renderNotificationSettings,detail:renderDetail}[view]||renderToday)();
  if(view==='my'){
   let legacy=false,archives=false;try{legacy=localStorage.getItem(KEY)&&localStorage.getItem(KEY+'.legacy-owner')===dataOwner;archives=Object.keys(localStorage).some(key=>key.startsWith(accountDataKey(dataOwner)+':archive:'))}catch{}
@@ -517,11 +518,14 @@ function recordActions(c,inDetail=false){
  return '<div class="record-actions">'+(log?'<div class="row between"><strong>오늘 기록했어요</strong>'+button('취소','undoLog','textbtn',attr(c.id))+'</div>'+button(!inDetail&&c.type==='book'?(log.memo?'메모 수정':'메모 남기기'):'기록 수정',!inDetail&&c.type==='book'?'editMemo':'editLog','textbtn',attr(c.id)+' data-log="'+log.id+'"'):button(normalLabel,'record','primary ink-button',attr(c.id)))+button(c.type==='movie'?'끝까지 봤어요':typeName[c.type]+(c.type==='book'?'을 다 읽었어요':'을 다 들었어요'),'complete','textbtn completion-action',attr(c.id))+'</div>';
 }
 
+// Scrap rows (redesign 11a): cover, title, type · creator, status chip, the work's tree sticker.
+function stickerCover(c,cls=''){return '<span class="sticker-cover-art '+cls+'" data-type="'+c.type+'">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async" data-cover-kind="'+c.type+'">':'')+'</span>'}
+function scrapStatusLabel(c){const status=Model.status(c);return status==='done'?'완료':status==='active'?(c.type==='movie'?'보는 중':'읽는 중'):'담아둠'}
 function scrapCard(c,choose=false){
- const status=Model.status(c),labels={book:'BOOK',album:'ALBUM',movie:'MOVIE'};
- return '<button type="button" class="scrap-card" data-type="'+c.type+'" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+' aria-label="'+esc(c.title)+' · '+statusName[status]+'">'+
- '<div class="scrap-card-visual">'+cover(c)+'</div>'+
- '<div class="scrap-card-body"><div class="title">'+esc(c.title)+'</div><p class="creator">'+esc(c.creator||'제작자 미확인')+'</p><div class="scrap-card-bottom"><span class="record-status '+status+'">'+statusName[status]+'</span>'+(validRating(c.rating)?'<span class="row-rating"><span class="rating-star">★</span> '+c.rating+'</span>':'')+'</div></div></button>';
+ const status=Model.status(c),stage=Model.stage(c);
+ return '<button type="button" class="scrap-row" data-type="'+c.type+'" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+' aria-label="'+esc(c.title)+' · '+scrapStatusLabel(c)+'">'+stickerCover(c)+
+ '<span class="scrap-row-body"><strong>'+esc(c.title)+'</strong><small>'+typeName[c.type]+' · '+esc(c.creator||'제작자 미확인')+'</small><span class="scrap-status is-'+status+'">'+scrapStatusLabel(c)+(validRating(c.rating)?' · <b>★</b> '+c.rating:'')+'</span></span>'+
+ (stage>0?stickerTree(c,stage,'is-cut-sm'):'')+'</button>';
 }
 
 let pickingFilters={q:'',type:'all',status:'all',sort:'recent'};
@@ -538,8 +542,8 @@ function openScrapFilters(){
  clearTimeout(mainSearchRenderTimer);mainSearchRenderTimer=null;
  const f=activeScrapFilters();
  const option=(name,value,label,selected)=>'<label class="scrap-filter-option"><input type="radio" name="'+name+'" value="'+esc(value)+'" '+(selected?'checked':'')+'><span>'+esc(label)+'</span></label>';
- const status=picking?'':'<fieldset class="scrap-filter-group"><legend>경험 상태</legend><div class="scrap-filter-options">'+['all','saved','active','done'].map(value=>option('status',value,statusName[value],f.status===value)).join('')+'</div></fieldset>';
- const sort='<fieldset class="scrap-filter-group"><legend>정렬</legend><div class="scrap-filter-options">'+Object.entries(SCRAP_SORT_LABELS).map(([value,label])=>option('sort',value,label,f.sort===value)).join('')+'</div></fieldset>';
+ const status=picking?'':'<fieldset class="scrap-filter-group is-chips"><legend>경험 상태</legend><div class="scrap-filter-options">'+['all','saved','active','done'].map(value=>option('status',value,statusName[value],f.status===value)).join('')+'</div></fieldset>';
+ const sort='<fieldset class="scrap-filter-group is-list"><legend>정렬</legend><div class="scrap-filter-options">'+Object.entries(SCRAP_SORT_LABELS).map(([value,label])=>option('sort',value,label,f.sort===value)).join('')+'</div></fieldset>';
  showModal('필터·정렬','<form id="scrapFilterForm">'+status+sort+'<div id="formError" class="form-error" role="alert"></div><div class="scrap-filter-footer">'+button('초기화','scrapFilterDraftReset','textbtn')+'<button type="submit" class="primary">적용하기</button></div></form>','scrap-filters');
 }
 function renderScrap(){
@@ -550,10 +554,10 @@ function renderScrap(){
  const applied=[];
  if(!picking&&f.status!=='all')applied.push(button(esc(statusName[f.status])+' '+icon('close'),'clearScrapStatus','scrap-applied-filter','aria-label="경험 상태 필터 해제"'));
  if(f.sort!=='recent')applied.push(button(esc(SCRAP_SORT_LABELS[f.sort])+' '+icon('close'),'clearScrapSort','scrap-applied-filter','aria-label="최근 담은 순으로 초기화"'));
- const count='<span class="scrap-result-count" role="status" aria-live="polite">'+list.length+'개'+(picking?' · 미완료 작품':'')+'</span>';
+ const count='<span class="sr-only" role="status" aria-live="polite">'+list.length+'개'+(picking?' · 미완료 작품':'')+'</span>';
  const filterLabel=icon('filter')+'필터·정렬'+(applied.length?'<span class="scrap-filter-count">'+applied.length+'</span>':'');
- const tools='<div class="scrap-list-tools">'+count+button(filterLabel,'scrapFilters','scrap-filter-trigger','aria-haspopup="dialog" aria-label="필터와 정렬'+(applied.length?' · '+applied.length+'개 적용':'')+'"')+'</div>'+(applied.length?'<div class="scrap-applied-filters" aria-label="적용한 필터">'+applied.join('')+'</div>':'');
- return '<section><div class="page-heading"><h1 class="page-title">'+ (picking?'오늘 경험할 작품':'나의 스크랩')+'</h1>'+(picking?button('취소','cancelPick','textbtn'):scrapAddButton())+'</div>'+typeTabs+'<div class="scrap-fixed-search">'+icon('search')+'<input id="search" type="search" placeholder="제목·제작자 검색" aria-label="스크랩 검색" value="'+esc(f.q)+'"></div>'+tools+'<div class="content-list scrap-grid">'+(list.length?list.map(c=>scrapCard(c,picking)).join(''):(state.items.length?'<div class="empty"><span class="empty-icon" aria-hidden="true">'+icon('search')+'</span><h3>일치하는 작품이 없어요</h3><p>다른 제목이나 제작자로 검색하거나<br>선택한 필터를 초기화해보세요.</p>'+button('검색·필터 초기화','resetFilters','secondary')+'</div>':'<div class="empty"><span class="empty-icon" aria-hidden="true">'+icon('scrap')+'</span><h3>첫 작품을 담아보세요</h3><p>읽고 싶은 책과<br>보고 싶은 영화를 모아보세요.</p>'+button('작품 추가하기','add','primary')+'</div>'))+'</div><div class="list-footer"></div></section>';
+ const filterButton=button(filterLabel,'scrapFilters','scrap-filter-trigger','aria-haspopup="dialog" aria-label="필터와 정렬'+(applied.length?' · '+applied.length+'개 적용':'')+'"'),appliedHTML=applied.length?'<div class="scrap-applied-filters" aria-label="적용한 필터">'+applied.join('')+'</div>':'';
+ return '<section class="scrap-page"><div class="page-heading"><h1 class="page-title">'+(picking?'오늘 경험할 작품':'나의 스크랩<span class="scrap-heading-count">'+state.items.length+'</span>')+'</h1>'+(picking?button('취소','cancelPick','textbtn'):scrapAddButton())+'</div><div class="scrap-tools">'+typeTabs+filterButton+'</div><div class="scrap-fixed-search">'+icon('search')+'<input id="search" type="search" placeholder="제목·제작자 검색" aria-label="스크랩 검색" value="'+esc(f.q)+'"></div>'+count+appliedHTML+'<div class="content-list scrap-list">'+(list.length?list.map(c=>scrapCard(c,picking)).join(''):(state.items.length?'<div class="empty"><span class="empty-icon" aria-hidden="true">'+icon('search')+'</span><h3>일치하는 작품이 없어요</h3><p>다른 제목이나 제작자로 검색하거나<br>선택한 필터를 초기화해보세요.</p>'+button('검색·필터 초기화','resetFilters','secondary')+'</div>':'<div class="empty"><span class="empty-icon" aria-hidden="true">'+icon('scrap')+'</span><h3>첫 작품을 담아보세요</h3><p>읽고 싶은 책과<br>보고 싶은 영화를 모아보세요.</p>'+button('작품 추가하기','add','primary')+'</div>'))+'</div><div class="list-footer"></div></section>';
 }
 function contentIntroText(c){
  // 상세 화면 전용: tasteIntroText()와 달리 절대 자르지 않고 원본 필드를 그대로 반환한다.
@@ -562,6 +566,7 @@ function contentIntroText(c){
  if(c.type==='album')return String(c.albumDescription||c.contents||c.description||'').trim();
  return String(c.contents||'').trim();
 }
+function detailMenu(c){return '<details class="more detail-more"><summary aria-label="콘텐츠 관리">⋯</summary><div class="more-menu">'+button('기본 정보 수정','editInfo','',attr(c.id))+(c.completed?button('완료 취소','undoComplete','',attr(c.id)):'')+button('스크랩 삭제','delete','',attr(c.id))+'</div></details>'}
 function renderDetail(){
  const c=candidatePreview||get(detailId);if(!c)return '<div class="empty">이 콘텐츠가 없어요.'+button('스크랩으로','toScrap','textbtn')+'</div>';
  if(c.type==='book'&&!detailIntroAttempts.has(detailIntroKey(c))&&(!c.contents||looksTruncatedIntro(c.contents)))setTimeout(()=>ensureDetailIntro(c),0);
@@ -570,9 +575,22 @@ function renderDetail(){
   // 추천 후보 미리보기: Model.add()를 호출하지 않으므로 id가 없다. 편집·삭제·기록 등 저장 전제 기능은 노출하지 않는다.
   return '<section><div class="detail-title-row"><div><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'</div></div><p class="creator">'+esc(c.creator||'제작자 미확인')+' · '+typeName[c.type]+' · 추천 후보 · 아직 스크랩 전</p><div class="row">'+cover(c)+'</div>'+detailMetadata(c)+introHTML+'</section>';
  }
- const logs=[...c.logs].sort((a,b)=>b.date.localeCompare(a.date));
- const logHTML=l=>'<div class="history"><div class="row between"><strong>'+esc(l.date)+'</strong>'+button('수정','editLog','textbtn',attr(c.id)+' data-log="'+l.id+'"')+'</div>'+(l.page?'<p>'+esc(l.page)+'쪽</p>':'')+(l.memo?'<p>'+esc(l.memo)+'</p>':'<p class="muted">오늘 '+(c.type==='book'?'읽었어요':c.type==='movie'?'감상했어요':'들었어요')+'</p>')+'</div>';
- return '<section><div class="detail-title-row"><div><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'</div><details class="more"><summary aria-label="콘텐츠 관리">⋯</summary><div class="more-menu">'+button('기본 정보 수정','editInfo','',attr(c.id))+(c.completed?button('완료 취소','undoComplete','',attr(c.id)):'')+button('스크랩 삭제','delete','',attr(c.id))+'</div></details></div><p class="creator">'+esc(c.creator||'제작자 미확인')+' · '+typeName[c.type]+' · '+statusName[Model.status(c)]+'</p>'+'<div class="detail-cover-row" data-tone="'+todayTone(c)+'"><div>'+cover(c)+'</div><div class="grow"><small>내 별점</small><button class="rating-inline" data-action="rating" '+attr(c.id)+' aria-label="별점 수정">'+(validRating(c.rating)?averageStars(c.rating):'<span class="muted">아직 별점 없음</span>')+'</button></div></div>'+ detailMetadata(c)+button('나무 모습 바꾸기','bmWorkTree','textbtn',attr(c.id))+introHTML+renderLinkSources(c)+((c.completed&&!c.review)?'':'<div class="rule"></div>')+(c.completed?'':recordActions(c,true))+(c.review?'<div class="review-copy"><h3>나의 감상</h3><p>'+esc(c.review)+'</p></div>':'')+'<div class="rule"></div><h3>경험 기록</h3>'+(logs.length?logHTML(logs[0])+(logs.length>1?'<details class="collapse"><summary>지난 기록 '+(logs.length-1)+'개 보기</summary>'+logs.slice(1).map(logHTML).join('')+'</details>':''):'<p class="creator">아직 일일 기록이 없어요.</p>')+'</section>';
+ const logs=[...c.logs].sort((a,b)=>b.date.localeCompare(a.date)),stage=Model.stage(c),logDays=todayLogDates(c).size,days=todayDayCount(c);
+ const genre=cleanGenreValue(c.genre)?launchGenre(c.type,c.genre,c):'';
+ const chips=c.completed?'<span class="detail-chip is-ink">완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed.slice(5).replace('-','.')))+'</span>'+(validRating(c.rating)?'<span class="detail-chip"><b>★</b> '+c.rating+'</span>':''):
+  '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'','기록 '+logDays+'회'].filter(Boolean).join(' · ')+'</span>':'');
+ const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'메모 없음')+'</span></button>';
+ const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
+ const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'감상 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
+  button(c.type==='movie'?'끝까지 봤어요':'다 읽었어요','complete','detail-action-secondary',attr(c.id))+(todayLog?button('오늘 기록했어요 · '+(todayLog.memo?'메모 수정':'메모'),'editLog','detail-action-primary is-done',attr(c.id)+' data-log="'+esc(todayLog.id)+'"'):button('<i aria-hidden="true"></i>오늘 '+verb,'record','detail-action-primary',attr(c.id))))+'</div>';
+ return '<section class="detail-page" data-type="'+c.type+'"><div class="detail-panel">'+stickerCover(c,'detail-cover')+(stage>0?'<span class="detail-tree">'+stickerTree(c,stage)+'</span>':'')+'</div>'+
+ '<div class="detail-head"><span>'+typeName[c.type]+(genre?' · '+esc(genre):'')+'</span><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'<p class="detail-creator">'+esc(c.creator||'제작자 미확인')+(c.publisher?' · '+esc(c.publisher):'')+'</p></div>'+
+ '<div class="detail-chips">'+chips+'</div>'+
+ '<button type="button" class="detail-rating" data-action="rating" '+attr(c.id)+' aria-label="별점 수정"><span>내 별점</span>'+(validRating(c.rating)?averageStars(c.rating):'<span class="muted">아직 별점 없음</span>')+'<b aria-hidden="true">›</b></button>'+
+ (c.review?'<div class="detail-section review-copy"><h2>나의 감상</h2><p>'+esc(c.review)+'</p></div>':'')+
+ '<div class="detail-section"><h2>기록</h2>'+(logs.length?'<div class="detail-logs">'+logs.slice(0,5).map(logRow).join('')+'</div>'+(logs.length>5?'<details class="collapse"><summary>지난 기록 '+(logs.length-5)+'개 더 보기</summary><div class="detail-logs">'+logs.slice(5).map(logRow).join('')+'</div></details>':''):'<p class="detail-empty">아직 기록이 없어요.</p>')+'</div>'+
+ '<div class="detail-section">'+detailMetadata(c)+button('나무 모습 바꾸기','bmWorkTree','textbtn detail-tree-change',attr(c.id))+'</div>'+
+ (introHTML?'<div class="detail-section">'+introHTML+'</div>':'')+renderLinkSources(c)+actions+'</section>';
 }
 function forestGrowthKey(c){
  if(!c||!c.id||c._bmSample||!['book','movie'].includes(c.type)||c.completed)return '';
@@ -732,7 +750,7 @@ function scrapComposerConfig(type){
 }
 function updateScrapSessionCount(delta=0){
  scrapComposerState.count=Math.max(0,scrapComposerState.count+Number(delta||0));
- const el=$('scrapSessionCount');if(el)el.textContent='이번에 '+scrapComposerState.count+'개 추가';
+ const el=$('scrapSessionCount');if(el)el.innerHTML='이번에 <b>'+scrapComposerState.count+'개</b> 추가';
  const done=document.querySelector('[data-action="scrapDone"]');if(done)done.disabled=scrapComposerState.count===0;
 }
 function openScrapComposer(type='book',query=null,reset=false){
@@ -742,7 +760,8 @@ function openScrapComposer(type='book',query=null,reset=false){
  if(query!==null)scrapComposerState.queries[type]=String(query||'');
  const cfg=scrapComposerConfig(type),q=scrapComposerState.queries[type]||'';
  const tabs=['book','movie'].map(t=>button(scrapTypeLabel(t),'scrapType','composer-type-tab '+(t===type?'active':''),'data-type="'+t+'" aria-pressed="'+(t===type)+'"')).join('');
- const body='<div class="scrap-composer-body"><div class="composer-type-tabs" role="group" aria-label="스크랩 유형">'+tabs+'</div><div class="scrap-search-block"><input id="'+cfg.input+'" type="search" value="'+esc(q)+'" placeholder="'+cfg.placeholder+'" aria-label="'+cfg.placeholder+'" autocomplete="off"></div><div class="scrap-shortcuts">'+button('링크에서 가져오기','linkAdd','textbtn')+button('사진에서 가져오기','photoAdd','textbtn')+'</div><div id="'+cfg.results+'" class="scrap-results"></div></div><div class="scrap-session-footer"><span id="scrapSessionCount" class="scrap-count">이번에 '+scrapComposerState.count+'개 추가</span>'+button('완료','scrapDone','primary',scrapComposerState.count===0?'disabled':'')+'</div>';
+ const linkIcon='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',cameraIcon='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+ const body='<div class="scrap-composer-body"><div class="composer-toolbar"><div class="composer-type-tabs" role="group" aria-label="스크랩 유형">'+tabs+'</div><div class="scrap-shortcuts">'+button(linkIcon,'linkAdd','composer-icon','aria-label="링크에서 가져오기"')+button(cameraIcon,'photoAdd','composer-icon','aria-label="사진에서 가져오기"')+'</div></div><div class="scrap-search-block">'+icon('search')+'<input id="'+cfg.input+'" type="search" value="'+esc(q)+'" placeholder="'+cfg.placeholder+'" aria-label="'+cfg.placeholder+'" autocomplete="off"></div><div id="'+cfg.results+'" class="scrap-results"></div></div><div class="scrap-session-footer"><span id="scrapSessionCount" class="scrap-session-count">이번에 <b>'+scrapComposerState.count+'개</b> 추가</span>'+button('완료','scrapDone','primary',scrapComposerState.count===0?'disabled':'')+'</div>';
  showModal('스크랩 추가',body,'scrap-composer');
  if(type==='book')searchResults(q);else if(type==='album')musicSearchResults(q);else movieSearchResults(q);
 }
@@ -1207,10 +1226,7 @@ function renderRemoteBooks(results,message=''){
    cover(c)+
    '<div class="grow">'+
     '<div class="title">'+esc(c.title)+'</div>'+
-    '<div class="creator">'+esc(c.creator||'저자 미확인')+'</div>'+
-    (c.genre?'<div class="badge">장르 · '+esc(c.genre)+'</div>':'<div class="badge">장르 확인 중</div>')+
-    (c.publisher?'<div class="badge">'+esc(c.publisher)+'</div>':'')+
-    (c.isbn?'<div class="badge">ISBN '+esc(c.isbn)+'</div>':'')+
+    '<div class="creator">'+[c.creator||'저자 미확인',String(c.publishedAt||'').slice(0,4),c.publisher].filter(Boolean).map(esc).join(' · ')+'</div>'+
    '</div>'+
    remoteScrapButton(c,i,'Book')+
   '</div>'
@@ -1517,7 +1533,7 @@ function movieSpacingRescueQueries(query){
 function renderRemoteMovies(results,message=''){
  const el=$('movieCatalogResults');if(!el)return;
  if(message){el.innerHTML='<div class="scrap-empty"><p>'+esc(message)+'</p>'+button('직접 입력하기','manual','textbtn scrap-manual')+'</div>';return}
- el.innerHTML=results.length?'<div class="content-list">'+results.map((c,i)=>'<div class="content-row" style="align-items:flex-start">'+cover(c)+'<div class="grow"><div class="title">'+esc(c.title)+'</div>'+(c.originalTitle&&Model.norm(c.originalTitle)!==Model.norm(c.title)?'<div class="creator">'+esc(c.originalTitle)+'</div>':'')+'<div class="badge">'+[c.releaseDate?c.releaseDate.slice(0,4):'',c.genre||''].filter(Boolean).map(esc).join(' · ')+'</div></div>'+remoteScrapButton(c,i,'Movie')+'</div>').join('')+'</div>':'<div class="scrap-empty"><p>검색 결과가 없어요.</p>'+button('직접 입력하기','manual','textbtn scrap-manual')+'</div>';
+ el.innerHTML=results.length?'<div class="content-list">'+results.map((c,i)=>'<div class="content-row" style="align-items:flex-start">'+cover(c)+'<div class="grow"><div class="title">'+esc(c.title)+'</div>'+(c.originalTitle&&Model.norm(c.originalTitle)!==Model.norm(c.title)?'<div class="creator">'+esc(c.originalTitle)+'</div>':'')+'<div class="creator">'+[c.releaseDate?c.releaseDate.slice(0,4):'',c.genre||''].filter(Boolean).map(esc).join(' · ')+'</div></div>'+remoteScrapButton(c,i,'Movie')+'</div>').join('')+'</div>':'<div class="scrap-empty"><p>검색 결과가 없어요.</p>'+button('직접 입력하기','manual','textbtn scrap-manual')+'</div>';
 }
 async function fetchMovieSearchPayload(query){
  const res=await fetch(MOVIE_SEARCH_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({query})});
@@ -1584,11 +1600,12 @@ function findSavedWork(candidate){
  const keys=new Set(tasteKeys(candidate));
  return state.items.find(item=>tasteKeys(item).some(key=>keys.has(key)));
 }
+const REMOTE_ADD_HTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>',REMOTE_ADDED_HTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>담음';
 function remoteScrapButton(candidate,index,type){
  const saved=findSavedWork(candidate);
- if(!saved)return button('스크랩','addRemote'+type,'textbtn','data-index="'+index+'"');
- if(scrapSessionAdds.has(saved.id))return button('스크랩 취소','removeRemote'+type,'textbtn','data-index="'+index+'"');
- return button('저장됨','detail','textbtn',attr(saved.id)+' aria-label="'+esc(candidate.title)+' 저장됨 · 상세 보기"');
+ if(!saved)return button(REMOTE_ADD_HTML,'addRemote'+type,'remote-add','data-index="'+index+'" aria-label="'+esc(candidate.title)+' 스크랩"');
+ if(scrapSessionAdds.has(saved.id))return button(REMOTE_ADDED_HTML,'removeRemote'+type,'remote-added','data-index="'+index+'" aria-label="'+esc(candidate.title)+' 스크랩 취소"');
+ return button('이미 있음','detail','remote-saved',attr(saved.id)+' aria-label="'+esc(candidate.title)+' 이미 있음 · 상세 보기"');
 }
 function undoSessionScrap(candidate,index,type){
  const item=candidate&&findSavedWork(candidate),eventId=item&&scrapSessionAdds.get(item.id);
@@ -1603,7 +1620,7 @@ function updateRemoteScrapButton(index,fromAction,toAction,text){
  const buttonEl=[...document.querySelectorAll('[data-index=\"'+index+'\"]')].find(el=>el.dataset.action===fromAction);
  if(buttonEl){
   buttonEl.dataset.action=toAction;
-  buttonEl.textContent=text;
+  if(toAction.startsWith('removeRemote')){buttonEl.className='remote-added';buttonEl.innerHTML=REMOTE_ADDED_HTML;buttonEl.setAttribute('aria-label',text)}else buttonEl.textContent=text;
  }
 }
 function markScrapped(action,index){
