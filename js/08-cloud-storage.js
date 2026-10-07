@@ -694,10 +694,13 @@ function forestYearIsland(y,type){
  parts.push('<polygon points="220,30 370,105 170,205 20,130" fill="#86B26F"/><polygon points="20,130 170,205 170,215 20,140" fill="#A9825E"/><polygon points="170,205 370,105 370,115 170,215" fill="#8B6A4C"/><polygon points="20,130 170,205 170,209 158,203.5 146,200 134,192.5 122,190 110,182.5 98,180 86,172.5 74,170 62,162.5 50,160 38,152.5 26,150 20,134" fill="#7FAE68"/><polygon points="370,105 170,205 170,208.5 182,201.5 194,199 206,191.5 218,189 230,181.5 242,179 254,171.5 266,169 278,161.5 290,159 302,151.5 314,149 326,141.5 338,139 350,131.5 362,129 370,109" fill="#6C9A57"/>');
  for(let i=0;i<12;i++){
   const period=y+'-'+String(i+1).padStart(2,'0'),p=plot(i),future=period>current,items=future?[]:forestMonthItems(period,type);
-  parts.push('<g class="island-plot'+(future?' is-future':'')+'"'+(future?'':' data-action="forestMonthView" data-month="'+period+'" role="button" tabindex="0" aria-label="'+(i+1)+'월의 숲, '+items.length+'그루"')+'><polygon points="'+diamond(p.x,p.y,45,22.5)+'" fill="'+(future?'#CFE0C2':'#9FC888')+'"'+(period===current?' stroke="#1E2A22" stroke-width="2" stroke-linejoin="round"':'')+'/></g>');
-  islandPlantings(period,items).forEach(t=>trees.push({y:t.y,html:'<image href="'+esc(t.src)+'" x="'+(t.x-12).toFixed(1)+'" y="'+(t.y-21).toFixed(1)+'" width="24" height="24" pointer-events="none"/>'}));
-  if(!future)parts.push(islandTufts(period,p));
-  if(period===current)labels.push('<g pointer-events="none"><rect x="'+(p.x-58)+'" y="'+(p.y-26)+'" width="30" height="18" rx="9" fill="#1E2A22"/><text x="'+(p.x-43)+'" y="'+(p.y-13.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">'+(i+1)+'월</text></g>');
+  // This month's plot is raised one step like a block, with a pin naming it.
+  const now_=period===current,up=now_?7:0,top={x:p.x,y:p.y-up};
+  const raise=now_?'<polygon points="'+(p.x-45)+','+(p.y-up)+' '+p.x+','+(p.y+22.5-up)+' '+p.x+','+(p.y+22.5)+' '+(p.x-45)+','+p.y+'" fill="#7FA866"/><polygon points="'+p.x+','+(p.y+22.5-up)+' '+(p.x+45)+','+(p.y-up)+' '+(p.x+45)+','+p.y+' '+p.x+','+(p.y+22.5)+'" fill="#6E9858"/>':'';
+  parts.push('<g class="island-plot'+(future?' is-future':'')+(now_?' is-current':'')+'"'+(future?'':' data-action="forestMonthView" data-month="'+period+'" role="button" tabindex="0" aria-label="'+(i+1)+'월의 숲'+(now_?' (이번 달)':'')+', '+items.length+'그루"')+'>'+raise+'<polygon points="'+diamond(top.x,top.y,45,22.5)+'" fill="'+(future?'#CFE0C2':now_?'#A9D38F':'#9FC888')+'"/></g>');
+  islandPlantings(period,items).forEach(t=>trees.push({y:t.y,html:'<image href="'+esc(t.src)+'" x="'+(t.x-12).toFixed(1)+'" y="'+(t.y-21-up).toFixed(1)+'" width="24" height="24" pointer-events="none"/>'}));
+  if(!future)parts.push(islandTufts(period,top));
+  if(now_){const w=(i+1)>=10?42:36,tipY=top.y-24;labels.push('<g class="island-pin" pointer-events="none"><path d="M'+(p.x-w/2)+' '+(tipY-24)+'h'+w+'a9 9 0 0 1 9 9v0a9 9 0 0 1-9 9h-'+(w/2-6)+'l-6 6-6-6h-'+(w/2-6)+'a9 9 0 0 1-9-9v0a9 9 0 0 1 9-9z" fill="#1E2A22"/><text x="'+p.x+'" y="'+(tipY-11.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">'+(i+1)+'월</text></g>')}
  }
  trees.sort((a,b)=>a.y-b.y);
  return '<svg class="forest-island" viewBox="0 0 '+W+' 230" role="group" aria-label="'+y+'년의 숲">'+parts.join('')+trees.map(t=>t.html).join('')+labels.join('')+'</svg>';
