@@ -462,7 +462,7 @@ function todayLogOf(c){return c.logs.find(l=>l.date===now())}
 // Pressed, it prints as a rough-edged ink imprint in the work's colour.
 function stampSVG(c,done){
  const d=now(),date=d.slice(0,4)+'.'+d.slice(5,7)+'.'+d.slice(8,10),movie=c.type==='movie';
- const word=done?(movie?'봤음':'읽음'):'';
+ const word=done?'DONE':'';
  const center=done?'<text class="stamp-word" x="60" y="71" text-anchor="middle">'+word+'</text>':'<text class="stamp-small" x="60" y="61" text-anchor="middle">오늘</text><text class="stamp-mid" x="60" y="77" text-anchor="middle">'+(movie?'봤어요':'읽었어요')+'</text>';
  return '<svg class="stamp-svg" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="stampArcTop" d="M21 60a39 39 0 0 1 78 0"/><path id="stampArcBottom" d="M13 60a47 47 0 0 0 94 0"/>'+
   (done?'<filter id="stampRough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.2 2.45" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter>':'')+'</defs>'+
