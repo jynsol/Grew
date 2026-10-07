@@ -322,7 +322,7 @@ function cloudSetupModal(message=''){
 
 const KEY='songrim.prototype.v3';
 let forestEditMode=false,forestVisibilityObserver=null;
-const typeName={book:'책',movie:'영화'},statusName={all:'전체',saved:'스크랩',active:'감상 중',done:'완료'};
+const typeName={book:'책',movie:'영화'},statusName={all:'전체',saved:'담아둠',active:'진행 중',done:'완료'};
 let pendingForestArrival=null;
 let state=Model.empty(),view='today',detailId=null,detailOrigin='scrap',picking=false,year=String(new Date().getFullYear()),month=Model.today().slice(0,7),modal=null,zoomState={scale:1,x:0,y:0},storageOK=true,toastTimer,undoAction=null,shareBlob=null,shareURL=null,photoFiles=[],ocrGeneration=0,ocrBusy=false,candidates=[],authMode=false,candidatePreview=null,candidatePreviewReturn=null;
 const $=id=>document.getElementById(id);
@@ -472,7 +472,7 @@ function stampSVG(c,done){
 }
 function todayStamp(c){
  const stage=Model.stage(c),log=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
- if(stage===0)return button('<span class="stamp-start-label">'+(c.type==='movie'?'감상<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button is-start',attr(c.id)+' aria-label="'+(c.type==='movie'?'감상 시작하기':'읽기 시작하기')+'"');
+ if(stage===0)return button('<span class="stamp-start-label">'+(c.type==='movie'?'보기<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button is-start',attr(c.id)+' aria-label="'+(c.type==='movie'?'보기 시작하기':'읽기 시작하기')+'"');
  if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+stampSVG(c,true)+'</div></div>';
  // Not yet stamped: a plain grey face (no rings) so it reads clearly apart from the printed stamp.
  return button('<span class="stamp-face"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>오늘<br>'+verb+'</span></span>','record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
@@ -505,7 +505,7 @@ function todayBoard(c){
  const stage=Model.stage(c),readingItems=state.items.filter(x=>!x.completed&&x.id!==c.id&&Model.stage(x)>0),reading=readingItems.length,readingLabel=progressLabel(readingItems),others=state.items.some(x=>!x.completed&&x.id!==c.id),date=new Date(now()+'T12:00:00Z');
  const dateLabel=String(date.getUTCMonth()+1).padStart(2,'0')+'.'+String(date.getUTCDate()).padStart(2,'0')+' '+['SUN','MON','TUE','WED','THU','FRI','SAT'][date.getUTCDay()];
  const coverArt=c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'<span class="sticker-cover-blank" aria-hidden="true"></span>';
- const completeLabel=stage===0?(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요'):(c.type==='movie'?'끝까지 봤어요':'다 읽었어요');
+ const completeLabel=stage===0?(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요'):(c.type==='movie'?'다 봤어요':'다 읽었어요');
  // A trailing "(…)" in a book title reads as its subtitle, as in the design.
  const split=String(c.title).match(/^(.+?)\s*[(（]([^()（）]+)[)）]\s*$/),mainTitle=split?split[1]:c.title;
  const suffix=todayStageSuffix(c),sub=split?split[2]:c.originalTitle&&c.originalTitle!==c.title?c.originalTitle:'';
@@ -529,10 +529,10 @@ function todayBoard(c){
 function recordActions(c,inDetail=false){
  if(c.completed)return '<p class="muted">완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed))+'</p>'+button(c.rating?'평가 '+c.rating+'점 · 수정':'평가하기','rating','textbtn',attr(c.id))+button('완료일 수정','editCompletion','textbtn',attr(c.id));
  const stage=Model.stage(c);
- if(stage===0)return '<div class="record-actions">'+button(c.type==='movie'?'감상 시작하기':'읽기 시작하기','startExperience','primary ink-button',attr(c.id))+button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','textbtn completion-action',attr(c.id))+'</div>';
+ if(stage===0)return '<div class="record-actions">'+button(c.type==='movie'?'보기 시작하기':'읽기 시작하기','startExperience','primary ink-button',attr(c.id))+button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','textbtn completion-action',attr(c.id))+'</div>';
  const log=c.logs.find(l=>l.date===now());
- const normalLabel={book:'오늘 읽었어요',album:'오늘 들었어요',movie:'오늘 감상했어요'}[c.type];
- return '<div class="record-actions">'+(log?'<div class="row between"><strong>오늘 기록했어요</strong>'+button('취소','undoLog','textbtn',attr(c.id))+'</div>'+button(!inDetail&&c.type==='book'?(log.memo?'메모 수정':'메모 남기기'):'기록 수정',!inDetail&&c.type==='book'?'editMemo':'editLog','textbtn',attr(c.id)+' data-log="'+log.id+'"'):button(normalLabel,'record','primary ink-button',attr(c.id)))+button(c.type==='movie'?'끝까지 봤어요':typeName[c.type]+(c.type==='book'?'을 다 읽었어요':'을 다 들었어요'),'complete','textbtn completion-action',attr(c.id))+'</div>';
+ const normalLabel={book:'오늘 읽었어요',album:'오늘 들었어요',movie:'오늘 봤어요'}[c.type];
+ return '<div class="record-actions">'+(log?'<div class="row between"><strong>오늘 기록했어요</strong>'+button('취소','undoLog','textbtn',attr(c.id))+'</div>'+button(!inDetail&&c.type==='book'?(log.memo?'메모 수정':'메모 남기기'):'기록 수정',!inDetail&&c.type==='book'?'editMemo':'editLog','textbtn',attr(c.id)+' data-log="'+log.id+'"'):button(normalLabel,'record','primary ink-button',attr(c.id)))+button(c.type==='movie'?'다 봤어요':typeName[c.type]+(c.type==='book'?'을 다 읽었어요':'을 다 들었어요'),'complete','textbtn completion-action',attr(c.id))+'</div>';
 }
 
 // Scrap rows (redesign 11a): cover, title, type · creator, status chip, the work's tree sticker.
@@ -598,8 +598,8 @@ function renderDetail(){
   '<span class="detail-chip is-ink">'+esc(growthAppearance(stage).name)+'</span>'+(stage>0?'<span class="detail-chip">'+[days&&c.type==='book'?days+'일째':'',c.type==='movie'&&Number(c.runtime)?Number(c.runtime)+'분':'',c.type==='movie'?'기록 '+logDays+'회':''].filter(Boolean).join(' · ')+'</span>':'');
  const logRow=l=>'<button type="button" class="detail-log" data-action="editLog" '+attr(c.id)+' data-log="'+esc(l.id)+'"><span>'+esc(l.date.slice(5).replace('-','.'))+'</span><span class="'+(l.memo||l.page?'':'is-empty')+'">'+(l.memo?esc(l.memo):l.page?esc(l.page)+'쪽':'+ 메모 남기기')+'</span></button>';
  const todayLog=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
- const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'감상 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
-  button(c.type==='movie'?'끝까지 봤어요':'다 읽었어요','complete','detail-action-secondary',attr(c.id))+(todayLog?button('오늘 기록했어요 · '+(todayLog.memo?'메모 수정':'메모'),'editLog','detail-action-primary is-done',attr(c.id)+' data-log="'+esc(todayLog.id)+'"'):button('<i aria-hidden="true"></i>오늘 '+verb,'record','detail-action-primary',attr(c.id))))+'</div>';
+ const actions=c.completed?'':'<div class="detail-actions">'+(stage===0?button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','detail-action-secondary',attr(c.id))+button(c.type==='movie'?'보기 시작하기':'읽기 시작하기','startExperience','detail-action-primary',attr(c.id)):
+  button(c.type==='movie'?'다 봤어요':'다 읽었어요','complete','detail-action-secondary',attr(c.id))+(todayLog?button('오늘 기록했어요 · '+(todayLog.memo?'메모 수정':'메모'),'editLog','detail-action-primary is-done',attr(c.id)+' data-log="'+esc(todayLog.id)+'"'):button('<i aria-hidden="true"></i>오늘 '+verb,'record','detail-action-primary',attr(c.id))))+'</div>';
  return '<section class="detail-page" data-type="'+c.type+'"><div class="detail-panel">'+stickerCover(c,'detail-cover')+(stage>0?'<span class="detail-tree">'+stickerTree(c,stage)+'</span>':'')+'</div>'+
  '<div class="detail-head"><span>'+typeName[c.type]+(genre?' · '+esc(genre):'')+'</span><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'<p class="detail-creator">'+esc(c.creator||'제작자 미확인')+(c.publisher?' · '+esc(c.publisher):'')+'</p></div>'+
  '<div class="detail-chips">'+chips+'</div>'+
@@ -643,7 +643,7 @@ function renderForestMonth(){
  const m=Number(month.slice(5)),items=forestMonthItems(month),reading=items.filter(c=>!c.completed).length;
  const shareIcon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>';
  const head='<div class="forest-top"><h1 class="page-title">'+m+'월의 숲</h1>'+button(shareIcon,'shareMonth','forest-share','aria-label="'+m+'월의 숲 공유하기"')+'</div>'+
-  '<div class="forest-title-row"><div>'+forestTypeChips(items,reading?'<span class="forest-reading">'+(items.some(c=>!c.completed&&c.type==='book')?'읽는':'보는')+' 중 <b>'+reading+'</b></span>':'')+'</div>'+forestNav('forestPrevMonth','forestNextMonth','지난달','다음 달',month<now().slice(0,7))+'</div>';
+  '<div class="forest-title-row"><div>'+forestTypeChips(items,reading?'<span class="forest-reading">'+progressLabel(items.filter(c=>!c.completed))+' <b>'+reading+'</b></span>':'')+'</div>'+forestNav('forestPrevMonth','forestNextMonth','지난달','다음 달',month<now().slice(0,7))+'</div>';
  const toggle='<div class="forest-toggle" role="group" aria-label="보기 방식">'+button(icon('forest')+'숲으로 보기','forestShow',forestShow==='forest'?'active':'','data-show="forest" aria-pressed="'+(forestShow==='forest')+'"')+button(icon('today')+'달력으로 보기','forestShow',forestShow==='calendar'?'active':'','data-show="calendar" aria-pressed="'+(forestShow==='calendar')+'"')+'</div>';
  // The year island sits with the other forest tools instead of above the title.
  const yearTool=button('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>올해의 숲','forestYearView','forest-tool','aria-label="'+esc(year)+' 올해의 숲 보기"');
@@ -665,7 +665,7 @@ function forestCalendarHTML(period){
   cells+='<button type="button" class="fcal-day'+(date===today?' is-today':'')+(done.length?' is-done':logged?' is-logged':'')+'"'+(done.length?' data-type="'+done[0].type+'"':'')+' data-action="day" data-date="'+date+'" aria-label="'+esc(label)+'"'+(date>today?' disabled':'')+'><span class="fcal-num">'+d+'</span>'+(done.length?'<span class="fcal-tree">'+stickerTree(done[0],3)+'</span>':logged?'<span class="fcal-stamp">'+check+'</span>':'')+'</button>';
  }
  const finished=state.items.filter(c=>c.completed&&c.completed.startsWith(period)).sort((a,b)=>b.completed.localeCompare(a.completed)||(b.completedAt||0)-(a.completedAt||0));
- const card=c=>{const dt=new Date(c.completed+'T12:00:00Z');return '<button type="button" class="fcal-card" data-action="detail" '+attr(c.id)+'>'+stickerCover(c)+'<span class="fcal-card-copy"><small>'+(dt.getUTCMonth()+1)+'월 '+dt.getUTCDate()+'일 '+FOREST_MONTH_NAMES[dt.getUTCDay()]+' · '+(c.type==='movie'?'다 봄':'다 읽음')+'</small><strong>'+esc(c.title)+'</strong><span>'+(validRating(c.rating)?'<b>★</b> '+c.rating+' · ':'')+esc(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요</span></span>'+stickerTree(c,3,'is-cut-sm')+'</button>'};
+ const card=c=>{const dt=new Date(c.completed+'T12:00:00Z');return '<button type="button" class="fcal-card" data-action="detail" '+attr(c.id)+'>'+stickerCover(c)+'<span class="fcal-card-copy"><small>'+(dt.getUTCMonth()+1)+'월 '+dt.getUTCDate()+'일 '+FOREST_MONTH_NAMES[dt.getUTCDay()]+' · '+'완료'+'</small><strong>'+esc(c.title)+'</strong><span>'+(validRating(c.rating)?'<b>★</b> '+c.rating+' · ':'')+esc(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요</span></span>'+stickerTree(c,3,'is-cut-sm')+'</button>'};
  return '<div class="fcal"><div class="fcal-grid">'+cells+'</div><div class="fcal-legend"><span><i class="is-logged"></i>기록한 날</span><span><i class="is-done"></i>다 읽은 날</span><span><i class="is-done is-movie"></i>다 본 날</span></div></div>'+(finished.length?'<div class="fcal-cards">'+finished.map(card).join('')+'</div>':'');
 }
 // Year island: twelve 5×5 plots, three per row, laid out on one isometric block.
