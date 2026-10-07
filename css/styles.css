@@ -3823,3 +3823,23 @@ html, body { overflow-x:clip; }
 .today-v2 .stamp-button.is-done svg { color:#fff; }
 .today-v2 .tv-watch { align-self:flex-start;height:28px;min-height:0;margin-top:4px;padding:0 11px;border:0;border-radius:14px;background:rgba(255,255,255,.7);color:var(--sb-ink);font:680 12px/1 var(--font-family); }
 .today-v2 .sticker-links { flex-wrap:nowrap; }
+
+/* Rubber stamp (Today) */
+.stamp-button, .stamp-button.is-done, .today-v2 .stamp-button.is-done { background:none;border:0;box-shadow:none;color:var(--sb-ink); }
+.stamp-button .stamp-svg { position:absolute;inset:0;width:100%;height:100%;overflow:visible; }
+.stamp-svg .stamp-arc { font:800 9.5px var(--sb-label);font-stretch:118%;letter-spacing:.14em; }
+.stamp-svg .stamp-stars { font:700 7px var(--font-family);letter-spacing:.2em; }
+.stamp-svg .stamp-word { font:900 25px var(--font-family);letter-spacing:-.02em; }
+.stamp-svg .stamp-small { font:700 10px var(--font-family); }
+.stamp-svg .stamp-mid { font:900 14px var(--font-family);letter-spacing:-.03em; }
+/* Not yet stamped: a clean grey stamp on a light disc, inviting a press */
+.stamp-button:not(.is-done) { background:#F0F0EC;color:#A3A39E;border-radius:50%; }
+.stamp-button.is-start { color:var(--sb-ink); }
+.stamp-start-label { font:800 15px/1.25 var(--font-family); }
+/* Stamped: an ink imprint in the work's colour, tilted like a real press */
+.stamp-button.is-done { transform:rotate(-10deg); }
+.today-v2 .stamp-button.is-done { color:var(--tv-accent); }
+.stamp-button.is-done.is-slam { animation:stampSlamReal .5s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes stampSlamReal { 0% { transform:translateY(-30px) scale(1.45) rotate(-22deg);opacity:0; } 55% { transform:translateY(0) scale(.92) rotate(-8deg);opacity:1; } 75% { transform:scale(1.03) rotate(-11deg); } 100% { transform:scale(1) rotate(-10deg); } }
+.today-v2 .stamp-button.is-done .stamp-svg, .stamp-button.is-done .stamp-svg { color:var(--tv-accent,var(--sb-ink)); }
+.stamp-button:not(.is-done) .stamp-svg { color:#A3A39E; }

@@ -458,12 +458,23 @@ function todayStageSuffix(c){
  const days=todayDayCount(c);return Model.stage(c)&&days?days+'일째':'';
 }
 function todayLogOf(c){return c.logs.find(l=>l.date===now())}
+// A rubber stamp: thick and thin rings, curved GREW / date lettering, stars and one bold word.
+// Pressed, it prints as a rough-edged ink imprint in the work's colour.
+function stampSVG(c,done){
+ const d=now(),date=d.slice(0,4)+'.'+d.slice(5,7)+'.'+d.slice(8,10),movie=c.type==='movie';
+ const word=done?(movie?'봤음':'읽음'):'';
+ const center=done?'<text class="stamp-word" x="60" y="71" text-anchor="middle">'+word+'</text>':'<text class="stamp-small" x="60" y="61" text-anchor="middle">오늘</text><text class="stamp-mid" x="60" y="77" text-anchor="middle">'+(movie?'봤어요':'읽었어요')+'</text>';
+ return '<svg class="stamp-svg" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="stampArcTop" d="M21 60a39 39 0 0 1 78 0"/><path id="stampArcBottom" d="M13 60a47 47 0 0 0 94 0"/>'+
+  (done?'<filter id="stampRough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.2 2.45" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter>':'')+'</defs>'+
+  '<g'+(done?' filter="url(#stampRough)"':'')+'><g fill="none" stroke="currentColor"><circle cx="60" cy="60" r="56" stroke-width="3.4"/><circle cx="60" cy="60" r="51" stroke-width="1.1"/><circle cx="60" cy="60" r="35" stroke-width="1.4"/></g>'+
+  '<g fill="currentColor"><text class="stamp-arc"><textPath href="#stampArcTop" startOffset="50%" text-anchor="middle">GREW · TODAY</textPath></text><text class="stamp-arc"><textPath href="#stampArcBottom" startOffset="50%" text-anchor="middle">'+date+'</textPath></text>'+
+  '<text class="stamp-stars" x="60" y="'+(done?47:44)+'" text-anchor="middle">★ ★ ★</text>'+center+'<circle cx="16" cy="60" r="1.6"/><circle cx="104" cy="60" r="1.6"/></g></g></svg>';
+}
 function todayStamp(c){
  const stage=Model.stage(c),log=c.logs.find(l=>l.date===now()),verb=c.type==='movie'?'봤어요':'읽었어요';
- const ring='<i class="stamp-ring" aria-hidden="true"></i>',check='<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
- if(stage===0)return button(ring+'<span>'+(c.type==='movie'?'감상<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button is-start',attr(c.id)+' aria-label="'+(c.type==='movie'?'감상 시작하기':'읽기 시작하기')+'"');
- if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+ring+check+'<span>오늘<br>기록 완료</span></div></div>';
- return button(ring+check+'<span>오늘<br>'+verb+'</span>','record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
+ if(stage===0)return button('<span class="stamp-start-label">'+(c.type==='movie'?'감상<br>시작':'읽기<br>시작')+'</span>','startExperience','stamp-button is-start',attr(c.id)+' aria-label="'+(c.type==='movie'?'감상 시작하기':'읽기 시작하기')+'"');
+ if(log)return '<div class="stamp-done"><div class="stamp-button is-done" role="img" aria-label="오늘 기록했어요">'+stampSVG(c,true)+'</div></div>';
+ return button(stampSVG(c,false),'record','stamp-button',attr(c.id)+' aria-label="오늘 '+verb+'"');
 }
 // Long titles shrink until the whole title fits in two lines next to the cover stickers.
 // Long titles shrink until the whole title fits in two lines beside the cover.
