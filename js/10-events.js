@@ -64,7 +64,7 @@ document.addEventListener('click',async e=>{
   state.selected=pool[(index+1)%pool.length].id;if(!commit())return;window.scrollTo(0,0);return
  }
  if(a==='detail'){openDetail(id);return}
- if(a==='back'){if(candidatePreview){closeCandidateDetail();return}go(['sound','notifications'].includes(view)?'my':view==='calendar'?'forest':detailOrigin);return}
+ if(a==='back'){if(candidatePreview){closeCandidateDetail();return}go(['sound','notifications'].includes(view)?'my':['calendar','shop','codex'].includes(view)?'forest':detailOrigin);return}
  if(a==='toToday'){go('today');return}
  if(a==='toScrap'){go('scrap');return}
  if(a==='calendar'){forestMode='month';forestShow='calendar';go('forest');return}

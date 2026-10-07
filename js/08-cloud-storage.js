@@ -390,12 +390,12 @@ function render(){
  syncThemeColor();
  $('tabs').hidden=false;$('page').classList.remove('entry-page','taste-page','intro-page');$('page').dataset.view=view;$('head').dataset.view=view;document.body.dataset.view=view;
  const parentTab=view==='detail'?detailOrigin:view;
- const tab=['sound','notifications'].includes(parentTab)?'my':parentTab==='calendar'?'forest':parentTab;
+ const tab=['sound','notifications'].includes(parentTab)?'my':['calendar','shop','codex'].includes(parentTab)?'forest':parentTab;
  $('tabs').innerHTML=['today','scrap','forest','my'].map((t,i)=>'<button class="'+(tab===t?'active':'')+'" data-action="tab" data-tab="'+t+'" aria-current="'+(tab===t?'page':'false')+'">'+icon(t)+'<span class="tab-label">'+['오늘','스크랩','숲','마이'][i]+'</span></button>').join('');
- $('head').hidden=!['detail','calendar','sound','notifications'].includes(view);
- $('head').innerHTML=!$('head').hidden?'<div class="row">'+button(icon('back'),'back','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+(['sound','notifications'].includes(view)?'설정':view==='calendar'?'나의 숲 · 월간 기록':({today:'오늘',scrap:'스크랩',forest:'숲',calendar:'숲',my:'마이'}[detailOrigin]||'스크랩'))+'</span></div>'+(view==='detail'&&!candidatePreview&&get(detailId)?detailMenu(get(detailId)):''):'';
+ $('head').hidden=!['detail','calendar','sound','notifications','shop','codex'].includes(view);
+ $('head').innerHTML=!$('head').hidden?'<div class="row">'+button(icon('back'),'back','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+(['shop','codex'].includes(view)?'나의 숲':['sound','notifications'].includes(view)?'설정':view==='calendar'?'나의 숲 · 월간 기록':({today:'오늘',scrap:'스크랩',forest:'숲',calendar:'숲',my:'마이'}[detailOrigin]||'스크랩'))+'</span></div>'+(view==='detail'&&!candidatePreview&&get(detailId)?detailMenu(get(detailId)):view==='shop'?(()=>{const q=bmCouponStatus();return button(BM_PAGE_ICONS.coupon+'쿠폰 '+q.balance+'장<span class="bm-wallet-go">'+BM_PAGE_ICONS.arrow+'</span>','collectionTab','bm-wallet-pill','data-tab="coupons" aria-label="쿠폰 '+q.balance+'장, 쿠폰 모으기"')})():''):'';
  $('tabs').hidden=view==='detail';
- $('page').innerHTML=({today:renderToday,scrap:renderScrap,forest:renderForest,calendar:renderCalendar,my:renderMy,sound:renderForestSoundSettings,notifications:renderNotificationSettings,detail:renderDetail}[view]||renderToday)();
+ $('page').innerHTML=({today:renderToday,scrap:renderScrap,forest:renderForest,calendar:renderCalendar,my:renderMy,sound:renderForestSoundSettings,notifications:renderNotificationSettings,detail:renderDetail,shop:renderShopPage,codex:renderCodexPage}[view]||renderToday)();
  if(view==='my'){
   let legacy=false,archives=false;try{legacy=localStorage.getItem(KEY)&&localStorage.getItem(KEY+'.legacy-owner')===dataOwner;archives=Object.keys(localStorage).some(key=>key.startsWith(accountDataKey(dataOwner)+':archive:'))}catch{}
   if(legacy||archives)$('page').insertAdjacentHTML('beforeend','<section class="settings-group"><h2>기록 보관함</h2><details class="settings-archive"><summary>이전 기록과 백업</summary>'+(archives?'<p>다른 기기와 충돌했을 때 보관한 기록을 내려받을 수 있어요.</p>'+button('보관 기록 확인','syncArchives','secondary'):'')+(legacy?'<p>계정별 저장으로 전환하기 전의 기록이에요. 필요한 경우 내려받아 복원할 수 있어요.</p>'+button('이전 기록 내려받기','legacyBackup','secondary'):'')+'</details></section>');
