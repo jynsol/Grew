@@ -3941,3 +3941,12 @@ html, body { overflow-x:clip; }
 .stamp-face svg { width:22px;height:22px;color:#9A9A95; }
 .stamp-face span { font:800 14px/1.25 var(--font-family);color:#6B6B66;text-align:center; }
 .today-v2 .sticker-week li.is-today:not(.is-logged) { background:#ECECE8;box-shadow:none;color:var(--sb-ink); }
+/* Latest memo as a quote in the hero's open middle (left of the tree) */
+.today-v2 .tv-note { position:relative;z-index:1;display:flex;flex-direction:column;gap:6px;width:56%;min-height:0;margin-top:18px;padding:12px 14px;border:0;border-radius:16px;background:rgba(255,255,255,.55);text-align:left;color:var(--sb-ink); }
+.today-v2 .tv-note span { font:600 13.5px/1.45 var(--font-family);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden; }
+.today-v2 .tv-note span::before { content:"“"; }
+.today-v2 .tv-note span::after { content:"”"; }
+.today-v2 .tv-note small { font:620 11.5px/1 var(--font-family);color:rgba(30,42,34,.5); }
+/* 읽기 시작 stamp label matches the 오늘 읽었어요 face */
+.stamp-button.is-start .stamp-start-label { font:800 14px/1.25 var(--font-family);color:#6B6B66; }
+.today-v2 .tv-note { z-index:auto; } .today-v2 .today-tree { z-index:1; }

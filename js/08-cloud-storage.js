@@ -513,6 +513,8 @@ function todayBoard(c){
  // tree in a soft disc, then a white week card with the stamp. Stages are not a goal, so no progress ring.
  // Big count: films with a known running time show minutes, everything else the days recorded.
  const minutes=c.type==='movie'?Number(c.runtime)||0:0,count=minutes||todayDayCount(c),unit=minutes?'분':'일째';
+ // The latest memo fills the card's open middle as a quoted line.
+ const lastMemo=[...c.logs].filter(l=>String(l.memo||'').trim()).sort((a,b)=>b.date.localeCompare(a.date))[0];
  return '<section class="sticker-today today-v2" data-type="'+c.type+'" data-stage="'+stage+'">'+
  '<header class="tv-head"><div class="sticker-top"><div class="sticker-titles"><h1 class="page-title">오늘</h1></div><div class="page-heading-actions">'+scrapAddButton()+'</div></div></header>'+
  '<article class="today-panel tv-hero">'+
@@ -520,8 +522,8 @@ function todayBoard(c){
    (reading?button('⇄ '+readingLabel+' '+reading,'readingList','sticker-switch',attr(c.id)+' aria-label="함께 '+readingLabel+'인 작품 '+reading+'개 보기"'):others?button('⇄ 다른 작품','pick','sticker-switch','aria-label="다른 작품 고르기"'):'')+'</div>'+
   '<div class="tv-hero-main"><div class="today-panel-title"><h1 class="page-title"><button type="button" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+'">'+esc(mainTitle)+'</button></h1>'+(sub?'<span>'+esc(sub)+'</span>':'')+(c.creator?'<span class="today-panel-kicker">'+esc(c.creator)+'</span>':'')+(c.type==='movie'?button('보러 가기 ↗','external','tv-watch',attr(c.id)):'')+'</div>'+
   '<button type="button" class="sticker-cover" data-action="detail" '+attr(c.id)+' aria-label="'+esc(c.title)+' 상세 보기">'+coverArt+'</button></div>'+
-  '<i class="tv-sun" aria-hidden="true"></i>'+stickerTree(c,stage,'today-tree')+
-  '<div class="today-stage tv-count">'+(stage&&count?'<b>'+count+'</b><small>'+unit+'</small>':'')+'<span>'+esc(growthAppearance(stage).name)+(stage?'':' · 시작 전')+'</span></div>'+
+  (lastMemo?'<button type="button" class="tv-note" data-action="detail" '+attr(c.id)+'><span>'+esc(lastMemo.memo)+'</span><small>'+esc(lastMemo.date.slice(5).replace('-','.'))+' 메모</small></button>':'')+'<i class="tv-sun" aria-hidden="true"></i>'+stickerTree(c,stage,'today-tree')+
+  '<div class="today-stage tv-count">'+'<b>'+(stage?count:0)+'</b><small>'+(stage?unit:'일째')+'</small><span>'+esc(growthAppearance(stage).name)+(stage?'':' · 시작 전')+'</span></div>'+
  '</article>'+
  '<article class="tv-week sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(todayLogOf(c)?button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</article>'+
  '</section>';
