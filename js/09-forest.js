@@ -883,8 +883,8 @@ async function drawShareCard(kind,format,target){
  const top=story?250:200;ctx.fillStyle=ink;ctx.font='700 46px '+F;ctx.fillText(name+'의 '+(isYear?'올해':m+'월')+' 숲',72,top);
  const big=String(isYear?done.length:items.length);ctx.font='800 '+(story?300:250)+'px '+L;ctx.fillText(big,60,top+(story?290:240));
  ctx.font='700 56px '+F;ctx.fillText(isYear||month<now().slice(0,7)?'그루를 심었어요':'그루가 자라고 있어요',72,top+(story?390:330));
- sharePill(ctx,'책 ',W-72,top-30,{fill:'#E6DDF8',size:34,bold:books+'권',boldSize:48,rotate:-6,align:'right'});
- sharePill(ctx,'영화 ',W-110,top+90,{fill:'#C5E8CE',size:34,bold:films+'편',boldSize:48,rotate:5,align:'right'});
+ sharePill(ctx,'책 ',W-72,top-30,{fill:'#FFC2A8',size:34,bold:books+'권',boldSize:48,rotate:-6,align:'right'});
+ sharePill(ctx,'영화 ',W-110,top+90,{fill:'#BDEBE3',size:34,bold:films+'편',boldSize:48,rotate:5,align:'right'});
  const bandTop=top+(story?520:400),bandH=story?820:560;
  if(isYear){const scale=Math.min((W-80)/390,bandH/230);await shareIsland(ctx,bandTop+(bandH-230*scale)/2,(W-390*scale)/2,scale,items)}
  else{try{const board=items.map(x=>({...x,forestTile:''})),svg=await inlineSvgImages(shareCropSVG(selfContainedForestSVG(forestSVG(board,'basic',false,{preview:true,transient:true,grid:'month'})))),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=await loadImage(url),iw=img.naturalWidth||720,ih=img.naturalHeight||540,s=Math.min((W+60)/iw,bandH/ih);ctx.drawImage(img,(W-iw*s)/2,bandTop+(bandH-ih*s)/2,iw*s,ih*s)}finally{URL.revokeObjectURL(url)}}catch{}}

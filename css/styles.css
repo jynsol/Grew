@@ -3860,3 +3860,52 @@ html, body { overflow-x:clip; }
 .today-v2 .tv-head { padding-top:4px; }
 .stamp-svg .stamp-word { font:900 23px var(--sb-label);font-stretch:112%;letter-spacing:.04em; }
 .stamp-svg .stamp-word { font-size:20px;font-stretch:100%;letter-spacing:.03em; }
+
+/* ── Book / film colours: apricot and mint-blue, everywhere ──────────────── */
+:root { --book-bg:#FFC2A8;--book-tint:#FFE3D6;--book-ink:#C24A2F;--movie-bg:#BDEBE3;--movie-tint:#DCF3EF;--movie-ink:#1C7A6C; }
+.type-tag.is-book, .forest-chip.is-book { background:var(--book-tint);color:var(--book-ink); }
+.type-tag.is-movie, .forest-chip.is-movie { background:var(--movie-tint);color:var(--movie-ink); }
+.forest-chip b { color:inherit; }
+.detail-panel { background:var(--book-bg); }
+.detail-page[data-type="movie"] .detail-panel { background:var(--movie-bg); }
+.sticker-cover-art { background-color:var(--book-tint); }
+.sticker-cover-art[data-type="movie"], .scrap-composer-body .content-row div.cover.movie { background-color:var(--movie-tint); }
+.sticker-recent-card .sticker-recent-art, .sticker-recent-card[data-type="book"] .sticker-recent-art { background:var(--book-bg); }
+.sticker-recent-card[data-type="movie"] .sticker-recent-art { background:var(--movie-bg); }
+.sticker-recent-card .sticker-recent-type, .sticker-recent-card[data-type="book"] .sticker-recent-type { background:var(--book-tint) !important;color:var(--book-ink); }
+.sticker-recent-card[data-type="movie"] .sticker-recent-type { background:var(--movie-tint) !important;color:var(--movie-ink); }
+.sticker-recent-card i.sticker-recent-cover { background-color:#fff; }
+
+/* ── Today hero (design C): solid colour card, big count, big sticker tree ── */
+.today-v2 { --tv-accent:var(--book-ink);--tv-hero:var(--book-bg); }
+.today-v2[data-type="movie"] { --tv-accent:var(--movie-ink);--tv-hero:var(--movie-bg); }
+.today-v2 .tv-hero { height:400px;padding:18px 20px 20px;background:var(--tv-hero); }
+.today-v2 .tv-tag, .today-v2 .sticker-switch, .today-v2 .tv-watch { background:rgba(255,255,255,.6); }
+.today-v2 .tv-tag { color:var(--tv-accent); }
+.today-v2 .tv-hero-main { margin-top:12px; }
+.page .today-v2 .today-panel-title h1 { font-size:23px; }
+.today-v2 .today-panel-title>span { color:rgba(30,42,34,.6); }
+.today-v2 .sticker-cover { width:46px;height:66px;filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 5px 6px rgba(30,42,34,.2));box-shadow:none;transform:rotate(5deg); }
+.today-v2 .tv-sun { position:absolute;right:-44px;bottom:-64px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.35);pointer-events:none; }
+.today-v2 .today-tree { left:auto;right:14px;top:auto;bottom:26px;width:200px;height:200px;margin:0;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 8px 8px rgba(30,42,34,.22)); }
+.today-v2[data-stage="0"] .today-tree, .today-v2[data-stage="1"] .today-tree { right:24px;bottom:30px;width:160px;height:160px;margin:0; }
+.today-v2 .today-tree.is-leaving.is-small { right:24px;bottom:30px;width:160px;height:160px;margin:0; }
+.today-v2 .tv-count { position:absolute;left:20px;bottom:20px;height:auto;padding:0;margin:0;border-radius:0;background:none;display:block;transform:none; }
+.today-v2 .tv-count b { font:800 52px/1 var(--font-family);letter-spacing:-.04em;color:var(--sb-ink); }
+.today-v2 .tv-count small { margin-left:2px;font:750 16px/1 var(--font-family);color:var(--sb-ink); }
+.today-v2 .tv-count span { display:block;margin-top:4px;font:620 13px/1.2 var(--font-family);color:rgba(30,42,34,.6); }
+.today-v2 .tv-count.is-pop { animation:tvCountPop .5s ease-out 1.1s; }
+@keyframes tvCountPop { 0%,100% { transform:scale(1); } 50% { transform:scale(1.08); } }
+/* Week card: recorded days filled with the work's colour, today ringed */
+.today-v2 .sticker-week li.is-logged, .today-v2[data-type] .sticker-week li.is-logged { background:var(--tv-accent);color:#fff; }
+.today-v2 .sticker-week li.is-today:not(.is-logged) { background:#fff;box-shadow:inset 0 0 0 2px var(--tv-accent);color:var(--tv-accent); }
+/* Stamp: the work's colour before (outline) and after (imprint) */
+.today-v2 .stamp-button:not(.is-done) { background:none; }
+.today-v2 .stamp-button:not(.is-done) .stamp-svg { color:var(--tv-accent);opacity:.75; }
+.today-v2 .tv-count { top:auto;right:auto; }
+.sticker-today.today-v2 .today-panel.tv-hero { background:var(--tv-hero); }
+.today-v2 .tv-count b, .today-v2 .tv-count small { opacity:1; }
+.detail-page .detail-chip:not(.is-ink) { background:var(--book-tint);color:var(--book-ink); }
+.detail-page[data-type="movie"] .detail-chip:not(.is-ink) { background:var(--movie-tint);color:var(--movie-ink); }
+.detail-page .detail-action-primary { background:var(--book-bg);color:var(--sb-ink); }
+.detail-page[data-type="movie"] .detail-action-primary { background:var(--movie-bg); }
