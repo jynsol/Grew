@@ -3954,3 +3954,5 @@ html, body { overflow-x:clip; }
 .today-v2 .tv-hero { height:350px; }
 .today-v2 .tv-sun { width:270px;height:270px;bottom:-60px; }
 .today-v2 .today-tree { width:186px;height:186px;bottom:22px; }
+/* The printed stamp is always coral, like red stamp ink (books and films alike) */
+.today-v2 .stamp-button.is-done .stamp-svg, .stamp-button.is-done .stamp-svg { color:var(--sb-coral); }
