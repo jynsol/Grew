@@ -3988,3 +3988,6 @@ html, body { overflow-x:clip; }
 .scrap-tree-slot .sticker-tree.is-cut-sm { width:48px;height:48px;margin:0; }
 .scrap-type { justify-content:center;width:50px;padding:0; }
 .scrap-row-marks { min-height:20px; }
+/* Scrap list sits straight on the page: no card around it, just hairlines between rows */
+.scrap-list { margin-top:8px;padding:0;border-radius:0;background:none;box-shadow:none; }
+.scrap-row { border-bottom:1px solid rgba(30,42,34,.08); }
