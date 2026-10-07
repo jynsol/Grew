@@ -3912,8 +3912,8 @@ html, body { overflow-x:clip; }
 
 /* Books butter, films mint: the forest's own palette. Colour now only means book / film. */
 :root { --book-bg:#F7E7A1;--book-tint:#FBF0C6;--book-ink:#946B00;--movie-bg:#BFE7CB;--movie-tint:#DDF2E3;--movie-ink:#2A7D4E; }
-/* Tab bar: one white pill for the active tab, whatever the tab */
-.tabs button.active, .tabs button[data-tab].active { background:#fff;color:var(--sb-ink); }
+/* Tab bar keeps a colour per tab; 오늘 is sky so it never repeats the book butter */
+.tabs button[data-tab="today"].active { background:#CBE4FF;color:var(--sb-ink); }
 /* 최근 완료: white cards; only the small BOOK / MOVIE label carries colour */
 .sticker-recent-card .sticker-recent-art, .sticker-recent-card[data-type] .sticker-recent-art { background:#fff;box-shadow:inset 0 0 0 1px rgba(30,42,34,.06); }
 .sticker-recent-card .sticker-recent-type, .sticker-recent-card[data-type] .sticker-recent-type { height:20px;padding:0 7px;border-radius:6px;font:800 10px/1 var(--sb-label);font-stretch:118%;letter-spacing:.06em; }
