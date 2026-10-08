@@ -18,7 +18,7 @@ function orderSeries(pool){
 function discoveryCatalog(){const seen=new Set();return [...CATALOG,...SEED_BOOKS.map(b=>({type:'book',title:b.title,creator:b.creator,genre:b.genre}))].filter(c=>{if(!allowDiscoveryCandidate(c))return false;const key=c.type+':'+Model.norm(c.title)+':'+Model.norm(c.creator);if(seen.has(key))return false;seen.add(key);return true})}
 function renderDiscovery(){
  const completed=state.items.filter(c=>c.completed),known=discoveryCatalog();
- if(!known.length)return '<section>'+todayHeading()+'<div class="empty"><h2>'+(completed.length?'담아둔 작품을 모두 완료했어요':'작품을 추가해보세요')+'</h2>'+button('새로운 작품 추천받기','tastes')+button('직접 스크랩하기','add','textbtn')+'</div></section>';
+ if(!known.length)return '<section>'+todayHeading()+'<div class="empty today-empty"><span class="empty-icon" aria-hidden="true">'+icon('scrap')+'</span><h3>'+(completed.length?'담아둔 작품을 모두 완료했어요':'첫 작품을 담아보세요')+'</h3><p>'+(completed.length?'다음에 읽거나 볼 작품을 골라보세요.':'읽고 싶은 책과 보고 싶은 영화를 담으면<br>여기서 하루하루 함께 키워요.')+'</p>'+button('새로운 작품 추천받기','tastes','primary')+button('직접 스크랩하기','add','textbtn')+'</div></section>';
  const refs=[...completed,...known.filter(c=>['experienced','interested'].includes(state.profile.responses?.[c.type+':'+c.title]))];
  const pool=known.filter(c=>(discoveryType==='all'||c.type===discoveryType)&&!isTasteCandidateSaved(c)&&!hasTasteHistory(c));
  const score=c=>refs.reduce((n,x)=>n+(x.type===c.type?1:0)+(c.genre&&x.genre===c.genre?3:0),0);

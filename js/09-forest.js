@@ -839,11 +839,19 @@ function sharePill(ctx,text,x,y,{fill='#fff',color='#1E2A22',size=34,rotate=0,bo
  ctx.shadowColor='rgba(30,42,34,.18)';ctx.shadowBlur=24;ctx.shadowOffsetY=10;ctx.fillStyle='#fff';shareRounded(ctx,-w/2-6,-h/2-6,w+12,h+12,(h+12)/2);ctx.fill();ctx.shadowColor='transparent';
  ctx.fillStyle=fill;shareRounded(ctx,-w/2,-h/2,w,h,h/2);ctx.fill();ctx.fillStyle=color;ctx.textBaseline='middle';ctx.font='600 '+size+'px '+F;ctx.fillText(text,-w/2+28,2);if(bold){ctx.font='800 '+(boldSize||size*1.25)+'px '+F;ctx.fillText(bold,-w/2+28+w1+12,2)}ctx.restore();return w;
 }
-function shareStamp(ctx,cx,cy,r,label,rotate=10){
- const F='"Pretendard Variable",Pretendard,sans-serif';ctx.save();ctx.translate(cx,cy);ctx.rotate(rotate*Math.PI/180);ctx.shadowColor='rgba(30,42,34,.35)';ctx.shadowBlur=30;ctx.shadowOffsetY=14;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,r+5,0,Math.PI*2);ctx.fill();ctx.shadowColor='transparent';
- ctx.fillStyle='#1E2A22';ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.setLineDash([10,8]);ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,r-16,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
- ctx.strokeStyle='#FF6A55';ctx.lineWidth=r*.1;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(-r*.22,-r*.2);ctx.lineTo(-r*.06,-r*.06);ctx.lineTo(r*.24,-r*.34);ctx.stroke();
- ctx.fillStyle='#fff';ctx.font='800 '+Math.round(r*.36)+'px '+F;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,r*.24);ctx.restore();
+// Same rubber stamp as stampSVG (coral rings, arc lettering, DONE), drawn on canvas.
+function shareStamp(ctx,cx,cy,r,date,rotate=10){
+ const k=r/60,L='Archivo,"Pretendard Variable",sans-serif',coral='#E85A47';
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(rotate*Math.PI/180);ctx.globalAlpha=.92;ctx.strokeStyle=coral;ctx.fillStyle=coral;
+ [[56,3.4],[51,1.1],[35,1.4]].forEach(([rr,w])=>{ctx.lineWidth=w*k;ctx.beginPath();ctx.arc(0,0,rr*k,0,Math.PI*2);ctx.stroke()});
+ const arc=(text,rr,top)=>{ctx.font='600 '+(10*k)+'px '+L;const sp=1.4*k,ws=[...text].map(ch=>ctx.measureText(ch).width+sp),total=ws.reduce((x,y)=>x+y,0)-sp;
+  let pos=-total/2;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  [...text].forEach((ch,i)=>{const mid=pos+(ws[i]-sp)/2,ang=mid/(rr*k);ctx.save();if(top){ctx.rotate(ang);ctx.fillText(ch,0,-rr*k)}else{ctx.rotate(-ang);ctx.fillText(ch,0,rr*k+7*k)}ctx.restore();pos+=ws[i]})};
+ arc('GREW · TODAY',39,true);arc(String(date||now()).replace(/-/g,'.'),47,false);
+ ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.font='600 '+(7*k)+'px '+L;ctx.fillText('★  ★  ★',0,-13*k);
+ ctx.font='700 '+(21*k)+'px '+L;ctx.letterSpacing=(.6*k)+'px';ctx.fillText('DONE',0,11*k);ctx.letterSpacing='0px';
+ [-44,44].forEach(x=>{ctx.beginPath();ctx.arc(x*k,0,1.6*k,0,Math.PI*2);ctx.fill()});
+ ctx.restore();
 }
 async function shareIsland(ctx,y0,x0,scale,items){
  const plot=i=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}},P=(x,y)=>[x0+x*scale,y0+y*scale],poly=(pts,fill)=>{ctx.fillStyle=fill;ctx.beginPath();pts.forEach(([x,y],k)=>{const [px,py]=P(x,y);k?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.closePath();ctx.fill()};
@@ -860,7 +868,7 @@ async function drawShareCard(kind,format,target){
  const W=1080,H=format==='story'?1920:1350,story=format==='story',canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
  const F='"Pretendard Variable",Pretendard,sans-serif',L='Archivo,'+F,name=state.profile.name||'나',ink='#1E2A22',muted='#52524F',months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
  const c=kind==='work'?get(target):null;
- ctx.fillStyle=kind==='work'?'#F6E7A8':'#F8F8F6';ctx.fillRect(0,0,W,H);
+ ctx.fillStyle=kind==='work'?(c&&c.type==='movie'?'#BFE7CB':'#F7E7A1'):'#F8F8F6';ctx.fillRect(0,0,W,H);
  const head=(right)=>{ctx.fillStyle=ink;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textBaseline='alphabetic';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillText(right,W-72,96);ctx.letterSpacing='0px';ctx.textAlign='left'};
  const foot=()=>{ctx.fillStyle=muted;ctx.font='500 30px '+F;ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=ink;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left'};
  if(kind==='work'&&c){
@@ -871,7 +879,7 @@ async function drawShareCard(kind,format,target){
   const cy=story?1080:800,r=story?380:300;ctx.save();ctx.shadowColor='rgba(30,42,34,.12)';ctx.shadowBlur=30;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,cy,r,0,Math.PI*2);ctx.fill();ctx.restore();
   const tree=await shareAsset(stickerTreeSrc(c,3));if(tree){const s=r*1.6;ctx.drawImage(tree,W/2-s/2,cy-s/2-10,s,s)}
   const cover=c.cover?await loadShareCover(c.cover):null;ctx.save();ctx.translate(W/2-r*.95,cy+r*.45);ctx.rotate(-8*Math.PI/180);ctx.fillStyle='#fff';shareRounded(ctx,-6,-6,172,248,16);ctx.fill();if(cover)ctx.drawImage(cover,0,0,160,236);else{ctx.fillStyle=c.type==='movie'?'#BFE7CB':'#F7E7A1';ctx.fillRect(0,0,160,236)}ctx.restore();
-  shareStamp(ctx,W/2+r*.85,cy-r*.75,story?120:100,'완료',12);
+  shareStamp(ctx,W/2+r*.82,cy-r*.78,story?130:110,done,12);
   if(validRating(c.rating))sharePill(ctx,'★ '+Number(c.rating).toFixed(1),W/2+r*.35,cy+r*.55,{size:40,rotate:-6});
   const logs=new Set(c.logs.map(l=>l.date)).size,start=Model.firstExperienceDate(c),days=start?Math.max(1,Math.round((Date.parse(done+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/864e5)+1):0;
   ctx.textAlign='center';ctx.fillStyle=muted;ctx.font='600 34px '+F;ctx.fillText([days?days+'일':'',logs?'기록 '+logs+'회':'',(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요'].filter(Boolean).join(' · '),W/2,cy+r+(story?140:110));ctx.textAlign='left';
@@ -943,5 +951,5 @@ document.addEventListener('click',e=>{if(!e.target.closest('.inline-picker'))clo
 document.addEventListener('keydown',e=>{const panel=e.target.closest('.inline-picker');if(!panel)return;const trigger=panel.querySelector('button');if(e.key==='Escape'){closeInlinePickers();trigger.focus();e.preventDefault()}if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();if(trigger.getAttribute('aria-expanded')!=='true')toggleInlinePicker(trigger);const buttons=[...panel.querySelectorAll('.inline-picker-panel button')],index=buttons.indexOf(document.activeElement);buttons[(index+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus()}});
 document.addEventListener('focusin',e=>{if(!e.target.closest('.inline-picker'))closeInlinePickers()});
 function editCompletion(id){
- const c=get(id);showModal('완료일 수정','<form id="completionForm" data-id="'+id+'"><label for="completionDate">완료 날짜</label><input id="completionDate" type="date" max="'+now()+'" value="'+(c.completed==='unknown'?'':c.completed)+'" required><p class="creator">해당 날짜의 숲과 달력에 반영합니다.</p><div id="formError" class="form-error" role="alert"></div><button type="submit" class="primary">수정 저장</button></form>','completion');
+ const c=get(id);showModal('완료일 수정','<form id="completionForm" data-id="'+id+'"><label for="completionDate">완료 날짜</label><input id="completionDate" type="date" max="'+now()+'" value="'+(c.completed==='unknown'?'':c.completed)+'" required><p class="creator">해당 날짜의 숲과 달력에 반영돼요.</p><div id="formError" class="form-error" role="alert"></div><button type="submit" class="primary">수정 저장</button></form>','completion');
 }

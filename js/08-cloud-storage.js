@@ -295,7 +295,7 @@ async function handleCloudStorage(event){
 function downloadStateSnapshot(value,label){download(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}),'grew-'+label+'-'+Model.today()+'.json')}
 function showCloudConflict(){
  const conflict=dataEnvelope?.conflict;if(!conflict)return;
- showModal('두 기기의 기록을 확인해주세요','<p>이 기기 '+state.items.length+'개 · 클라우드 '+conflict.state.items.length+'개. 선택하지 않은 기록도 이 기기에 별도 보관합니다.</p>'+button('이 기기 기록 백업','backup','secondary')+button('클라우드 기록 백업','backupRemoteConflict','secondary')+button('클라우드 기록 사용','useRemoteConflict','primary')+button('이 기기 기록 사용','useLocalConflict','secondary'),'sync-conflict');
+ showModal('두 기기의 기록을 확인해주세요','<p>이 기기 '+state.items.length+'개 · 클라우드 '+conflict.state.items.length+'개. 선택하지 않은 기록도 이 기기에 별도 보관해요.</p>'+button('이 기기 기록 백업','backup','secondary')+button('클라우드 기록 백업','backupRemoteConflict','secondary')+button('클라우드 기록 사용','useRemoteConflict','primary')+button('이 기기 기록 사용','useLocalConflict','secondary'),'sync-conflict');
 }
 async function resolveCloudConflict(useLocal){
  const owner=dataOwner,generation=dataGeneration;
@@ -312,7 +312,7 @@ async function resolveCloudConflict(useLocal){
 
 function cloudSetupModal(message=''){
  showModal('Supabase 사용자 데이터 연결',
-  '<p class="muted">브라우저용 <strong>Publishable key</strong>를 한 번 저장하면 이 기기에서는 다시 입력하지 않아도 됩니다.</p>'+
+  '<p class="muted">브라우저용 <strong>Publishable key</strong>를 한 번 저장하면 이 기기에서는 다시 입력하지 않아도 돼요.</p>'+
   (message?'<p class="form-error">'+esc(message)+'</p>':'')+
   '<form id="cloudConfigForm"><label for="cloudPublicKey">Supabase Publishable key</label>'+
   '<input id="cloudPublicKey" type="password" autocomplete="off" spellcheck="false" placeholder="sb_publishable_...">'+
@@ -656,7 +656,7 @@ function renderForestMonth(){
  const board=items.map(c=>({...c,forestTile:''}));
  const tools='<div class="forest-tools-row">'+button('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'+(forestEditMode?'완료':'꾸미기'),'forestEdit','forest-tool is-ink','aria-pressed="'+forestEditMode+'"')+button('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9 5.5 4h13L20 9"/><path d="M4 9h16v2a3 3 0 0 1-5.3 2 3 3 0 0 1-5.4 0A3 3 0 0 1 4 11z"/><path d="M5 13v7h14v-7"/></svg>상점','bmOpenShop','forest-tool')+button('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>도감','bmCodex','forest-tool')+yearTool+'</div>';
  return '<section class="forest-page-section forest-month is-board">'+head+toggle+
- '<div class="forest-board"><div class="forest-viewport '+(forestEditMode?'editing':'')+'" id="forestViewport" data-theme="basic" tabindex="0" aria-label="'+(forestEditMode?'꾸미기 중. 바꿀 나무를 선택하세요.':m+'월의 숲, '+items.length+'그루. 나무를 선택해 기록을 볼 수 있습니다.')+'">'+forestSVG(board,'basic',true,{transient:true,grid:'month'})+'</div>'+
+ '<div class="forest-board"><div class="forest-viewport '+(forestEditMode?'editing':'')+'" id="forestViewport" data-theme="basic" tabindex="0" aria-label="'+(forestEditMode?'꾸미기 중. 바꿀 나무를 선택하세요.':m+'월의 숲, '+items.length+'그루. 나무를 선택해 기록을 볼 수 있어요.')+'">'+forestSVG(board,'basic',true,{transient:true,grid:'month'})+'</div>'+
  '<div class="forest-float">'+(forestEditMode?'<p class="forest-edit-hint">바꿀 나무를 선택하세요</p>':items.length?'':'<p class="forest-empty">'+(month===now().slice(0,7)?'이번 달 첫 기록을 남기면 새싹이 자라요':'이 달에는 심은 나무가 없어요')+'</p>')+tools+'</div></div></section>';
 }
 const FOREST_MONTH_NAMES=['일','월','화','수','목','금','토'];
@@ -755,7 +755,7 @@ function addTreeUnlockTestData(){
   }
  });
  ensureCompletedSpeciesAssignments();
- if(!persist())return;render();toast('각 나무에 완료 경험 3개씩 넣었어요. 일반 나무 20종이 모두 해금됩니다.');
+ if(!persist())return;render();toast('각 나무에 완료 경험 3개씩 넣었어요. 일반 나무 20종이 모두 해금돼요.');
 }
 
 let profileEdit=null;
@@ -831,7 +831,7 @@ function showModal(title,html,kind='generic'){
  dismissToast();modal=kind;const composer=kind==='scrap-composer',collection=kind==='collection';
  $('overlay').innerHTML='<div class="sheet-back '+(composer?'scrap-composer-back':collection?'collection-back':'')+'" data-kind="'+esc(kind)+'" data-action="backdrop"><section class="sheet '+(composer?'scrap-composer-sheet':collection?'collection-sheet':'')+'" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="sheet-head"><h2 id="sheetTitle" tabindex="-1">'+esc(title)+'</h2>'+button(icon('close'),'close','iconbtn','aria-label="닫기"')+'</div>'+html+'</section></div>';
  document.querySelector('.app').inert=true;
- document.body.style.overflow='hidden';modalFocusTimer=setTimeout(()=>{const sheet=$('overlay').querySelector('.sheet');const target=['scrap-filters','scrap-composer','record-done','planted','finish'].includes(kind)?sheet?.querySelector('#sheetTitle'):kind==='confirm'?sheet?.querySelector('[data-action="close"]'):(sheet?.querySelector('input:not([type=hidden]):not([type=file]):not([hidden]):not(:disabled),textarea:not(:disabled),select:not(:disabled)')||sheet?.querySelector('button:not([data-action="close"])')||sheet?.querySelector('button'));target?.focus()},35);;window.initRatingPicker?.();
+ document.body.style.overflow='hidden';modalFocusTimer=setTimeout(()=>{const sheet=$('overlay').querySelector('.sheet');const target=['scrap-filters','scrap-composer','record-done','planted','finish'].includes(kind)?sheet?.querySelector('#sheetTitle'):kind==='confirm'?sheet?.querySelector('#sheetTitle'):(sheet?.querySelector('input:not([type=hidden]):not([type=file]):not([hidden]):not(:disabled),textarea:not(:disabled),select:not(:disabled)')||sheet?.querySelector('#sheetTitle')||sheet?.querySelector('button'));target?.focus({preventScroll:true})},35);;window.initRatingPicker?.();
 }
 function closeModal(){if(modal==='link')cancelLinkImport();if(modal==='profile'&&profileEdit){profileEdit.request++;profileEdit=null}clearTimeout(modalFocusTimer);document.querySelector('.app').inert=false;if(ocrBusy){ocrGeneration++;ocrBusy=false}if(modal==='scrap-composer')scrapFlowActive=false;modal=null;$('overlay').innerHTML='';document.body.style.overflow='';if(modalReturnFocus?.isConnected)modalReturnFocus.focus({preventScroll:true});modalReturnFocus=null;}
 function confirmBox(title,text,onConfirm,label='확인',danger=false){window.pendingConfirm=onConfirm;showModal(title,'<p>'+esc(text)+'</p>'+button(label,'confirm',danger?'primary danger':'primary')+button('취소','close','textbtn'),'confirm')}
@@ -1693,7 +1693,7 @@ function infoForm(c=null,source=''){
  const d=c||{type:defaultType,title:$('catalogSearch')?.value||$('musicCatalogSearch')?.value||$('movieCatalogSearch')?.value||'',creator:'',source};
  const editable=!c||!c.providerId&&!c.isbn;
  const locked=c&&!editable?' disabled aria-disabled="true"':'';
- showModal(c?'나의 분류 수정':'직접 입력','<form id="infoForm" data-edit="'+esc(c?.id||'')+'"><label for="contentType">유형</label><select id="contentType"'+locked+'>'+Object.entries(typeName).map(([k,v])=>'<option value="'+k+'" '+(d.type===k?'selected':'')+'>'+v+'</option>').join('')+'</select><label for="contentTitle">제목</label><input id="contentTitle" required maxlength="200" value="'+esc(d.title)+'"'+(c&&!editable?' readonly':'')+'><label for="contentCreator">제작자 · 모르면 비워두세요</label><input id="contentCreator" maxlength="100" value="'+esc(d.creator)+'"'+(c&&!editable?' readonly':'')+'>'+(c&&!editable?'<p class="muted tiny">검색에서 가져온 원본 정보예요. 장르와 나의 기록을 수정할 수 있어요.</p>':'')+metadataFields(d)+'<label for="contentScrapCount">스크랩 횟수</label><input id="contentScrapCount" type="number" min="0" step="1" value="'+(d.saves?.length||0)+'"><label for="contentSource">출처·메모 · 선택</label><input id="contentSource" maxlength="500" value="'+esc(d.source||'')+'"><label for="contentCover">표지 사진 · 선택</label><input id="contentCover" type="file" accept="image/*"><p class="muted tiny">표지는 스크랩과 달력에만 사용합니다.</p><div id="formError" class="form-error" role="alert"></div><button class="primary" type="submit">'+(c?'나의 분류 저장':'스크랩')+'</button></form>','info');
+ showModal(c?'나의 분류 수정':'직접 입력','<form id="infoForm" data-edit="'+esc(c?.id||'')+'"><label for="contentType">유형</label><select id="contentType"'+locked+'>'+Object.entries(typeName).map(([k,v])=>'<option value="'+k+'" '+(d.type===k?'selected':'')+'>'+v+'</option>').join('')+'</select><label for="contentTitle">제목</label><input id="contentTitle" required maxlength="200" value="'+esc(d.title)+'"'+(c&&!editable?' readonly':'')+'><label for="contentCreator">제작자 · 모르면 비워두세요</label><input id="contentCreator" maxlength="100" value="'+esc(d.creator)+'"'+(c&&!editable?' readonly':'')+'>'+(c&&!editable?'<p class="muted tiny">검색에서 가져온 원본 정보예요. 장르와 나의 기록을 수정할 수 있어요.</p>':'')+metadataFields(d)+'<label for="contentScrapCount">스크랩 횟수</label><input id="contentScrapCount" type="number" min="0" step="1" value="'+(d.saves?.length||0)+'"><label for="contentSource">출처·메모 · 선택</label><input id="contentSource" maxlength="500" value="'+esc(d.source||'')+'"><label for="contentCover">표지 사진 · 선택</label><input id="contentCover" type="file" accept="image/*"><p class="muted tiny">표지는 스크랩과 달력에만 사용해요.</p><div id="formError" class="form-error" role="alert"></div><button class="primary" type="submit">'+(c?'나의 분류 저장':'스크랩')+'</button></form>','info');
 }
 function findSavedWork(candidate){
  const keys=new Set(tasteKeys(candidate));

@@ -95,10 +95,10 @@ document.addEventListener('click',async e=>{
  if(a==='editNote'){editNote(id,b.dataset.note);return}
  if(a==='deleteNote'){const noteId=b.dataset.note;c.notes=(c.notes||[]).filter(n=>n.id!==noteId);if(!commit(true))return;toast('메모를 삭제했어요.');return}
  if(a==='editLog'){editLog(id,b.dataset.log);return}
- if(a==='deleteLog'){const logId=b.dataset.log;confirmBox('이 기록을 삭제할까요?','선택한 날의 경험 기록만 삭제합니다.',()=>{c.logs=c.logs.filter(l=>l.id!==logId);if(!commit())return;toast('기록을 삭제했어요.')},'기록 삭제',true);return}
+ if(a==='deleteLog'){const logId=b.dataset.log;confirmBox('이 기록을 삭제할까요?','선택한 날의 경험 기록만 삭제해요.',()=>{c.logs=c.logs.filter(l=>l.id!==logId);if(!commit())return;toast('기록을 삭제했어요.')},'기록 삭제',true);return}
  if(a==='editInfo'){infoForm(c);return}
  if(a==='rescrap'){const event=Model.uid();Model.add(state,c,event);saved(c,event);return}
- if(a==='delete'){confirmBox('스크랩을 삭제할까요?','이 콘텐츠의 스크랩·경험 기록·완료·숲의 나무가 함께 삭제됩니다.',()=>{Model.remove(state,id);if(!persist())return;go('scrap');toast('스크랩을 삭제했어요.')},'삭제',true);return}
+ if(a==='delete'){confirmBox('스크랩을 삭제할까요?','이 콘텐츠의 스크랩·경험 기록·완료·숲의 나무가 함께 삭제돼요.',()=>{Model.remove(state,id);if(!persist())return;go('scrap');toast('스크랩을 삭제했어요.')},'삭제',true);return}
  if(a==='rating'){ratingPrompt(c,view==='today'&&state.selected===c.id&&!!c.completed);return}
  if(a==='star'){$('ratingValue').value=b.dataset.value;$('ratingText').textContent=b.dataset.value+'점';document.querySelectorAll('.rating button').forEach(el=>el.classList.toggle('on',Number(el.dataset.value)<=Number(b.dataset.value)));return}
  if(a==='clearRating'){c.rating=null;if(!commit(true))return;return}
@@ -125,7 +125,7 @@ document.addEventListener('click',async e=>{
  if(a==='theme'){themes();return}
  if(a==='prevMonth'){changeMonth(-1);return}
  if(a==='nextMonth'){changeMonth(1);return}
- if(a==='months'){showModal('월 선택','<label for="monthValue">연월</label><input id="monthValue" type="month" max="'+now().slice(0,7)+'" value="'+month+'"><p class="summary">선택하면 바로 반영됩니다.</p>','months');return}
+ if(a==='months'){showModal('월 선택','<label for="monthValue">연월</label><input id="monthValue" type="month" max="'+now().slice(0,7)+'" value="'+month+'"><p class="summary">선택하면 바로 반영돼요.</p>','months');return}
  if(a==='day'){
   const list=state.items.filter(c=>c.completed===b.dataset.date||c.logs.some(l=>l.date===b.dataset.date));if(!list.length){toast('이날 남긴 기록이 없어요.');return}
   if(list.length===1)openDetail(list[0].id,'calendar');
@@ -153,7 +153,7 @@ document.addEventListener('click',async e=>{
  if(a==='treeUnlockTest'){addTreeUnlockTestData();return}
  if(a==='nextDay'){state.offset++;if(!persist())return;render();toast('체험 날짜를 '+now()+'로 바꿨어요.');return}
  if(a==='realDay'){state.offset=0;if(!persist())return;render();toast('실제 날짜로 돌아왔어요.');return}
- if(a==='clear'){confirmBox('모든 데이터를 삭제할까요?','이 브라우저의 '+APP_BRAND.ko+' 스크랩·경험·완료·테마·프로필이 모두 초기화됩니다.',resetAll,'전체 삭제');return}
+ if(a==='clear'){confirmBox('모든 데이터를 삭제할까요?','이 브라우저의 '+APP_BRAND.ko+' 스크랩·경험·완료·테마·프로필이 모두 초기화돼요.',resetAll,'전체 삭제');return}
 
 });
 const imeComposingIds=new Set();
@@ -282,7 +282,7 @@ document.addEventListener('change',async e=>{
  }
  if(el.id==='restoreFile'){
   const file=el.files[0];if(!file)return;
-  try{if(file.size>20000000)throw Error('백업 파일이 너무 커요.');const parsed=JSON.parse(await file.text());const s=Array.isArray(parsed.contents)?migrateLegacy(parsed):Model.validate(parsed);confirmBox('백업을 복원할까요?','현재 기록을 백업의 '+s.items.length+'개 콘텐츠로 대체합니다.',()=>replaceData(s),'복원')}catch(err){toast(err.message||'백업 파일을 확인해주세요.')}el.value='';
+  try{if(file.size>20000000)throw Error('백업 파일이 너무 커요.');const parsed=JSON.parse(await file.text());const s=Array.isArray(parsed.contents)?migrateLegacy(parsed):Model.validate(parsed);confirmBox('백업을 복원할까요?','현재 기록을 백업의 '+s.items.length+'개 콘텐츠로 대체해요.',()=>replaceData(s),'복원')}catch(err){toast(err.message||'백업 파일을 확인해주세요.')}el.value='';
  }
 });
 document.addEventListener('submit',async e=>{
@@ -297,7 +297,7 @@ document.addEventListener('submit',async e=>{
    if(!f.isConnected)return;
    if(old){
     const duplicate=state.items.find(c=>c.id!==old.id&&c.type===data.type&&Model.norm(c.title)===Model.norm(data.title)&&Model.norm(c.creator)===Model.norm(data.creator));
-    if(duplicate){$('formError').textContent='같은 작품이 이미 있어요. 중복된 정보로 바꾸지 않았습니다.';submit.disabled=false;return}
+    if(duplicate){$('formError').textContent='같은 작품이 이미 있어요. 중복된 정보로 바꾸지 않았어요.';submit.disabled=false;return}
     Object.assign(old,data);if(Number.isFinite(data.scrapCount)){while(old.saves.length<data.scrapCount)old.saves.push({id:Model.uid(),at:Date.now(),source:'직접 수정'});if(old.saves.length>data.scrapCount)old.saves=old.saves.slice(0,data.scrapCount)}delete old.scrapCount;if(!commit(true))return;toast('기본 정보를 저장했어요.');
    }else{const event=Model.uid(),c=Model.add(state,data,event);saved(c,event)}
   }catch(err){if($('formError'))$('formError').textContent=err.message;submit.disabled=false}
@@ -319,7 +319,7 @@ document.addEventListener('submit',async e=>{
   if(!Model.validDate(date)||date>now()){$('formError').textContent='오늘 또는 과거 날짜를 선택해주세요.';return}
   const duplicate=c.logs.find(x=>x.date===date&&x.id!==l.id);
   const apply=()=>{if(duplicate){duplicate.page=page||duplicate.page;duplicate.memo=[duplicate.memo,memo].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join('\n');c.logs=c.logs.filter(x=>x.id!==l.id)}else Object.assign(l,{date,page,memo});if(!commit(true))return;toast('기록을 수정했어요.')};
-  if(duplicate)confirmBox('같은 날짜에 기록이 있어요','입력한 메모를 기존 기록과 합칩니다. 페이지를 입력했다면 해당 값으로 바꿉니다.',apply,'기록 합치기');else apply();
+  if(duplicate)confirmBox('같은 날짜에 기록이 있어요','입력한 메모를 기존 기록과 합쳐요. 페이지를 입력했다면 해당 값으로 바꿔요.',apply,'기록 합치기');else apply();
  }
  if(f.id==='completionForm'){const date=$('completionDate').value;if(!Model.validDate(date)||date>now()){$('formError').textContent='오늘 또는 과거 날짜를 선택해주세요.';return}const item=get(f.dataset.id);item.completed=date;item.completedAt=item.completedAt||Date.now();assignAutoSpecies(item);if(!commit(true))return;toast('완료일과 숲·달력을 갱신했어요.')}
  if(f.id==='ratingForm'){

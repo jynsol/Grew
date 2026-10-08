@@ -1,7 +1,7 @@
 /* original script block 5 */
-/* iOS Safari는 요소에 touch 이벤트 리스너가 연결돼 있어야 :active 상태(눌림 효과)를 인식합니다.
+/* iOS Safari는 요소에 touch 이벤트 리스너가 연결돼 있어야 :active 상태(눌림 효과)를 인식해요.
    버튼 등에 별도 touch 핸들러가 없으면 :active CSS가 있어도 모바일에서 눌림 반응이 전혀 보이지 않기 때문에,
-   문서 전체에 빈 touchstart 리스너를 하나 달아 :active 인식을 활성화합니다. */
+   문서 전체에 빈 touchstart 리스너를 하나 달아 :active 인식을 활성화해요. */
 document.addEventListener('touchstart',function(){},{passive:true});
 
 /* original script block 6 */
@@ -599,7 +599,7 @@ function bmAction(a,b){
 
 function ratingPrompt(c,advance=false){
  const finishing=advance&&!c.completed,done=c.completed&&c.completed!=='unknown'?c.completed:now();
- const cover='<span class="finish-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span>';
+ const cover='<span class="finish-cover is-'+c.type+'">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span>';
  showModal(finishing?(c.type==='movie'?'다 봤어요':'다 읽었어요'):'평점과 감상','<form id="ratingForm" class="finish-form" data-id="'+esc(c.id)+'" data-advance="'+(advance?'yes':'no')+'"><div class="finish-head">'+cover+'<div><span>'+(c.completed||finishing?'FINISHED · '+done.slice(5).replace('-','.'):'')+'</span><strong>'+esc(c.title)+'</strong></div></div>'+
  '<div class="finish-rating"><span>어땠어요?</span><div class="rating"><div class="rating-half-stars" data-rating-picker></div></div><input type="hidden" id="ratingValue" value="'+(c.rating||'')+'"><p id="ratingText">'+(c.rating?Number(c.rating).toFixed(1):'선택 안 함')+'</p></div>'+
  '<label class="sr-only" for="reviewMemo">한 줄 감상 · 선택</label><textarea id="reviewMemo" maxlength="4000" placeholder="한 줄 감상 · 선택">'+esc(c.review||'')+'</textarea>'+
