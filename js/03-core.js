@@ -183,17 +183,18 @@ const BM_RESERVED_IDS=Array.from({length:10},(_,i)=>'paid-reserved-'+String(i+1)
 const BM_SHOP_IDS=[...BM_EXISTING_SHOP_IDS,...BM_RESERVED_IDS];
 const BM_READY_IDS=[...BM_BASE_IDS,...BM_RECORD_IDS,...BM_EXISTING_SHOP_IDS];
 const BM_SOURCE_KINDS=['base','growth','cash','coupon','legacy','beta'];
+// Each genre: 1 free genre tree + 1 special tree now + 1 special tree in the second pack.
 const BM_POOLS=[
- {id:'book-literature',type:'book',label:'순문학',free:'zelkova',paid:['cherry','magnolia']},
- {id:'book-genre',type:'book',label:'장르문학',free:'metasequoia',paid:['maple','willow']},
- {id:'book-humanities',type:'book',label:'인문',free:'ginkgo',paid:['pine','juniper']},
- {id:'book-science',type:'book',label:'과학',free:'cedar',paid:['paulownia','paid-reserved-01']},
- {id:'book-other',type:'book',label:'기타',free:'oak',paid:['paid-reserved-03','paid-reserved-07']},
- {id:'movie-drama',type:'movie',label:'드라마',free:'evergreen',paid:['hackberry','fringe']},
- {id:'movie-action',type:'movie',label:'액션·스릴러',free:'yew',paid:['paid-reserved-04','paid-reserved-08']},
- {id:'movie-sf',type:'movie',label:'SF·판타지',free:'cypress',paid:['paid-reserved-05','paid-reserved-09']},
- {id:'movie-comedy',type:'movie',label:'로맨스·코미디',free:'fir',paid:['crape','paid-reserved-02']},
- {id:'movie-other',type:'movie',label:'기타',free:'birch',paid:['paid-reserved-06','paid-reserved-10']}
+ {id:'book-literature',type:'book',label:'순문학',free:'zelkova',paid:['magnolia','paid-reserved-01']},
+ {id:'book-genre',type:'book',label:'장르문학',free:'metasequoia',paid:['maple','paid-reserved-02']},
+ {id:'book-humanities',type:'book',label:'인문',free:'ginkgo',paid:['pine','paid-reserved-03']},
+ {id:'book-science',type:'book',label:'과학',free:'cedar',paid:['paulownia','paid-reserved-04']},
+ {id:'book-other',type:'book',label:'기타',free:'oak',paid:['juniper','paid-reserved-05']},
+ {id:'movie-drama',type:'movie',label:'드라마',free:'evergreen',paid:['fringe','paid-reserved-06']},
+ {id:'movie-action',type:'movie',label:'액션·스릴러',free:'yew',paid:['hackberry','paid-reserved-07']},
+ {id:'movie-sf',type:'movie',label:'SF·판타지',free:'cypress',paid:['willow','paid-reserved-08']},
+ {id:'movie-comedy',type:'movie',label:'로맨스·코미디',free:'fir',paid:['cherry','paid-reserved-09']},
+ {id:'movie-other',type:'movie',label:'기타',free:'birch',paid:['crape','paid-reserved-10']}
 ];
 const BM_GROWTH_RULES=[
  {id:'first-record',speciesId:'zelkova',label:'첫 기록 남기기',target:1,metric:'record'},
