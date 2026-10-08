@@ -6,7 +6,10 @@ const CLOUD_SESSION_STORAGE='songrim.supabase.session.v1';
 const CLOUD_LAST_EMAIL_STORAGE='songrim.supabase.last-email.v1';
 let cloudSession=null,cloudApplying=false,cloudSyncTimer=null,cloudSyncStatus='local';
 
-function cloudPublicKey(){try{return localStorage.getItem(CLOUD_PUBLIC_KEY_STORAGE)||''}catch{return ''}}
+// The publishable key is meant to ship in browser code (Row Level Security guards the data).
+// Once it is set here, nobody has to paste it; a key saved on the device (?debug) still wins.
+const SUPABASE_PUBLISHABLE_KEY='';
+function cloudPublicKey(){try{return localStorage.getItem(CLOUD_PUBLIC_KEY_STORAGE)||SUPABASE_PUBLISHABLE_KEY}catch{return SUPABASE_PUBLISHABLE_KEY}}
 function saveCloudPublicKey(v){try{localStorage.setItem(CLOUD_PUBLIC_KEY_STORAGE,String(v||'').trim())}catch{}}
 function clearCloudSession(){cloudSession=null;try{localStorage.removeItem(CLOUD_SESSION_STORAGE)}catch{}}
 function saveCloudSession(session){cloudSession=session||null;try{session?localStorage.setItem(CLOUD_SESSION_STORAGE,JSON.stringify(session)):localStorage.removeItem(CLOUD_SESSION_STORAGE)}catch{}}

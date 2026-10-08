@@ -904,7 +904,7 @@ function forestOverlapEdges(points,cfg,theme){
 // triangles of slightly different greens. 'meadow' (꽃이끼 정원) is the same shape in pale moss
 // with soft moss patches and a few small flowers.
 const POLY_FLOORS={
- basic:{greens:['#8DBA73','#89B670','#91BE77','#87B46E','#8BB872'],soil:['#A9825E','#8B6A4C'],lip:['#6F9B58','#62904F'],speck:['#8E6B4C','#73563D'],dot:'#A9D190'},
+ basic:{greens:['#B2D68F','#AED38B','#B6D993','#ABD088','#B0D58D'],soil:['#A9825E','#8B6A4C'],lip:['#88B56C','#7BA862'],speck:['#8E6B4C','#73563D'],dot:'#C6E3A6'},
  meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#BFA27A','#A58A66'],lip:['#86AD82','#779E7A'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'}
 };
 function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
@@ -927,9 +927,9 @@ function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
   specks.push({x:p1[0]+(p2[0]-p1[0])*f,y:p1[1]+(p2[1]-p1[1])*f+depth*(.35+rnd('sy'+n)*.5),r:(1+rnd('sr'+n))*k*1.3,fill:pal.speck[lft?0:1]})}
  if(floor==='meadow'){
   // soft moss patches with a few small white flowers on top
-  const flower=(x,y,z)=>{[[0,-1],[1,0],[0,1],[-1,0]].forEach(([dx,dy])=>extras.push({x:x+dx*z*.9,y:y+dy*z*.55,rx:z*.75,ry:z*.5,fill:'#FBF7E4'}));extras.push({x,y,rx:z*.38,ry:z*.28,fill:'#F2C94C'})};
-  for(let n=0;n<K*3;n++){const a=rnd('ma'+n)*1.7-.85,b=rnd('mb'+n)*1.7-.85;if(Math.abs(a)+Math.abs(b)>.8)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2;
-   if(n%2===0)extras.push({x,y,rx:cw*.55,ry:cw*.3,fill:'#C3D39C',opacity:.3});else if(n%4===1)flower(x,y,2.4*k)}
+  const flower=(x,y,z,pink)=>{[[0,-1],[1,0],[0,1],[-1,0]].forEach(([dx,dy])=>extras.push({x:x+dx*z*.9,y:y+dy*z*.55,rx:z*.75,ry:z*.5,fill:pink?'#F7DCE0':'#FBF7E4'}));extras.push({x,y,rx:z*.38,ry:z*.28,fill:'#F2C94C'})};
+  for(let n=0;n<K*3;n++){const a=rnd('ma'+n)*1.7-.85,b=rnd('mb'+n)*1.7-.85;if(Math.abs(a)+Math.abs(b)>.8||n%2)continue;extras.push({x:cx+(a-b)*rx/2,y:cy+(a+b)*ry/2,rx:cw*.55,ry:cw*.3,fill:'#C3D39C',opacity:.3})}
+  for(let n=0;n<K*K*3;n++){const a=rnd('fa'+n)*1.8-.9,b=rnd('fb'+n)*1.8-.9;if(Math.abs(a)+Math.abs(b)>.84)continue;flower(cx+(a-b)*rx/2,cy+(a+b)*ry/2,(2.3+rnd('fz'+n)*1)*k,rnd('fc'+n)<.3)}
  }
  // silhouette for the sticker edge: back edges, then the dropped front edges
  const backL=V.map(r=>r[0]);
@@ -947,7 +947,7 @@ function polyGroundArtwork(cfg,cx=360,cy=286,floor='basic'){
  const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.max(18,rx*.2),k=rx/189,K=Math.max(3,Math.min(6,cfg.cols+1));
  const g=polyGround(cx,cy,rx,ry,depth,K,'month'+cfg.cols,floor),f=n=>n.toFixed(1),P=pts=>pts.map(p=>f(p[0])+','+f(p[1])).join(' ');
  let tufts='';for(let n=0;n<Math.round(rx/14);n++){const a=(hash('tuft|a'+n)%1000)/500-1,b=(hash('tuft|b'+n)%1000)/500-1;if(Math.abs(a)+Math.abs(b)>.85)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2,w=4*k;
-  tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="${floor==='meadow'?'#93AE7C':'#6E9C58'}" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
+  tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="${floor==='meadow'?'#93AE7C':'#86B06A'}" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
  const id='poly-ground-'+floor+'-'+Math.round(rx);
  const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="${f(9*k)}"/></filter>`;
  const body=`<g data-forest-ground="terrain" data-floor="${floor}" pointer-events="none"><polygon points="${P(g.silhouette)}" transform="translate(0 ${f(12*k)})" fill="rgba(30,42,34,.24)" filter="url(#${id}-shadow)"/><polygon points="${P(g.silhouette)}" fill="#fff" stroke="#fff" stroke-width="${f(7*k)}" stroke-linejoin="round"/>${polyGroundSVG(g,k)}<polygon data-ground-surface="true" points="${P([...g.V[0],...g.V.map(r=>r[g.K]).slice(1),...g.V[g.K].slice().reverse().slice(1),...g.V.map(r=>r[0]).reverse().slice(1)])}" fill="none"/>${tufts}</g>`;
