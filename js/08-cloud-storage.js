@@ -392,7 +392,7 @@ function closeCandidateDetail(){
  authRoute=back;
  render();scrollPageTop();
 }
-function cover(c,small=false){return c.cover?'<img class="cover '+c.type+'" data-cover-kind="'+c.type+'" src="'+esc(c.cover)+'" alt="'+esc(c.title)+' 표지" decoding="async">':'<div class="cover '+c.type+'" aria-label="'+esc(c.title)+' 표지 없음">'+icon(c.type)+'</div>'}
+function cover(c,small=false){return c.cover?'<img class="cover '+c.type+'" data-cover-kind="'+c.type+'" src="'+esc(c.cover)+'" alt="'+esc(c.title)+' 표지" decoding="async" loading="lazy">':'<div class="cover '+c.type+'" aria-label="'+esc(c.title)+' 표지 없음">'+icon(c.type)+'</div>'}
 function row(c,choose=false){return '<button class="content-row" data-action="'+(choose?'choose':'detail')+'" '+attr(c.id)+'>'+cover(c)+'<div class="grow"><span class="badge">'+typeName[c.type]+'</span><div class="title">'+esc(c.title)+'</div><div class="creator">'+esc(c.creator||'제작자 미확인')+'</div><div class="content-row-meta"><span class="record-status '+Model.status(c)+'">'+statusName[Model.status(c)]+'</span>'+(validRating(c.rating)?'<span class="row-rating"><span class="rating-star" aria-hidden="true">★</span> '+c.rating+'</span>':'')+(c.saves.length>1?'<span>스크랩 '+c.saves.length+'회</span>':'')+'</div></div><span class="muted" aria-hidden="true">›</span></button>'}
 function handleCoverError(event){
  const img=event.target;if(!img?.matches?.('img[data-cover-kind]'))return;
@@ -558,7 +558,7 @@ function todayBoard(c){
 }
 
 // Scrap rows (redesign 11a): cover, title, type · creator, status chip, the work's tree sticker.
-function stickerCover(c,cls=''){return '<span class="sticker-cover-art '+cls+'" data-type="'+c.type+'">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async" data-cover-kind="'+c.type+'">':'')+'</span>'}
+function stickerCover(c,cls=''){return '<span class="sticker-cover-art '+cls+'" data-type="'+c.type+'">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async" loading="lazy" data-cover-kind="'+c.type+'">':'')+'</span>'}
 function scrapStatusLabel(c){const status=Model.status(c);return status==='done'?'완료':status==='active'?statusName.active:statusName.saved}
 function scrapCard(c,choose=false){
  const status=Model.status(c),stage=Model.stage(c);
@@ -1894,7 +1894,7 @@ function plantedMoment(c){
  '<div class="planted-stage" data-type="'+c.type+'"><i class="planted-rays" aria-hidden="true"></i><i class="planted-sun" aria-hidden="true"></i>'+
   spark(14,18,14,0)+spark(80,58,10,.6)+spark(22,70,9,1.1)+spark(70,12,8,1.6)+spark(88,30,12,.3)+spark(8,46,7,1.9)+
   stickerTree(c,3,'planted-tree')+'<div class="planted-stamp-real" aria-hidden="true">'+stampSVG(c,true)+'</div>'+
-  '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="">':'')+'</span></div>'+
+  '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async" loading="lazy">':'')+'</span></div>'+
  '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+((code=>{const fin=code>=0&&code<=11171?code%28:0;return fin&&fin!==8?'으로':'로'})(tree.charCodeAt(tree.length-1)-0xAC00))+' 자랐어요</span></div>'+
  '<div class="planted-stats">'+stat(number,'번째','이달의 나무')+stat(logs||1,'일','함께한 기록')+stat(validRating(c.rating)?'<i class="planted-star" aria-hidden="true">★</i>'+Number(c.rating).toFixed(1):'–','','별점')+'</div>'+
  '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+button(icon('share'),'shareWork','planted-share',attr(c.id)+' aria-label="'+esc(c.title)+' 공유하기"')+'</div>','planted');

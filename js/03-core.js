@@ -245,7 +245,7 @@ function bmPool(c){
  return c.type==='book'?'book-other':'movie-other';
 }
 function bmFallback(c){return c?.type==='movie'?'birch':'oak'}
-function bmAvailablePool(c,s=state){const b=s.collection?.bm||bmRefresh(s),p=BM_POOLS.find(p=>p.id===bmPool(c));return p?[p.free,...p.paid].filter(id=>bmTreeReady(id)&&bmCanUseFrom(b,id)):[]}
+function bmAvailablePool(c,s=state){const b=s.collection?.bm||bmRefresh(s),p=BM_POOLS.find(p=>p.id===bmPool(c));if(!p)return [];const owned=new Set(bmOwnedFrom(b));return [p.free,...p.paid].filter(id=>bmTreeReady(id)&&owned.has(id))}
 function bmProgressFrom(b){return {record:b.hasRecorded?1:0,completed:b.completedKeys.length,media:new Set(b.completedKeys.map(k=>k.split('|')[0])).size,days:b.recordDays.length}}
 function bmGrowthFrom(b){const p=bmProgressFrom(b);return BM_GROWTH_RULES.map(r=>({...r,progress:Math.min(r.target,p[r.metric]),done:b.earnedTreeIds.includes(r.speciesId)||p[r.metric]>=r.target}))}
 function bmSyncLedger(b,items){
@@ -501,7 +501,7 @@ let collectionTab='inventory';
 let bmCollectionTab='inventory',bmPreview=null,bmCodexTab='trees',bmSelectedWork='',bmTreeFilter='shop',bmCheckout=null,bmPendingProduct=null;
 const BM_NAMES={base:'기본 나무',record:'성장 나무',shop:'스페셜 나무',mystery:'히든 나무'};
 const BM_FLOOR_NAMES={basic:'기본 바닥',meadow:'꽃이끼 정원'};
-const bmKRW=n=>n.toLocaleString('ko-KR')+'원';
+const BM_KRW_FORMAT=new Intl.NumberFormat('ko-KR'),bmKRW=n=>BM_KRW_FORMAT.format(n)+'원';
 function bmTreeName(id){return id.startsWith('mystery-')?bmMysteries().find(t=>t.id===id.slice(-1))?.name||'히든 나무':TREE_SPECIES.find(t=>t.id===id)?.name||'새 나무 '+String(BM_RESERVED_IDS.indexOf(id)+1)}
 function bmPlaceholder(label='디자인 준비 중'){return '<div class="bm-placeholder" aria-label="'+esc(label)+'"><span aria-hidden="true">✧</span><small>'+esc(label)+'</small></div>'}
 function bmTreeSVG(id){if(!bmTreeReady(id))return bmPlaceholder();const special=id.startsWith('mystery-'),key=special?(id==='mystery-A'?'shining':'moonlight'):id,b=SONGLIM_TREE_ASSETS[key]?.bounds;if(!b)return bmPlaceholder();const w=Math.max(94,b.width+12);return '<svg viewBox="'+[-w/2,b.y-7,w,b.height+15].join(' ')+'" aria-hidden="true">'+(special?hiddenTreeArt(id.slice(-1),'basic'):previewSpeciesArt(id,'basic'))+'</svg>'}
@@ -675,7 +675,7 @@ const CATALOG=[];
 
 /* Shop and codex pages (redesign 14a). Previews and checkout stay as sheets over these pages. */
 function bmTreeImgSrc(id){const key=id.startsWith('mystery-')?(id==='mystery-A'?'shining':'moonlight'):id;return SONGLIM_TREE_ASSETS[key]?.src||''}
-function bmTreeImg(id,cls=''){const src=bmTreeImgSrc(id);return src&&bmTreeReady(id)?'<img class="bm-img '+cls+'" src="'+esc(src)+'" alt="" decoding="async">':'<span class="bm-img-soon">곧<br>만나요</span>'}
+function bmTreeImg(id,cls='',variant='thumb'){const src=bmTreeImgSrc(id).replace('/trees/','/trees/'+variant+'/');return src&&bmTreeReady(id)?'<img class="bm-img '+cls+'" src="'+esc(src)+'" alt="" decoding="async" loading="lazy">':'<span class="bm-img-soon">곧<br>만나요</span>'}
 const BM_PAGE_ICONS={coupon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10" stroke-dasharray="2 2"/></svg>',arrow:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>',check:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',lock:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'};
 function bmPageTabs(tabs,current,action){return '<div class="bm-page-tabs" role="group">'+tabs.map(([id,label])=>button(label,action,id===current?'active':'','data-tab="'+id+'" aria-pressed="'+(id===current)+'"')).join('')+'</div>'}
 function bmShopCard(id){
@@ -737,7 +737,7 @@ function bmCodexTreeCard(id){
  if(group==='record'){const m=bmGrowthMilestones().find(t=>t.speciesId===id);note=owned?m.label:m.label+' · '+Math.max(0,m.target-m.progress)+' 남음'}
  else if(group==='shop')note=bmGenreLabel(id)||'스페셜';
  else if(group==='mystery'){const m=bmMysteries().find(t=>'mystery-'+t.id===id);note=owned?'열렸어요':bmMysteryCondition(m)+' · '+Math.min(m.progress,m.at)+'/'+m.at}
- return '<div class="bm-codex-tree'+(owned?'':' is-locked')+'">'+(bmTreeReady(id)?button(bmTreeImg(id),'bmPreviewTree','bm-codex-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"'):'<div class="bm-codex-art is-mystery"><span aria-hidden="true">?</span></div>')+(owned||!bmTreeReady(id)?'':'<span class="bm-codex-lock">'+BM_PAGE_ICONS.lock+'</span>')+'<strong>'+esc(bmTreeName(id))+'</strong><small>'+esc(note)+'</small></div>';
+ return '<div class="bm-codex-tree'+(owned?'':' is-locked')+'">'+(bmTreeReady(id)?button(bmTreeImg(id,owned?'is-sticker':'',owned?'sticker':'thumb'),'bmPreviewTree','bm-codex-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"'):'<div class="bm-codex-art is-mystery"><span aria-hidden="true">?</span></div>')+(owned||!bmTreeReady(id)?'':'<span class="bm-codex-lock">'+BM_PAGE_ICONS.lock+'</span>')+'<strong>'+esc(bmTreeName(id))+'</strong><small>'+esc(note)+'</small></div>';
 }
 function renderCodexPage(){
  bmRefresh(state);const tab=bmCodexTab==='visitors'?'visitors':'trees';
@@ -745,8 +745,8 @@ function renderCodexPage(){
  if(tab==='visitors'){
   const seen=new Set(collectionState().visitorsSeen),done=completedAll().length,found=FOREST_VISITORS.filter(v=>seen.has(v.id)),next=FOREST_VISITORS.find(v=>!seen.has(v.id));
   const hero=found.at(-1)||FOREST_VISITORS[0];
-  const card=v=>{const met=seen.has(v.id),near=!met&&v===next;return '<div class="bm-visitor'+(met?'':' is-locked')+'">'+'<i class="bm-visitor-art" style="background-image:url(./assets/images/forest/visitor-'+v.id+'.webp)"></i>'+'<strong>'+esc(v.name)+'</strong><small>'+(met?'만났어요':(done>=v.need?'곧 찾아와요':near?'완료 '+(v.need-done)+'개 더':'완료 '+v.need+'개'))+'</small></div>'};
-  return '<section class="bm-page">'+head+'<div class="bm-codex-hero is-visitors"><div><span>숲을 찾은 친구</span><strong>'+found.length+'<small>/'+FOREST_VISITORS.length+'</small></strong><p>작품을 완료할수록 새 친구가 와요.'+(next?'<br>다음은 '+esc(next.name)+' · '+(done>=next.need?'곧 찾아와요':(next.need-done)+'개 남음'):'')+'</p></div><span class="bm-codex-hero-art'+(found.length?'':' is-locked')+'"><i class="bm-visitor-art" style="background-image:url(./assets/images/forest/visitor-'+hero.id+'.webp)"></i></span></div><div class="bm-visitor-grid">'+FOREST_VISITORS.map(card).join('')+'</div></section>';
+  const card=v=>{const met=seen.has(v.id),near=!met&&v===next;return '<div class="bm-visitor'+(met?'':' is-locked')+'">'+'<i class="bm-visitor-art is-thumb" style="background-image:url(./assets/images/forest/'+(met?'sticker':'thumb')+'/visitor-'+v.id+'.webp)"></i>'+'<strong>'+esc(v.name)+'</strong><small>'+(met?'만났어요':(done>=v.need?'곧 찾아와요':near?'완료 '+(v.need-done)+'개 더':'완료 '+v.need+'개'))+'</small></div>'};
+  return '<section class="bm-page">'+head+'<div class="bm-codex-hero is-visitors"><div><span>숲을 찾은 친구</span><strong>'+found.length+'<small>/'+FOREST_VISITORS.length+'</small></strong><p>작품을 완료할수록 새 친구가 와요.'+(next?'<br>다음은 '+esc(next.name)+' · '+(done>=next.need?'곧 찾아와요':(next.need-done)+'개 남음'):'')+'</p></div><span class="bm-codex-hero-art'+(found.length?'':' is-locked')+'"><i class="bm-visitor-art is-thumb" style="background-image:url(./assets/images/forest/thumb/visitor-'+hero.id+'.webp)"></i></span></div><div class="bm-visitor-grid">'+FOREST_VISITORS.map(card).join('')+'</div></section>';
  }
  const paid=BM_SHOP_IDS.filter(bmTreeReady),mysteries=bmMysteries().map(t=>'mystery-'+t.id),total=BM_GENRE_IDS.length+paid.length+mysteries.length,hidden=bmMysteries().filter(t=>t.unlocked).length,owned=[...BM_GENRE_IDS,...paid].filter(id=>bmReadyTreeIds().includes(id)),regular=owned.length;
  const count=g=>g.filter(id=>bmReadyTreeIds().includes(id)).length,latest=owned.at(-1)||'oak';

@@ -4031,3 +4031,12 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-package-floor small{display:block;font:500 12px/1.2 var(--font-family);color:var(--text-2)}
 .bm-package-floor strong{display:block;margin-top:3px;font:700 16px/1.2 var(--font-family);color:var(--sb-ink)}
 .bm-hero-art>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+/* Perf: skip layout/paint for list items that are off screen */
+.bm-shop-card{content-visibility:auto;contain-intrinsic-size:auto 230px}
+.bm-codex-tree,.bm-visitor{content-visibility:auto;contain-intrinsic-size:auto 150px}
+/* Codex thumbnails: outline/shadow are baked into the sticker images, so no live filters */
+.bm-codex-art .bm-img.is-sticker{filter:none;width:92px;height:92px}
+.bm-visitor-art.is-thumb{background-size:contain!important;background-position:center!important;filter:none}
+.bm-visitor:not(.is-locked) .bm-visitor-art.is-thumb{width:92px;height:92px;margin:-4px}
+/* Perf: a plain dim is enough behind sheets; full-screen blur stutters on phones */
+.sheet-back{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(30,42,34,.46)}
