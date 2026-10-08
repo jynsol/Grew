@@ -4205,3 +4205,23 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .linked-action{min-height:0;height:32px;padding:0 14px;border:0;border-radius:16px;background:var(--fill);color:var(--text-1);font:600 13px/1 var(--font-family);box-shadow:none}
 .linked-action.is-unlink{color:var(--sb-coral,#E85A47)}
 .linked-note{margin:6px 0;font:500 13px/1.4 var(--font-family);color:var(--text-2)}
+/* ===== Line pass: one hairline colour, no doubled or boxed-in lines ===== */
+:root{--hair:rgba(30,42,34,.08)}
+/* rows inside a bordered card: the card edge is the last line */
+.settings-card>:last-child,.settings-card .menu-row:last-child,.settings-card .notification-time-row:last-child{border-bottom:0!important}
+/* filter: chips sit on the sheet, no box; the sort list keeps one card */
+.scrap-filter-group.is-chips .scrap-filter-options{border:0!important;background:none!important;padding:0!important}
+.scrap-filter-group.is-list .scrap-filter-option{border-bottom:1px solid var(--hair)!important}
+.scrap-filter-group.is-list .scrap-filter-option:last-child{border-bottom:0!important}
+/* sound: no line under the two sound cards */
+.forest-sound-choices{border-bottom:0!important}
+.forest-sound-auto{border-bottom:1px solid var(--hair)!important}
+.forest-sound-credits{border-top:1px solid var(--hair)!important}
+/* notifications: one thin line between "오늘 기록" and "알림 시간" */
+.notification-setting-row{border-bottom:1px solid var(--hair)!important}
+.notification-time-row{border-top:0!important}
+.notification-note{border-top:1px solid var(--hair)!important}
+/* other old grey lines */
+.scrap-session-footer{border-top:1px solid var(--hair)!important}
+.sheet .content-row{border-color:rgba(30,42,34,.1)!important}
+.forest-tree-tooltip{border-color:rgba(30,42,34,.1)!important}
