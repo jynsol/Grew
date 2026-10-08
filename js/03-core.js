@@ -518,7 +518,8 @@ function bmWorkSelect(){const items=bmWorkItems(),c=bmWork();if(c)bmSelectedWork
 // Preview = the real month board (same ground art as the forest tab), empty, 3×3.
 function bmFloorPreviewArt(floor){return forestSVG([],'basic',false,{grid:'month',minCols:3,transient:true,preview:true,floor}).replace(/viewBox="[^"]*"/,'viewBox="215 168 290 240" aria-hidden="true"').replace(/ role="group" aria-label="[^"]*"/,'')}
 function bmFloorCard(f){const current=bmFloorId()===f.id,owned=bmFloorOwned(f.id);return '<article class="bm-floor-card">'+(f.ready?button(bmFloorPreviewArt(f.id),'bmPreviewFloor','bm-floor-art','data-floor="'+f.id+'" aria-label="'+f.name+' 미리보기"'):bmPlaceholder())+'<div><h3>'+f.name+'</h3>'+bmBadge(f.free?'base':'shop')+'<p>'+(f.free?'처음부터 무료':'한 번 구매로 계속 사용')+'</p><small>'+(current?'사용 중':!f.ready?'디자인 준비 중':owned?'보유 중':'내 숲에 미리보기')+'</small>'+(f.ready?(!owned&&!BM_STORE_OPEN?'<span class="bm-card-buy is-soon">곧 열려요</span>':button(owned?'바꿔보기':'2,200원',owned?'bmPreviewFloor':'bmQuickBuy','bm-card-buy','data-floor="'+f.id+'" data-kind="floor" '+(!owned?'aria-label="'+f.name+' 2,200원 구매 체험"':''))):'')+'</div></article>'}
-function openCollection(tab=bmCollectionTab){if(tab==='visitors'){bmOpenCodex('visitors');return}bmRefresh(state);bmPreview=null;bmCheckout=null;bmCollectionTab=['floors','coupons'].includes(tab)?tab:'inventory';collectionTab=tab;const same=view==='shop';closeModal();view='shop';forestEditMode=false;render();if(!same)scrollPageTop()}
+let bmShopFilter='all';
+function openCollection(tab=bmCollectionTab){bmShopFilter=['book','movie'].includes(tab)?tab:tab==='inventory'?'all':bmShopFilter;if(tab==='visitors'){bmOpenCodex('visitors');return}bmRefresh(state);bmPreview=null;bmCheckout=null;bmCollectionTab=['floors','coupons'].includes(tab)?tab:'inventory';collectionTab=tab;const same=view==='shop';closeModal();view='shop';forestEditMode=false;render();if(!same)scrollPageTop()}
 function bmOpenCodex(tab='trees'){bmRefresh(state);bmPreview=null;bmCodexTab=tab==='visitors'?'visitors':'trees';const same=view==='codex';closeModal();view='codex';render();if(!same)scrollPageTop()}
 function bmPreviewItems(){return forestItems(state,year).map(c=>Model.clone(c))}
 function bmPreviewHTML(){const p=bmPreview,isTree=p.kind==='tree',name=isTree?bmTreeName(p.id):BM_FLOOR_NAMES[p.id],owned=isTree?bmReadyTreeIds().includes(p.id):bmFloorOwned(p.id),group=isTree?bmCatalogGroup(p.id):p.id==='basic'?'base':'shop',q=bmCouponStatus();const art=isTree?'<div class="bm-preview-specimen">'+bmTreeSVG(p.id)+'</div>':'<div class="bm-live-scene" id="bmPreviewScene" inert>'+forestSVG(bmPreviewItems(),'basic',false,{floor:p.id,preview:true})+'</div>';let actions='';if(owned)actions=button(isTree?'숲에서 꾸미기':'바닥 바꾸기',isTree?'bmDecorateForest':'bmDecorateFloors','primary');else if(group==='shop'&&!BM_STORE_OPEN)actions='<p class="bm-money-note">스페셜 나무와 바닥은 곧 열려요.</p>';else if(group==='shop')actions=(isTree?button(q.balance>=q.cost?'쿠폰 '+q.cost+'장으로 해금하기':'쿠폰 모으기 · '+q.balance+'/'+q.cost,q.balance>=q.cost?'bmRedeemStart':'bmCoupons','secondary'):'')+button(bmKRW(isTree?1100:2200)+' 구매 체험','bmBuyStart','primary');else actions='<p class="bm-money-note">'+(group==='record'?'기록으로 조건을 채우면 무료로 열려요.':'나무를 심어 조건을 채우면 자동으로 열려요. 판매하지 않아요.')+'</p>';return '<div class="bm-preview-body">'+art+'<div class="bm-preview-copy">'+bmBadge(group)+'<h3>'+esc(name)+'</h3>'+(isTree?(owned?'<p>'+bmTreeStatus(p.id)+'</p>':bmConditionHTML(p.id)):'<p>'+(owned?'보유 중':BM_STORE_OPEN?'2,200원 · 현금 구매':'곧 열려요')+'</p>')+'</div>'+bmNotice()+'<p id="formError" class="form-error" role="alert"></p><div class="bm-acquire-actions">'+actions+'</div>'+button('돌아가기','bmBackCollection','textbtn')+'</div>'}
@@ -674,10 +675,34 @@ function bmShopCard(id){
 }
 // Shop = things you can buy. Genre trees are free and hidden trees are earned, so they live in the codex.
 function bmShopTreesHTML(){
- const pack=[bmPackageInfo(state,'first'),bmPackageInfo(state,'second')].find(p=>p.canBuy)||bmPackageInfo(state,'first'),ids=BM_SHOP_IDS.filter(bmTreeReady),owned=ids.filter(id=>bmReadyTreeIds().includes(id)).length;
- const banner=BM_STORE_OPEN&&pack.canBuy?'<div class="bm-pack">'+'<span class="bm-pack-sale">'+(pack.pack.firstOnly?'첫 결제 25% 할인':'25% 할인')+'</span><span class="bm-pack-kicker">'+(pack.pack.firstOnly?'FIRST PURCHASE ONLY':'FOREST PACK')+'</span><strong>'+pack.pack.name+'</strong><small>나무 '+pack.ids.length+'종 + 바닥 '+pack.floorIds.length+'종'+(pack.pack.firstOnly?' · 첫 결제 때 한 번만':'')+'</small><div class="bm-pack-price">'+button(bmKRW(pack.pack.price),'bmPackage','bm-pack-buy','data-pack="'+pack.pack.id+'"')+'<del>'+bmKRW(pack.pack.list)+'</del></div><div class="bm-pack-art" aria-hidden="true">'+pack.ids.slice(0,3).map(id=>bmTreeImg(id)).join('')+'</div></div>':'';
- const note=BM_STORE_OPEN?'':'<div class="bm-store-note"><div><strong>스페셜 나무는 곧 열려요</strong><p>장르 나무 10종은 처음부터 모두 무료예요.<br>히든 나무는 나무를 심을수록 열려요.</p></div>'+button('도감 보기','bmCodex','bm-store-note-link')+'</div>';
- return banner+note+'<div class="bm-shop-head"><h2>나무 '+ids.length+'종</h2>'+(owned?'<span>보유 '+owned+'종</span>':'')+'</div><div class="bm-shop-grid">'+ids.map(bmShopCard).join('')+'</div>';
+ const type=bmShopFilter==='all'?'':bmShopFilter,ids=BM_SHOP_IDS.filter(id=>bmTreeReady(id)&&(!type||BM_POOLS.find(p=>p.paid.includes(id))?.type===type)),owned=ids.filter(id=>bmReadyTreeIds().includes(id)).length;
+ const missing=BM_SHOP_IDS.filter(id=>bmTreeReady(id)&&!bmReadyTreeIds().includes(id)).length,note=BM_STORE_OPEN||!missing?'':'<div class="bm-store-note"><div><strong>스페셜 나무는 곧 살 수 있어요</strong><p>결제를 준비하고 있어요. 아직 없는 나무 '+missing+'종을 미리 구경해 보세요.</p></div></div>';
+ return (type?'':bmShopHeroHTML()+note+bmWeeklyHTML())+'<div class="bm-shop-head"><h2>'+(type==='book'?'책 나무':type==='movie'?'영화 나무':'스페셜 나무')+' '+ids.length+'종</h2>'+(owned?'<span>보유 '+owned+'종</span>':'')+'</div><div class="bm-shop-grid">'+ids.map(bmShopCard).join('')+'</div>';
+}
+// Hero carousel: one big card per pack on sale (a first-purchase pack disappears after any paid purchase).
+function bmShopHeroHTML(){
+ const b=bmRefresh(state),packs=BM_PACKS.map(p=>bmPackageInfo(state,p.id)).filter(p=>p.ready&&(BM_STORE_OPEN?p.canBuy:!(p.pack.firstOnly&&bmHasPaidFrom(b))&&(p.newTreeCount>0||p.floorNew)));
+ if(!packs.length)return '';
+ const slide=p=>{const f=p.floorIds[0],trees=p.ids.slice(0,3);return '<article class="bm-hero">'+'<div class="bm-hero-copy"><span class="bm-hero-tag">'+(p.pack.firstOnly?'첫 결제 할인':'묶음 할인')+'</span><strong>'+esc(p.pack.name)+'</strong><small>스페셜 나무 '+p.ids.length+'종 + '+esc(BM_FLOORS.find(x=>x.id===f)?.name||'바닥')+'</small></div>'+
+  '<div class="bm-hero-art" aria-hidden="true">'+bmFloorPreviewArt(f)+'<div class="bm-hero-trees">'+trees.map(id=>bmTreeImg(id)).join('')+'</div></div>'+
+  '<div class="bm-hero-price"><div><strong>'+bmKRW(p.pack.price)+'</strong><del>'+bmKRW(p.pack.list)+'</del></div>'+(BM_STORE_OPEN?button('구매하기','bmPackage','bm-hero-buy','data-pack="'+p.pack.id+'"'):'<span class="bm-hero-buy is-soon">곧 열려요</span>')+'</div>'+
+  (p.pack.firstOnly?'<p class="bm-hero-fine">첫 결제 때 한 번만 살 수 있어요</p>':'')+'</article>'};
+ return '<div class="bm-hero-track'+(packs.length>1?' is-multi':'')+'">'+packs.map(slide).join('')+'</div>';
+}
+// Weekly pick: a special tree from the genre you've finished most lately. Changes every Monday.
+function bmWeekIndex(){const d=new Date();return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5+3)/7)}
+function bmWeeklyPick(){
+ const ready=BM_SHOP_IDS.filter(bmTreeReady),own=new Set(bmReadyTreeIds()),fresh=ready.filter(id=>!own.has(id)),pickFrom=fresh.length?fresh:ready,week=bmWeekIndex();
+ if(!pickFrom.length)return null;
+ const done=completedAll(),since=new Date(Date.now()-90*864e5).toISOString().slice(0,10),recent=done.filter(c=>String(c.completed)>=since),base=recent.length>=3?recent:done,count={};
+ base.forEach(c=>{const p=bmPool(c);if(p)count[p]=(count[p]||0)+1});
+ for(const [poolId] of Object.entries(count).sort((a,b)=>b[1]-a[1])){const pool=BM_POOLS.find(p=>p.id===poolId),cand=pool?.paid.filter(id=>pickFrom.includes(id))||[];if(cand.length&&!/other$/.test(poolId))return {id:cand[week%cand.length],reason:'요즘 '+pool.label+' '+(pool.type==='book'?'책을 많이 읽었네요':'영화를 많이 봤네요')}}
+ return {id:pickFrom[week%pickFrom.length],reason:'그루가 고른 나무'};
+}
+function bmWeeklyHTML(){
+ const pick=bmWeeklyPick();if(!pick||bmReadyTreeIds().includes(pick.id))return '';const id=pick.id,owned=bmReadyTreeIds().includes(id);
+ const action=owned?'<span class="bm-shop-action is-owned">보유 중</span>':!BM_STORE_OPEN?'<span class="bm-shop-action is-soon">곧 열려요</span>':button('1,100원','bmQuickBuy','bm-shop-action','data-species="'+id+'" data-kind="tree" aria-label="'+esc(bmTreeName(id))+' 1,100원 구매 체험"');
+ return '<div class="bm-shop-head"><h2>이번 주 추천</h2><span>월요일에 바뀌어요</span></div><article class="bm-weekly">'+button(bmTreeImg(id),'bmPreviewTree','bm-weekly-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"')+'<div class="bm-weekly-copy"><small>'+esc(pick.reason)+'</small><strong>'+esc(bmTreeName(id))+'</strong><span>'+esc(bmGenreLabel(id))+'</span></div>'+action+'</article>';
 }
 function bmCouponBoardHTML(){
  const q=bmCouponStatus(),have=Math.min(q.balance,q.cost),left=Math.max(0,q.cost-q.balance),target=BM_EXISTING_SHOP_IDS.find(id=>!bmReadyTreeIds().includes(id))||'maple';
@@ -687,9 +712,10 @@ function bmCouponBoardHTML(){
  (bmPendingProduct?button(bmTreeName(bmPendingProduct.id)+'로 돌아가기','bmReturnProduct','bm-coupon-return'):'')+
  '<ul class="bm-coupon-notes"><li>광고 1회에 쿠폰 1장, 하루 최대 2장이에요.</li><li>쿠폰 14장으로 스페셜 나무 1종을 영구로 열어요.</li><li>매일 모으면 7일에 한 그루씩 열 수 있어요.</li></ul>';
 }
+function bmShopChips(current){const chips=[['inventory','나무'],['book','책'],['movie','영화'],['floors','바닥'],...(BM_STORE_OPEN?[['coupons','쿠폰']]:[])];return '<div class="bm-filter-chips bm-shop-chips" role="group" aria-label="상점 분류">'+chips.map(([id,label])=>button(label,'collectionTab',id===current?'active':'','data-tab="'+id+'" aria-pressed="'+(id===current)+'"')).join('')+'</div>'}
 function renderShopPage(){
  bmRefresh(state);const tab=['floors',...(BM_STORE_OPEN?['coupons']:[])].includes(bmCollectionTab)?bmCollectionTab:'inventory';
- return '<section class="bm-page"><div class="bm-page-heading"><h1 class="page-title">상점</h1>'+bmPageTabs([['inventory','나무'],['floors','바닥'],...(BM_STORE_OPEN?[['coupons','쿠폰']]:[])],tab,'collectionTab')+'</div>'+
+ return '<section class="bm-page"><div class="bm-page-heading"><h1 class="page-title">상점</h1></div>'+bmShopChips(tab==='inventory'?(bmShopFilter==='all'?'inventory':bmShopFilter):tab)+
  (tab==='coupons'?bmCouponBoardHTML():tab==='floors'?'<p class="bm-page-note">'+(BM_STORE_OPEN?'기본 바닥은 무료 · 유료 바닥은 2,200원':'기본 바닥은 무료 · 유료 바닥은 곧 열려요')+'</p><div class="bm-floor-list">'+BM_FLOORS.map(bmFloorCard).join('')+'</div>':bmShopTreesHTML())+''+(BM_STORE_OPEN||tab!=='floors'?'':'')+'</section>';
 }
 function bmCodexTreeCard(id){
