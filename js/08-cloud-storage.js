@@ -8,7 +8,7 @@ let cloudSession=null,cloudApplying=false,cloudSyncTimer=null,cloudSyncStatus='l
 
 // The publishable key is meant to ship in browser code (Row Level Security guards the data).
 // Once it is set here, nobody has to paste it; a key saved on the device (?debug) still wins.
-const SUPABASE_PUBLISHABLE_KEY='';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_1aHPXqrU3WJP8zDTlh-y2g_9RLnt_lP';
 function cloudPublicKey(){try{return localStorage.getItem(CLOUD_PUBLIC_KEY_STORAGE)||SUPABASE_PUBLISHABLE_KEY}catch{return SUPABASE_PUBLISHABLE_KEY}}
 function saveCloudPublicKey(v){try{localStorage.setItem(CLOUD_PUBLIC_KEY_STORAGE,String(v||'').trim())}catch{}}
 function clearCloudSession(){cloudSession=null;try{localStorage.removeItem(CLOUD_SESSION_STORAGE)}catch{}}

@@ -4156,3 +4156,6 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 @media (max-height:740px) { .ob-work { margin-top:14px;padding-top:16px; } .ob-work-cover, #page.ob-page .ob-work-cover .cover { width:104px;height:145px; } .ob-type { margin-top:12px; } }
 /* full-bleed within the app column, not the window (wide screens cap the app at 430px) */
 .forest-month.is-board .forest-board{width:calc(100% + 2 * var(--page-gutter, 20px));margin-left:calc(-1 * var(--page-gutter, 20px))}
+/* hairlines as real borders: spread-shadow rings drop out on some screens (fractional pixels, scrolling layers) */
+.tv-week,.sticker-recent-card,.type-tabs,.forest-toggle,.fcal,.forest-type-filter,.settings-card,.notification-sample,.bm-wallet-pill,.bm-page-tabs,.bm-shop-card,.bm-floor-card,.scrap-filter-options,.bm-codex-hero-art,.bm-codex-art.is-soon{border:1px solid rgba(30,42,34,.1)!important;box-shadow:none!important}
+.detail-more summary{background:var(--fill)!important;box-shadow:none!important;border:0!important}
