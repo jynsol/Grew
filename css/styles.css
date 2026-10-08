@@ -4010,3 +4010,8 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .forest-edit-bar .forest-edit-reset{color:var(--text-2)}
 /* Codex: trees you don't have yet are a flat grey silhouette */
 .bm-codex-tree.is-locked .bm-codex-art img{filter:brightness(0) invert(.84)!important;opacity:1!important}
+/* Visitors you haven't met: the same flat grey silhouette as locked trees */
+.bm-visitor.is-locked .bm-visitor-art,.bm-visitor-art.is-hero.is-locked{filter:brightness(0) invert(.84)!important;opacity:1!important}
+.bm-visitor.is-locked strong{color:var(--text-2)}
+.bm-codex-hero.is-visitors .bm-codex-hero-art .bm-visitor-art{width:76px;height:76px}
+.bm-codex-hero-art.is-locked .bm-visitor-art{filter:brightness(0) invert(.84)!important}
