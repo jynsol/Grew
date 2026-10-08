@@ -3933,7 +3933,7 @@ button.primary:disabled,button.primary[disabled]{background:var(--fill-strong)!i
 /* forest edit hint: no pill border */
 .forest-edit-hint{background:var(--fill)!important;box-shadow:none!important;border:0!important;color:var(--text-2)}
 /* today: recent row lines up with the cards above */
-.today-v2 .sticker-recent{margin-left:0!important;margin-right:0!important}
+.page .sticker-recent{margin-left:-4px!important;margin-right:-4px!important}
 .finish-cover.is-movie{background-color:var(--movie-tint,#BFE7CB)}
 .bm-decoration-card.selected b,.bm-decoration-floor.selected b{color:var(--sb-ink)}
 .sheet .record-status.active{background:#CBE4FF;color:#2D5E9A}
