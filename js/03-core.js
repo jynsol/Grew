@@ -385,7 +385,7 @@ function bmPreviewBuyFloor(id,s=state){
 // Packs: 25% off the single prices, sold only while you own none of what's inside (open one tree or the
 // floor any way and that pack is gone). The second (10 trees + the third floor) appears once its art is ready.
 const BM_PACKS=[
- {id:'first',name:'첫 숲 패키지',trees:BM_EXISTING_SHOP_IDS,floors:['meadow'],price:9900,list:13200},
+ {id:'first',name:'시작 숲 패키지',trees:BM_EXISTING_SHOP_IDS,floors:['meadow'],price:9900,list:13200},
  {id:'second',name:'두 번째 숲 패키지',trees:BM_RESERVED_IDS,floors:['floor-reserved-01'],price:9900,list:13200}
 ];
 let bmActivePack='first';
