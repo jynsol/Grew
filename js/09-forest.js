@@ -6,9 +6,9 @@ function forestCameraFrame(vp,world,bounds=world.getBBox()){
  // shift its centre by half the difference.
  const tools=vp.closest('.forest-board')?.querySelector('.forest-tools-row'),vr=vp.getBoundingClientRect();
  const insetTop=tools?18:0,insetBottom=tools?Math.max(0,vr.bottom-tools.getBoundingClientRect().top+10):0,shiftY=(insetTop-insetBottom)/2/unit;
- const padding=6,visibleW=vp.clientWidth/unit,visibleH=vp.clientHeight/unit;
+ const padding=14,visibleW=vp.clientWidth/unit,visibleH=vp.clientHeight/unit;
  const fit=Math.min((vp.clientWidth-padding*2)/(Math.max(1,bounds.width)*unit),(vp.clientHeight-insetTop-insetBottom-padding*2)/(Math.max(1,bounds.height)*unit));
- return {bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},unit,visibleW,visibleH,padding:padding/unit,fit,min:fit*.92,max:fit*2.4,cx:bounds.x+bounds.width/2,cy:bounds.y+bounds.height/2,tier:forestBoardConfig(forestBoardCount(vp),vp.querySelector('svg[data-grid]')?.dataset.grid).tier+(vp.querySelector('svg[data-grid]')?'m':''),shiftY};
+ return {bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},unit,visibleW,visibleH,padding:padding/unit,fit,min:fit*.4,max:fit*2.4,cx:bounds.x+bounds.width/2,cy:bounds.y+bounds.height/2,tier:forestBoardConfig(forestBoardCount(vp),vp.querySelector('svg[data-grid]')?.dataset.grid).tier+(vp.querySelector('svg[data-grid]')?'m':''),shiftY};
 }
 // The board on screen may be one month, not the whole year: size everything from what was drawn.
 function forestBoardCount(vp){const n=vp?.querySelector('svg[data-count]')?.dataset.count;return n!=null?+n:forestItems(state,year).length;

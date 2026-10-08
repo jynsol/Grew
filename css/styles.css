@@ -4434,3 +4434,5 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .ob-work p { max-width:100%;margin:6px 0 0;font:500 14px/1.2 var(--font-family);color:var(--sb-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 #page.ob-page .ob-work-detail { min-height:0;margin-top:4px;padding:10px 8px;font-size:13px; }
 @media (max-height:740px) { .ob-work { margin-top:14px;padding-top:16px; } .ob-work-cover, #page.ob-page .ob-work-cover .cover { width:104px;height:145px; } .ob-type { margin-top:12px; } }
+/* full-bleed within the app column, not the window (wide screens cap the app at 430px) */
+.forest-month.is-board .forest-board{width:calc(100% + 2 * var(--page-gutter, 20px));margin-left:calc(-1 * var(--page-gutter, 20px))}
