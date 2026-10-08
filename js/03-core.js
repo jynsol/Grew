@@ -691,11 +691,14 @@ function bmShopTreesHTML(){
 }
 // Hero carousel: one big card per pack on sale (a first-purchase pack disappears after any paid purchase).
 function bmPackWarning(id){const pk=BM_PACKS.map(x=>bmPackageInfo(state,x.id)).find(x=>x.ready&&x.untouched&&(x.ids.includes(id)||x.floorIds.includes(id)));return pk?'<p class="bm-money-note">이 '+(pk.floorIds.includes(id)?'바닥':'나무')+'를 열면 '+esc(pk.pack.name)+'는 사라져요.</p>':''}
+// The pack's trees actually planted on the pack's floor (same renderer as the forest).
+function bmPackSceneArt(ids,floor){const s=Model.empty(),pick=ids.filter(bmTreeReady).slice(0,5);const items=pick.map((id,i)=>{const c=Model.add(s,{type:'book',title:bmTreeName(id),creator:''});Model.complete(s,c.id,'2026-01-0'+(i+1));c.speciesId=id;c.bmAppearance=true;c.bmAssignment={version:2,mode:'manual',pool:null,fallback:false,sequence:0};return c});
+ return forestSVG(items,'basic',false,{grid:'month',minCols:3,transient:true,preview:true,floor}).replace(/viewBox="[^"]*"/,'viewBox="222 168 276 246" aria-hidden="true"').replace(/ role="group" aria-label="[^"]*"/,'')}
 function bmShopHeroHTML(){
  const packs=BM_PACKS.map(p=>bmPackageInfo(state,p.id)).filter(p=>p.ready&&p.untouched&&(!BM_STORE_OPEN||p.canBuy));
  if(!packs.length)return '';
  const slide=p=>{const f=p.floorIds[0],trees=p.ids.slice(0,3);return '<article class="bm-hero">'+'<div class="bm-hero-copy"><span class="bm-hero-tag">'+'묶음 25% 할인'+'</span><strong>'+esc(p.pack.name)+'</strong><small>스페셜 나무 '+p.ids.length+'종 + '+esc(BM_FLOORS.find(x=>x.id===f)?.name||'바닥')+'</small></div>'+
-  '<div class="bm-hero-art" aria-hidden="true">'+bmFloorPreviewArt(f)+'<div class="bm-hero-trees">'+trees.map(id=>bmTreeImg(id)).join('')+'</div></div>'+
+  '<div class="bm-hero-art" aria-hidden="true">'+bmPackSceneArt(p.ids,f)+'</div>'+
   '<div class="bm-hero-price"><div><strong>'+bmKRW(p.pack.price)+'</strong><del>'+bmKRW(p.pack.list)+'</del></div>'+(BM_STORE_OPEN?button('구매하기','bmPackage','bm-hero-buy','data-pack="'+p.pack.id+'"'):'<span class="bm-hero-buy is-soon">곧 열려요</span>')+'</div>'+
   '<p class="bm-hero-fine">구성 나무가 하나도 없을 때만 살 수 있어요</p>'+'</article>'};
  return '<div class="bm-hero-track'+(packs.length>1?' is-multi':'')+'">'+packs.map(slide).join('')+'</div>';

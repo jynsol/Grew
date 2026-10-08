@@ -4023,3 +4023,5 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-stamp.is-goal{background:var(--sb-butter);border:0!important}
 .bm-ad-button:disabled{opacity:1;background:var(--fill);color:var(--text-2)}
 .bm-ad-button:disabled svg{display:none}
+.bm-hero-art{height:250px;margin:6px -14px 4px}
+.bm-hero-art>svg{position:absolute;inset:0;width:100%;height:100%}
