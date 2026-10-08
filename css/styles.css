@@ -4192,3 +4192,16 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .forest-top .forest-share{width:36px;height:36px;flex:none;align-self:center}
 .forest-top .forest-share svg{width:18px;height:18px}
 .forest-month .forest-top{min-height:44px;align-items:center}
+/* profile: linked sign-in methods */
+.linked-accounts{margin-top:14px;padding-top:14px;border-top:1px solid rgba(30,42,34,.08)}
+.linked-accounts>span{display:block;margin-bottom:6px;font:500 12px/1.3 var(--font-family);color:var(--text-2)}
+.linked-row{display:flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid rgba(30,42,34,.06)}
+.linked-row:last-child{border-bottom:0}
+.linked-row strong{font:600 14px/1 var(--font-family)}
+.linked-row small{flex:1;min-width:0;font:500 12px/1.2 var(--font-family);color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.linked-row strong+em,.linked-row strong+.linked-action{margin-left:auto}
+.linked-row em{font:500 13px/1 var(--font-family);font-style:normal;color:var(--text-2)}
+.linked-row em.is-off{color:var(--text-3)}
+.linked-action{min-height:0;height:32px;padding:0 14px;border:0;border-radius:16px;background:var(--fill);color:var(--text-1);font:600 13px/1 var(--font-family);box-shadow:none}
+.linked-action.is-unlink{color:var(--sb-coral,#E85A47)}
+.linked-note{margin:6px 0;font:500 13px/1.4 var(--font-family);color:var(--text-2)}

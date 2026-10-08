@@ -152,6 +152,8 @@ document.addEventListener('click',async e=>{
  if(a==='tastes'){tasteStart();return}
  if(a==='notifications'){go('notifications');return}
  // Terms and privacy are real pages under ./legal; the app opens them in a new tab.
+ if(a==='linkIdentity'){cloudLinkIdentity(b.dataset.provider);return}
+ if(a==='unlinkIdentity'){const id=b.dataset.id,pv=b.dataset.provider;confirmBox(OAUTH_NAMES[pv]+' 연결 해제',OAUTH_NAMES[pv]+'(으)로는 더 이상 로그인할 수 없어요. 해제할까요?',()=>cloudUnlinkIdentity(id,pv),'해제',true);return}
  if(a==='terms'){window.open('./legal/terms.html','_blank','noopener');return}
  if(a==='privacy'){window.open('./legal/privacy.html','_blank','noopener');return}
  if(a==='backup'){exportBackup();return}

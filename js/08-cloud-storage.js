@@ -76,22 +76,24 @@ async function readRecoveryLink(raw){
 }
 // Social login (Kakao, Apple, Google) through Supabase Auth. Each provider is switched on in the
 // Supabase dashboard; the provider sends the user back here with the session tokens in the URL hash.
-const OAUTH_PENDING='grew.oauth.pending',OAUTH_NAMES={kakao:'카카오',apple:'Apple',google:'Google'};
+const OAUTH_PENDING='grew.oauth.pending',OAUTH_LINKING='grew.oauth.linking',OAUTH_NAMES={kakao:'카카오',apple:'Apple',google:'Google'};
 function cloudOAuthStart(provider){
  if(!OAUTH_NAMES[provider])return;
  try{sessionStorage.setItem(OAUTH_PENDING,provider)}catch{}
  location.assign(SUPABASE_URL+'/auth/v1/authorize?provider='+encodeURIComponent(provider)+'&redirect_to='+encodeURIComponent(location.origin+location.pathname));
 }
+let oauthNotice='';
 async function finishOAuthReturn(){
  let provider='';try{provider=sessionStorage.getItem(OAUTH_PENDING)||''}catch{}
  const hash=new URLSearchParams(location.hash.slice(1)),query=new URLSearchParams(location.search);
  if(!provider||(!hash.has('access_token')&&!hash.has('error')&&!query.has('error')))return '';
- try{sessionStorage.removeItem(OAUTH_PENDING)}catch{}
+ let linking=false;try{linking=sessionStorage.getItem(OAUTH_LINKING)==='1';sessionStorage.removeItem(OAUTH_PENDING);sessionStorage.removeItem(OAUTH_LINKING)}catch{}
  try{history.replaceState(null,'',location.pathname)}catch{}
- if(hash.has('error')||query.has('error')){loginError=OAUTH_NAMES[provider]+' 로그인을 마치지 못했어요. 다시 시도해주세요.';return ''}
+ if(hash.has('error')||query.has('error')){if(linking){oauthNotice=OAUTH_NAMES[provider]+' 계정을 연결하지 못했어요. 이미 다른 그루 계정에 연결돼 있을 수 있어요.';return ''}loginError=OAUTH_NAMES[provider]+' 로그인을 마치지 못했어요. 다시 시도해주세요.';return ''}
  try{
   const token=hash.get('access_token'),user=await cloudRequest('/auth/v1/user',{token}),expires=Number(hash.get('expires_in'))||3600;
   saveCloudSession({access_token:token,refresh_token:hash.get('refresh_token')||'',token_type:hash.get('token_type')||'bearer',expires_in:expires,expires_at:Math.floor(Date.now()/1000)+expires,user});
+  if(linking)oauthNotice=OAUTH_NAMES[provider]+' 계정을 연결했어요.';
   return provider;
  }catch{loginError=OAUTH_NAMES[provider]+' 로그인을 확인하지 못했어요. 다시 시도해주세요.';return ''}
 }
@@ -305,6 +307,7 @@ async function cloudBootstrap(){
  authSession.name=state.profile?.name||'';authSession.finished=state.onboarded===true;saveSession();
  // A first social login still asks for the terms consent before starting.
  authRoute=authSession.finished?'app':oauth?'socialTerms':'profile';
+ if(oauthNotice){const m=oauthNotice;oauthNotice='';setTimeout(()=>toast(m),400)}
 }
 async function handleCloudStorage(event){
  if(event.key===CLOUD_SESSION_STORAGE||event.key===null){
@@ -799,10 +802,42 @@ function profileAvatarHTML(photo=state.profile.photo){
  const source=profilePhotoSource(photo);
  return source?'<img src="'+esc(source)+'" alt="프로필 사진">':icon('my');
 }
+// Linked sign-in methods = Supabase identities. Linking a new provider needs "Allow manual linking"
+// switched on in Supabase (Authentication → Sign In / Providers). A login method can be removed only
+// while at least one other remains.
+const LINKABLE=[['email','이메일'],['kakao','카카오'],['google','Google']];
+let profileIdentities=[];
+async function cloudAuthed(path,options={}){
+ try{return await cloudRequest(path,{...options,token:cloudSession?.access_token})}
+ catch(err){if(err.status!==401||!await cloudRefresh())throw err;return cloudRequest(path,{...options,token:cloudSession?.access_token})}
+}
+function linkedAccountsHTML(){
+ return LINKABLE.map(([id,label])=>{const it=profileIdentities.find(x=>x.provider===id);
+  const right=it?(profileIdentities.length>1&&id!=='email'?button('해제','unlinkIdentity','linked-action is-unlink','data-id="'+esc(it.identity_id||it.id)+'" data-provider="'+id+'"'):'<em>연결됨</em>'):id==='email'?'<em class="is-off">연결 안 됨</em>':button('연결','linkIdentity','linked-action','data-provider="'+id+'"');
+  return '<div class="linked-row"><strong>'+label+'</strong>'+(it&&it.identity_data?.email&&id!=='email'?'<small>'+esc(it.identity_data.email)+'</small>':'')+right+'</div>'}).join('');
+}
+async function loadLinkedAccounts(){
+ const box=$('linkedAccounts');if(!box)return;
+ try{const user=await cloudAuthed('/auth/v1/user');profileIdentities=user.identities||[];if($('linkedAccounts'))$('linkedAccounts').innerHTML=linkedAccountsHTML()}
+ catch{if($('linkedAccounts'))$('linkedAccounts').innerHTML='<p class="linked-note">연결 정보를 불러오지 못했어요.</p>'}
+}
+async function cloudLinkIdentity(provider){
+ if(!OAUTH_NAMES[provider])return;
+ try{
+  const data=await cloudAuthed('/auth/v1/user/identities/authorize?provider='+encodeURIComponent(provider)+'&skip_http_redirect=true&redirect_to='+encodeURIComponent(location.origin+location.pathname));
+  if(!data?.url)throw Error('no url');
+  try{sessionStorage.setItem(OAUTH_PENDING,provider);sessionStorage.setItem(OAUTH_LINKING,'1')}catch{}
+  location.assign(data.url);
+ }catch{toast(OAUTH_NAMES[provider]+' 연결을 시작하지 못했어요. 잠시 후 다시 시도해주세요.')}
+}
+async function cloudUnlinkIdentity(id,provider){
+ try{await cloudAuthed('/auth/v1/user/identities/'+encodeURIComponent(id),{method:'DELETE'});toast(OAUTH_NAMES[provider]+' 연결을 해제했어요.');await loadLinkedAccounts()}
+ catch{toast('연결을 해제하지 못했어요. 다른 로그인 방법이 하나 이상 있어야 해요.')}
+}
 function openProfile(){
  profileEdit={photo:profilePhotoSource(state.profile.photo),loading:false,request:0};
  const email=cloudSession?.user?.email||'';
- showModal('프로필 설정','<form id="profileForm"><div class="profile-photo-editor">'+button('<span class="profile-avatar profile-avatar-large" id="profilePhotoPreview">'+profileAvatarHTML(profileEdit.photo)+'</span>','profilePhotoChoose','profile-photo-trigger','aria-label="프로필 사진 변경"')+'<div class="profile-photo-actions">'+button('사진 변경','profilePhotoChoose','textbtn')+button('기본 이미지로','profilePhotoRemove','textbtn','id="profilePhotoRemove" '+(profileEdit.photo?'':'disabled'))+'</div><input id="profilePhotoFile" type="file" accept="image/*" hidden><p id="profilePhotoStatus" class="profile-photo-status" role="status">사진은 가운데를 기준으로 동그랗게 보여요.</p></div><label for="profileName">이름 또는 별명</label><input id="profileName" maxlength="30" required autocomplete="nickname" value="'+esc(state.profile.name)+'"><label for="profileBio">한 줄 소개 · 선택</label><textarea id="profileBio" maxlength="120" rows="2" placeholder="나의 취향을 짧게 소개해보세요.">'+esc(state.profile.bio||'')+'</textarea><div class="profile-bio-count"><span id="profileBioCount">'+String(state.profile.bio||'').length+'</span> / 120</div>'+(email?'<div class="profile-account"><span>로그인 계정</span><strong>'+esc(email)+'</strong></div>':'')+'<p id="profileError" class="form-error" role="alert"></p><button id="profileSave" class="primary" type="submit">저장</button>'+button('취소','close','textbtn')+'</form>','profile');
+ showModal('프로필 설정','<form id="profileForm"><div class="profile-photo-editor">'+button('<span class="profile-avatar profile-avatar-large" id="profilePhotoPreview">'+profileAvatarHTML(profileEdit.photo)+'</span>','profilePhotoChoose','profile-photo-trigger','aria-label="프로필 사진 변경"')+'<div class="profile-photo-actions">'+button('사진 변경','profilePhotoChoose','textbtn')+button('기본 이미지로','profilePhotoRemove','textbtn','id="profilePhotoRemove" '+(profileEdit.photo?'':'disabled'))+'</div><input id="profilePhotoFile" type="file" accept="image/*" hidden><p id="profilePhotoStatus" class="profile-photo-status" role="status">사진은 가운데를 기준으로 동그랗게 보여요.</p></div><label for="profileName">이름 또는 별명</label><input id="profileName" maxlength="30" required autocomplete="nickname" value="'+esc(state.profile.name)+'"><label for="profileBio">한 줄 소개 · 선택</label><textarea id="profileBio" maxlength="120" rows="2" placeholder="나의 취향을 짧게 소개해보세요.">'+esc(state.profile.bio||'')+'</textarea><div class="profile-bio-count"><span id="profileBioCount">'+String(state.profile.bio||'').length+'</span> / 120</div>'+(email?'<div class="profile-account"><span>로그인 계정</span><strong>'+esc(email)+'</strong></div>':'')+(cloudSession?.access_token?'<div class="linked-accounts"><span>연결된 로그인</span><div id="linkedAccounts" aria-live="polite"><p class="linked-note">불러오는 중…</p></div></div>':'')+'<p id="profileError" class="form-error" role="alert"></p><button id="profileSave" class="primary" type="submit">저장</button>'+button('취소','close','textbtn')+'</form>','profile');if(cloudSession?.access_token)void loadLinkedAccounts();
 }
 function updateProfilePhotoPreview(){
  if(modal!=='profile'||!$('profileForm')||!profileEdit)return;
