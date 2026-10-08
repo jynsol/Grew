@@ -44,7 +44,7 @@ Do not rely on opening `index.html` with `file://` for every browser feature. A 
 - **Store** — `BM_STORE_OPEN` in `js/03-core.js` is `false`: paid trees, floors, the pack and ad coupons
   show "곧 열려요" and nothing charges. Set it to `true` only once real payments and ads are connected.
   Hidden trees are never sold; they open at 30 / 50 / 75 / 100 planted trees (`BM_MYSTERY_AT`).
-- **Social login** — Kakao, Apple and Google go through Supabase Auth (`cloudOAuthStart`). Turn each
+- **Social login** — Kakao and Google go through (Apple is hidden for now; see `OB_SOCIAL`) Supabase Auth (`cloudOAuthStart`). Turn each
   provider on in Supabase → Authentication → Providers, and add `https://jynsol.github.io/Grew/` to
   Authentication → URL Configuration → Redirect URLs.
 - **Legal pages** — `legal/terms.html` and `legal/privacy.html`. Fill in `[운영자 이름]`, `[문의 이메일]`
