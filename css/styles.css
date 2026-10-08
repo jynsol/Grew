@@ -4008,3 +4008,5 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .forest-edit-bar .forest-edit-floor svg{color:var(--text-3)}
 .forest-edit-sep{flex:none;width:1px;height:18px;background:var(--hair,rgba(30,42,34,.12));margin:0 2px}
 .forest-edit-bar .forest-edit-reset{color:var(--text-2)}
+/* Codex: trees you don't have yet are a flat grey silhouette */
+.bm-codex-tree.is-locked .bm-codex-art img{filter:brightness(0) invert(.84)!important;opacity:1!important}
