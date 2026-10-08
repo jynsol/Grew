@@ -4025,3 +4025,8 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-ad-button:disabled svg{display:none}
 .bm-hero-art{height:250px;margin:6px -14px 4px}
 .bm-hero-art>svg{position:absolute;inset:0;width:100%;height:100%}
+.bm-package-floor{display:flex;align-items:center;gap:14px;margin:-6px 0 4px;padding:8px 14px 8px 8px;border-radius:16px;background:var(--soft)}
+.bm-package-floor-art{flex:none;width:96px;height:72px;display:block}
+.bm-package-floor-art svg{width:100%;height:100%;display:block}
+.bm-package-floor small{display:block;font:500 12px/1.2 var(--font-family);color:var(--text-2)}
+.bm-package-floor strong{display:block;margin-top:3px;font:700 16px/1.2 var(--font-family);color:var(--sb-ink)}
