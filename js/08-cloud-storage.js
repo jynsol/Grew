@@ -1711,6 +1711,23 @@ async function fetchMovieSearchPayload(query){
  if(!res.ok){const detail=payload?.error||payload?.message||('HTTP '+res.status);if(res.status===401)throw Error('검색 서버에서 인증 오류가 발생했어요. Edge Function의 Verify JWT 설정을 확인해주세요.');throw Error(detail)}
  return payload;
 }
+// Recommended movies arrive without credits. After one is scrapped, look it up in movie search
+// (which returns the director and runtime) and fill in whatever is missing.
+const movieEnrichPending=new Set();
+async function enrichMovieDetails(id){
+ const c=get(id);if(!c||c.type!=='movie'||c.creator&&c.runtime||movieEnrichPending.has(id))return;
+ movieEnrichPending.add(id);
+ try{
+  const list=unwrapMovies(await fetchMovieSearchPayload(c.title)).map(normalizeRemoteMovie).filter(x=>x?.title);
+  const year=String(c.releaseDate||c.published||'').slice(0,4);
+  const pick=list.find(x=>c.providerId&&x.providerId===String(c.providerId))||list.filter(x=>!year||String(x.releaseDate||'').startsWith(year)).sort((a,b)=>movieSearchScore(b,c.title)-movieSearchScore(a,c.title))[0];
+  const cur=get(id);if(!pick||!cur)return;
+  let changed=false;const fill=(k,v)=>{if(v&&!cur[k]){cur[k]=v;changed=true}};
+  fill('creator',pick.creator);fill('runtime',pick.runtime);fill('cover',pick.cover);fill('releaseDate',pick.releaseDate);
+  if(changed&&persist())render();
+ }catch{}finally{movieEnrichPending.delete(id)}
+}
+function backfillMovieDetails(){state.items.filter(c=>c.type==='movie'&&!c.creator).slice(0,6).forEach((c,i)=>setTimeout(()=>void enrichMovieDetails(c.id),400*i))}
 function movieResultKey(c){
  if(c?.provider&&c?.providerId)return c.provider+'|'+c.providerId;
  return Model.norm(c?.title)+'|'+String(c?.releaseDate||'').slice(0,4);

@@ -28,7 +28,7 @@ function renderDiscovery(){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action;
  if(a==='discoveryType'){if(!['all','book','movie'].includes(b.dataset.type))return;discoveryType=b.dataset.type;discoveryOffset=0;render()}
  if(a==='discoveryMore'){discoveryOffset+=3;render()}
- if(a==='discoverySave'){const candidate=discoveryShown[Number(b.dataset.index)];if(candidate&&['book','movie'].includes(candidate.type)){const id=Model.uid(),c=Model.add(state,candidate,id);saved(c,id)}}
+ if(a==='discoverySave'){const candidate=discoveryShown[Number(b.dataset.index)];if(candidate&&['book','movie'].includes(candidate.type)){const id=Model.uid(),c=Model.add(state,candidate,id);saved(c,id);void enrichMovieDetails(c.id)}}
 });
 // Routes: intro | entry | socialTerms | signup | signupSent | login | recover | recoverSent | resetPassword | profile | start | taste | tasteType(MY > 취향 추가) | app
 let authSession={signedIn:false,finished:false},authRoute='entry',tasteIndex=0,tasteOrigin='my',tasteOriginScroll=0,tastePool=[],tasteSeen=0,tasteReviewed=0,tasteMode='initial',tastePreferredType='book',flowCodeSent=false;
@@ -1158,9 +1158,9 @@ document.addEventListener('click',async e=>{
  if(a==='flowTaste')startTaste('initial',tastePreferredType||'book');
  if(a==='tasteClose'){closeAdditionalTaste();return}
  if(a==='flowFinish')finishEntry();
- if(a==='flowInterested'){Model.add(state,window.tasteCandidate);tasteSeen++;if(response('interested'))nextTaste()}
+ if(a==='flowInterested'){const added=Model.add(state,window.tasteCandidate);if(added)void enrichMovieDetails(added.id);tasteSeen++;if(response('interested'))nextTaste()}
  if(a==='flowSkip'){if(response('skipped'))nextTaste()}
- if(a==='flowExperienced'){const c=Model.add(state,window.tasteCandidate);if(!c.completed){c.completed='unknown';c.completedAt=Date.now()}if(response('experienced'))nextTaste()}
+ if(a==='flowExperienced'){const c=Model.add(state,window.tasteCandidate);if(c)void enrichMovieDetails(c.id);if(!c.completed){c.completed='unknown';c.completedAt=Date.now()}if(response('experienced'))nextTaste()}
  if(a==='flowLogout'){confirmBox('로그아웃할까요?','기록과 미전송 변경은 이 기기에 보관되며, 같은 계정으로 로그인하면 이어서 전송합니다.',async()=>{await cloudLogout();authSession={signedIn:false,finished:false};saveSession();state=Model.empty();/* Account snapshots, including pending uploads, survive logout. */authRoute='entry';view='today';render()},'로그아웃')}
  if(a==='deleteAccount'){
   if(!cloudSession?.access_token){toast('다시 로그인한 뒤 회원탈퇴를 진행해주세요.');return}
@@ -1260,10 +1260,10 @@ document.addEventListener('submit',async e=>{
   catch(err){if(f.isConnected)$('flowError').textContent=err.status===401||err.status===403?'재설정 링크가 만료됐어요. 새 메일을 받아주세요.':err.message}
   finally{if(f.isConnected)submit.disabled=false}return;
  }
- if(f.id==='flowTasteDateForm'){e.preventDefault();const date=$('flowTasteDate').value;if(date&&(!Model.validDate(date)||date>now())){$('flowError').textContent='오늘 또는 과거 날짜를 선택해주세요.';return}const c=Model.add(state,window.tasteCandidate);if(!c.completed){c.completed=date||'unknown';c.completedAt=Date.now()}if(response('experienced'))nextTaste()}
+ if(f.id==='flowTasteDateForm'){e.preventDefault();const date=$('flowTasteDate').value;if(date&&(!Model.validDate(date)||date>now())){$('flowError').textContent='오늘 또는 과거 날짜를 선택해주세요.';return}const c=Model.add(state,window.tasteCandidate);if(c)void enrichMovieDetails(c.id);if(!c.completed){c.completed=date||'unknown';c.completedAt=Date.now()}if(response('experienced'))nextTaste()}
 });
 document.addEventListener('input',e=>{if(e.target.id==='flowProfileName')e.target.setCustomValidity('')});
 // CLOUD_SESSION_STORAGE alone drives cross-tab account changes.
 authRoute='entry';
 render();
-cloudBootstrap().then(()=>render()).catch(()=>{cloudSyncStatus='error';showStorageStatus()});
+cloudBootstrap().then(()=>{render();setTimeout(backfillMovieDetails,2500)}).catch(()=>{cloudSyncStatus='error';showStorageStatus()});
