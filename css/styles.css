@@ -4000,3 +4000,11 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-weekly-copy strong{font:700 16px/1.2 var(--font-family);color:var(--sb-ink)}
 .bm-weekly-copy span{font:500 12px/1.2 var(--font-family);color:var(--text-3)}
 .bm-weekly .bm-shop-action{flex:none;width:auto;padding:0 14px;height:36px}
+/* Decorate mode: floors + reset in one floating bar */
+.forest-edit-bar{display:flex;align-items:center;gap:4px;max-width:calc(100% - 2*var(--page-gutter));padding:4px;border-radius:24px;background:#fff;box-shadow:var(--sb-card);overflow-x:auto;scrollbar-width:none}
+.forest-edit-bar::-webkit-scrollbar{display:none}
+.forest-edit-bar button{flex:none;height:36px;min-height:0;padding:0 13px;border:0;border-radius:18px;background:transparent;color:var(--text-1);display:inline-flex;align-items:center;gap:5px;font:600 13px/1 var(--font-family);white-space:nowrap}
+.forest-edit-bar .forest-edit-floor.active{background:var(--sb-mint)}
+.forest-edit-bar .forest-edit-floor svg{color:var(--text-3)}
+.forest-edit-sep{flex:none;width:1px;height:18px;background:var(--hair,rgba(30,42,34,.12));margin:0 2px}
+.forest-edit-bar .forest-edit-reset{color:var(--text-2)}
