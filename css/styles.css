@@ -4040,3 +4040,7 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-visitor:not(.is-locked) .bm-visitor-art.is-thumb{width:92px;height:92px;margin:-4px}
 /* Perf: a plain dim is enough behind sheets; full-screen blur stutters on phones */
 .sheet-back{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(30,42,34,.46)}
+.bm-hero-price>div{min-width:0;white-space:nowrap}
+.bm-hero-track.is-multi .bm-hero-price strong{font-size:22px}
+.bm-hero-buy{flex:none;white-space:nowrap}
+.bm-hero.is-sky{background:var(--sb-sky)}

@@ -168,33 +168,39 @@ const TREE_SPECIES=[
  {id:'paulownia',category:'other',name:'오동나무',need:1,shape:'twigleaf',colors:['#849B6B','#A6B985','#C4CEAA'],trunk:'#7A614D'},
  {id:'evergreen',category:'other',name:'후박나무',need:3,shape:'dense',colors:['#375F51','#57775F','#2B4B43'],trunk:'#6C5847'}
 ];
+// Winter trees reuse their summer species' shape and size, with a 겨울 name.
+TREE_SPECIES.push(...['zelkova','metasequoia','pine','cedar','juniper','fringe','yew','willow','cherry','birch'].map(id=>{const t=TREE_SPECIES.find(x=>x.id===id);return {...t,id:'winter'+id,name:'겨울 '+t.name,need:3}}));
 // Songlim launch-flow preview. This module has no network, advertisement, or payment operations.
 // Production entitlements must be issued and verified by a server before release.
 // Paid trees, floors, the pack and ad coupons stay closed until real payments and ads are connected.
 // Flip to true then; while false the shop is a catalogue and nothing pretends to charge.
 const BM_STORE_OPEN=true;
 const BM_CONFIG=Object.freeze({mode:'preview',future:Object.freeze({regularTrees:26,mysteryTrees:4,totalTrees:30,paidFloorCount:2,treePriceKRW:1100,floorPriceKRW:2200,packagePriceKRW:9900,packageTreeCount:10,rewardedViewsPerDay:2,viewsPerCoupon:1,couponCostPerTree:14,collectionMysteryAt:20,cashMysteryAt:10})});
-const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false}];
+const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'snow',name:'눈 덮인 숲',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false}];
 const BM_BASE_IDS=['oak','birch','fir'];
 const BM_RECORD_IDS=['zelkova','ginkgo','metasequoia','yew','cedar','evergreen','cypress'];
 const BM_EXISTING_SHOP_IDS=['cherry','maple','magnolia','crape','fringe','hackberry','willow','pine','juniper','paulownia'];
-// 10 special trees still to be drawn: together with 3 new floors they make the second pack.
+// Winter pack: snowy versions of ten trees, sold as their own special trees (one per genre).
+const BM_WINTER_IDS=['winterzelkova','wintermetasequoia','winterpine','wintercedar','winterjuniper','winterfringe','winteryew','winterwillow','wintercherry','winterbirch'];
+// 10 special trees still to be drawn: together with the next new floor they make the third pack.
 const BM_RESERVED_IDS=Array.from({length:10},(_,i)=>'paid-reserved-'+String(i+1).padStart(2,'0'));
-const BM_SHOP_IDS=[...BM_EXISTING_SHOP_IDS,...BM_RESERVED_IDS];
-const BM_READY_IDS=[...BM_BASE_IDS,...BM_RECORD_IDS,...BM_EXISTING_SHOP_IDS];
+const BM_SALE_IDS=[...BM_EXISTING_SHOP_IDS,...BM_WINTER_IDS];
+const BM_SHOP_IDS=[...BM_SALE_IDS,...BM_RESERVED_IDS];
+const BM_READY_IDS=[...BM_BASE_IDS,...BM_RECORD_IDS,...BM_SALE_IDS];
+const BM_PAID_FLOOR_IDS=BM_FLOORS.filter(f=>!f.free).map(f=>f.id);
 const BM_SOURCE_KINDS=['base','growth','cash','coupon','legacy','beta'];
-// Each genre: 1 free genre tree + 1 special tree now + 1 special tree in the second pack.
+// Each genre: 1 classic tree + 1 special tree (first pack) + 1 winter tree (winter pack) + 1 still to be drawn.
 const BM_POOLS=[
- {id:'book-literature',type:'book',label:'순문학',free:'zelkova',paid:['magnolia','paid-reserved-01']},
- {id:'book-genre',type:'book',label:'장르문학',free:'metasequoia',paid:['maple','paid-reserved-02']},
- {id:'book-humanities',type:'book',label:'인문',free:'ginkgo',paid:['pine','paid-reserved-03']},
- {id:'book-science',type:'book',label:'과학',free:'cedar',paid:['paulownia','paid-reserved-04']},
- {id:'book-other',type:'book',label:'기타',free:'oak',paid:['juniper','paid-reserved-05']},
- {id:'movie-drama',type:'movie',label:'드라마',free:'evergreen',paid:['fringe','paid-reserved-06']},
- {id:'movie-action',type:'movie',label:'액션·스릴러',free:'yew',paid:['hackberry','paid-reserved-07']},
- {id:'movie-sf',type:'movie',label:'SF·판타지',free:'cypress',paid:['willow','paid-reserved-08']},
- {id:'movie-comedy',type:'movie',label:'로맨스·코미디',free:'fir',paid:['cherry','paid-reserved-09']},
- {id:'movie-other',type:'movie',label:'기타',free:'birch',paid:['crape','paid-reserved-10']}
+ {id:'book-literature',type:'book',label:'순문학',free:'zelkova',paid:['magnolia','winterzelkova','paid-reserved-01']},
+ {id:'book-genre',type:'book',label:'장르문학',free:'metasequoia',paid:['maple','wintermetasequoia','paid-reserved-02']},
+ {id:'book-humanities',type:'book',label:'인문',free:'ginkgo',paid:['pine','winterpine','paid-reserved-03']},
+ {id:'book-science',type:'book',label:'과학',free:'cedar',paid:['paulownia','wintercedar','paid-reserved-04']},
+ {id:'book-other',type:'book',label:'기타',free:'oak',paid:['juniper','winterjuniper','paid-reserved-05']},
+ {id:'movie-drama',type:'movie',label:'드라마',free:'evergreen',paid:['fringe','winterfringe','paid-reserved-06']},
+ {id:'movie-action',type:'movie',label:'액션·스릴러',free:'yew',paid:['hackberry','winteryew','paid-reserved-07']},
+ {id:'movie-sf',type:'movie',label:'SF·판타지',free:'cypress',paid:['willow','winterwillow','paid-reserved-08']},
+ {id:'movie-comedy',type:'movie',label:'로맨스·코미디',free:'fir',paid:['cherry','wintercherry','paid-reserved-09']},
+ {id:'movie-other',type:'movie',label:'기타',free:'birch',paid:['crape','winterbirch','paid-reserved-10']}
 ];
 const BM_GROWTH_RULES=[
  {id:'first-record',speciesId:'zelkova',label:'첫 기록 남기기',target:1,metric:'record'},
@@ -268,8 +274,8 @@ function bmSanitize(raw,items=[]){
   b.recordDays=unique(raw.recordDays,bmValidDate);b.hasRecorded=raw.hasRecorded===true;
   b.earnedTreeIds=unique(raw.earnedTreeIds,id=>BM_RECORD_IDS.includes(id));
   b.legacyTreeIds=unique(raw.legacyTreeIds,id=>regular.has(id));b.legacyMysteryIds=unique(raw.legacyMysteryIds,id=>['A','B','C','D'].includes(id));
-  b.ownership=sourceMap(raw.ownership,id=>regular.has(id));b.floorOwnership=sourceMap(raw.floorOwnership,id=>id==='meadow');
-  b.previewOwnership=sourceMap(raw.previewOwnership,id=>BM_EXISTING_SHOP_IDS.includes(id));b.previewFloorOwnership=sourceMap(raw.previewFloorOwnership,id=>id==='meadow');
+  b.ownership=sourceMap(raw.ownership,id=>regular.has(id));b.floorOwnership=sourceMap(raw.floorOwnership,id=>BM_PAID_FLOOR_IDS.includes(id));
+  b.previewOwnership=sourceMap(raw.previewOwnership,id=>BM_SALE_IDS.includes(id));b.previewFloorOwnership=sourceMap(raw.previewFloorOwnership,id=>BM_PAID_FLOOR_IDS.includes(id));
   for(const [id,kinds] of Object.entries(b.previewOwnership)){const good=kinds.filter(k=>k==='cash'||k==='coupon');if(good.length)b.previewOwnership[id]=good;else delete b.previewOwnership[id]}
   for(const [id,kinds] of Object.entries(b.previewFloorOwnership)){if(kinds.includes('cash'))b.previewFloorOwnership[id]=['cash'];else delete b.previewFloorOwnership[id]}
   if(raw.previewCouponViews&&typeof raw.previewCouponViews==='object'&&!Array.isArray(raw.previewCouponViews))for(const [date,n] of Object.entries(raw.previewCouponViews))if(bmValidDate(date)&&Number.isSafeInteger(n)&&n>0)b.previewCouponViews[date]=Math.min(n,BM_CONFIG.future.rewardedViewsPerDay);
@@ -277,7 +283,7 @@ function bmSanitize(raw,items=[]){
   const cost=BM_CONFIG.future.couponCostPerTree,legacyCoupons=raw.previewVersion!==2;
   const earned=Math.floor(Object.values(b.previewCouponViews).reduce((sum,n)=>sum+n,0)/BM_CONFIG.future.viewsPerCoupon);
   const allowed=legacyCoupons?Math.floor(earned/12):Math.floor(earned/cost);
-  let couponOwned=0;for(const id of BM_EXISTING_SHOP_IDS)if(b.previewOwnership[id]?.includes('coupon')){if(couponOwned<allowed)couponOwned++;else{b.previewOwnership[id]=b.previewOwnership[id].filter(k=>k!=='coupon');if(!b.previewOwnership[id].length)delete b.previewOwnership[id]}}
+  let couponOwned=0;for(const id of BM_SALE_IDS)if(b.previewOwnership[id]?.includes('coupon')){if(couponOwned<allowed)couponOwned++;else{b.previewOwnership[id]=b.previewOwnership[id].filter(k=>k!=='coupon');if(!b.previewOwnership[id].length)delete b.previewOwnership[id]}}
   b.previewCouponSpent=legacyCoupons?Math.min(earned,couponOwned*cost):Math.max(couponOwned*cost,Number.isSafeInteger(raw.previewCouponSpent)&&raw.previewCouponSpent>=0?Math.min(raw.previewCouponSpent,earned):0);
   for(const p of BM_POOLS){const n=raw.nextByPool?.[p.id];if(Number.isSafeInteger(n)&&n>=0)b.nextByPool[p.id]=Math.min(n,1000000)}
  }else{
@@ -298,7 +304,7 @@ function bmSanitize(raw,items=[]){
  for(const id of b.legacyTreeIds)bmAddSource(b.ownership,id,'legacy');
  for(const id of b.earnedTreeIds)bmAddSource(b.ownership,id,'growth');
  bmSyncLedger(b,items);
- b.floor=raw?.floor==='meadow'&&bmFloorOwnedFrom(b,'meadow')?'meadow':'basic';
+ b.floor=BM_PAID_FLOOR_IDS.includes(raw?.floor)&&bmFloorOwnedFrom(b,raw.floor)?raw.floor:'basic';
  for(const c of items){
   if(!bmTracked(c))continue;
   const a=c.bmAssignment,validMode=['auto','manual','legacy'].includes(a?.mode);
@@ -344,7 +350,7 @@ function bmAssignManual(s,c,id){
  c.bmAssignment={version:2,mode:'manual',pool:bmPool(c),fallback:false,sequence:c.bmAssignment?.sequence||0};return true;
 }
 function bmResetItemAppearance(s,c){if(!bmTracked(c))return false;delete c.bmAssignment;bmAssignItem(s,c,true);return true}
-function bmFloorOwnedFrom(b,id){return id==='basic'||id==='meadow'&&!!(bmRealSources(b,id,true).length||bmPreviewSources(b,id,true).length)}
+function bmFloorOwnedFrom(b,id){return id==='basic'||BM_PAID_FLOOR_IDS.includes(id)&&!!(bmRealSources(b,id,true).length||bmPreviewSources(b,id,true).length)}
 function bmFloorOwned(id){return bmFloorOwnedFrom(bmState(),id)}
 function bmFloorId(){const b=bmState();return bmFloorOwnedFrom(b,b.floor)?b.floor:'basic'}
 function bmSetFloor(id){if(!bmFloorOwned(id))return false;bmState().floor=id;return true}
@@ -383,11 +389,12 @@ function bmPreviewBuyFloor(id,s=state){
  const b=bmRefresh(s);if(bmFloorOwnedFrom(b,id))return {ok:false,reason:'already-owned'};
  bmAddSource(b.previewFloorOwnership,id,'cash');return {ok:true,reason:'',id};
 }
-// Packs: 25% off the single prices, sold only while you own none of what's inside (open one tree or the
-// floor any way and that pack is gone). The second (10 trees + the third floor) appears once its art is ready.
+// Packs: a discount on the single prices, sold only while you own none of what's inside (open one tree or the
+// floor any way and that pack is gone). The third (10 trees + a new floor) appears once its art is ready.
 const BM_PACKS=[
  {id:'first',name:'시작 숲 패키지',trees:BM_EXISTING_SHOP_IDS,floors:['meadow'],price:9900,list:13200,art:'./assets/images/shop/pack-first.webp'},
- {id:'second',name:'두 번째 숲 패키지',trees:BM_RESERVED_IDS,floors:['floor-reserved-01'],price:9900,list:13200}
+ {id:'winter',name:'겨울 숲 패키지',trees:BM_WINTER_IDS,floors:['snow'],price:11000,list:13200,art:'./assets/images/shop/pack-winter.webp',tone:'sky'},
+ {id:'third',name:'세 번째 숲 패키지',trees:BM_RESERVED_IDS,floors:['floor-reserved-01'],price:9900,list:13200}
 ];
 let bmActivePack='first';
 function bmPackDef(id=bmActivePack){return BM_PACKS.find(p=>p.id===id)||BM_PACKS[0]}
@@ -539,7 +546,7 @@ function bmResetToGenre(s=state){const b=bmRefresh(s);b.nextByPool={};const key=
 function bmResetGenreConfirm(){confirmBox('처음으로','꾸며 둔 나무를 모두 처음 모습으로 되돌릴까요? 장르마다 가진 나무가 번갈아 심어져요. 바닥은 그대로예요.',()=>{const before=Model.clone(state);bmResetToGenre(state);if(!persist()){state=before;return}closeModal();view='forest';forestEditMode=true;render();toast('처음 모습으로 되돌렸어요.')},'되돌리기')}
 // Prototype only: undo every preview purchase, coupon and ad view, and any special tree/floor carried
 // over from older data, so the shop and packs can be tried again from scratch.
-function bmPreviewResetPurchases(s=state){const b=bmRefresh(s);b.previewOwnership={};b.previewFloorOwnership={};for(const id of BM_SHOP_IDS)delete b.ownership[id];delete b.floorOwnership.meadow;b.legacyTreeIds=b.legacyTreeIds.filter(id=>!BM_SHOP_IDS.includes(id));b.previewCouponViews={};b.previewCouponSpent=0;if(!bmFloorOwnedFrom(b,b.floor))b.floor='basic';for(const c of s.items||[]){if(!bmTracked(c))continue;const id=c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId;if(!bmCanUseFrom(b,id))bmResetItemAppearance(s,c)}bmRefresh(s);return b}
+function bmPreviewResetPurchases(s=state){const b=bmRefresh(s);b.previewOwnership={};b.previewFloorOwnership={};for(const id of BM_SHOP_IDS)delete b.ownership[id];for(const f of BM_PAID_FLOOR_IDS)delete b.floorOwnership[f];b.legacyTreeIds=b.legacyTreeIds.filter(id=>!BM_SHOP_IDS.includes(id));b.previewCouponViews={};b.previewCouponSpent=0;if(!bmFloorOwnedFrom(b,b.floor))b.floor='basic';for(const c of s.items||[]){if(!bmTracked(c))continue;const id=c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId;if(!bmCanUseFrom(b,id))bmResetItemAppearance(s,c)}bmRefresh(s);return b}
 function bmPreviewResetConfirm(){confirmBox('구매 되돌리기','체험으로 산 나무·바닥·패키지와 모은 쿠폰을 모두 되돌릴까요? 그 나무로 꾸민 자리는 클래식 나무로 돌아가요.',()=>{const before=Model.clone(state);bmPreviewResetPurchases(state);if(!persist()){state=before;return}closeModal();render();toast('구매를 되돌렸어요.')},'되돌리기',true)}
 function bmEditBarHTML(){const cur=bmFloorId(),lock='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
  return '<div class="forest-edit-bar" role="group" aria-label="꾸미기">'+BM_FLOORS.filter(f=>f.ready).map(f=>{const owned=bmFloorOwned(f.id),on=cur===f.id;return button((owned?'':lock)+esc(f.name),owned?'bmChooseOwnedFloor':'bmPreviewFloor','forest-edit-floor'+(on?' active':''),'data-floor="'+f.id+'" aria-pressed="'+on+'"')}).join('')+'<span class="forest-edit-sep" aria-hidden="true"></span>'+button('처음으로','bmResetGenre','forest-edit-reset')+'</div>'}
@@ -697,7 +704,7 @@ function bmPackSceneArt(ids,floor){const s=Model.empty(),pick=ids.filter(bmTreeR
 function bmShopHeroHTML(){
  const packs=BM_PACKS.map(p=>bmPackageInfo(state,p.id)).filter(p=>p.ready&&p.untouched&&(!BM_STORE_OPEN||p.canBuy));
  if(!packs.length)return '';
- const slide=p=>{const f=p.floorIds[0],trees=p.ids.slice(0,3);return '<article class="bm-hero">'+'<div class="bm-hero-copy"><span class="bm-hero-tag">'+'묶음 25% 할인'+'</span><strong>'+esc(p.pack.name)+'</strong><small>스페셜 나무 '+p.ids.length+'종 + '+esc(BM_FLOORS.find(x=>x.id===f)?.name||'바닥')+'</small></div>'+
+ const slide=p=>{const f=p.floorIds[0],trees=p.ids.slice(0,3);return '<article class="bm-hero'+(p.pack.tone?' is-'+p.pack.tone:'')+'">'+'<div class="bm-hero-copy"><span class="bm-hero-tag">'+'묶음 '+Math.round((1-p.pack.price/p.pack.list)*100)+'% 할인'+'</span><strong>'+esc(p.pack.name)+'</strong><small>스페셜 나무 '+p.ids.length+'종 + '+esc(BM_FLOORS.find(x=>x.id===f)?.name||'바닥')+'</small></div>'+
   '<div class="bm-hero-art" aria-hidden="true">'+(p.pack.art?'<img src="'+p.pack.art+'" alt="" decoding="async">':bmPackSceneArt(p.ids,f))+'</div>'+
   '<div class="bm-hero-price"><div><strong>'+bmKRW(p.pack.price)+'</strong><del>'+bmKRW(p.pack.list)+'</del></div>'+(BM_STORE_OPEN?button('구매하기','bmPackage','bm-hero-buy','data-pack="'+p.pack.id+'"'):'<span class="bm-hero-buy is-soon">곧 열려요</span>')+'</div>'+
   '<p class="bm-hero-fine">구성 나무가 하나도 없을 때만 살 수 있어요</p>'+'</article>'};
@@ -719,7 +726,7 @@ function bmWeeklyHTML(){
  return '<div class="bm-shop-head"><h2>이번 주 추천</h2><span>월요일에 바뀌어요</span></div><article class="bm-weekly">'+button(bmTreeImg(id),'bmPreviewTree','bm-weekly-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"')+'<div class="bm-weekly-copy"><small>'+esc(pick.reason)+'</small><strong>'+esc(bmTreeName(id))+'</strong><span>'+esc(bmGenreLabel(id))+'</span></div>'+action+'</article>';
 }
 function bmCouponBoardHTML(){
- const q=bmCouponStatus(),have=Math.min(q.balance,q.cost),left=Math.max(0,q.cost-q.balance),target=BM_EXISTING_SHOP_IDS.find(id=>!bmReadyTreeIds().includes(id))||'maple';
+ const q=bmCouponStatus(),have=Math.min(q.balance,q.cost),left=Math.max(0,q.cost-q.balance),target=BM_SALE_IDS.find(id=>!bmReadyTreeIds().includes(id))||'maple';
  const stamps=Array.from({length:q.cost},(_,i)=>i<have?'<span class="bm-stamp is-filled">'+BM_PAGE_ICONS.check+'</span>':i===q.cost-1?'<span class="bm-stamp is-goal">'+bmTreeImg(target)+'</span>':'<span class="bm-stamp">'+(i+1)+'</span>').join('');
  return '<div class="bm-coupon-board"><div class="bm-coupon-top"><div><span class="bm-pack-kicker">TREE COUPON</span><strong>'+have+' / '+q.cost+'장</strong><small>'+(left?left+'장 더 모으면 나무 1종':'나무 1종을 열 수 있어요')+'</small></div><span class="bm-coupon-today">오늘 '+q.watchedToday+' / '+q.dailyLimit+'회</span></div><div class="bm-stamps" role="img" aria-label="쿠폰 '+have+'장, 14장 중">'+stamps+'</div>'+
  button('<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z" fill="#FF6A55"/></svg>'+(q.watchedToday>=q.dailyLimit?'오늘 2장을 모두 모았어요':'광고 보고 쿠폰 받기'),'bmAdStart','bm-ad-button',q.watchedToday>=q.dailyLimit?'disabled':'')+'</div>'+

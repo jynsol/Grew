@@ -439,14 +439,16 @@ function render(){
 function todayLogDates(c){
  return new Set((c.logs||[]).map(l=>l.date).filter(date=>typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&Number.isFinite(Date.parse(date+'T12:00:00Z'))&&new Date(date+'T12:00:00Z').toISOString().slice(0,10)===date));
 }
+// The streak and this week's dots are shared: any day you recorded any book or film counts.
+function allLogDates(){const out=new Set();for(const c of state.items||[]){todayLogDates(c).forEach(d=>out.add(d));if(typeof c.completed==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.completed))out.add(c.completed)}return out}
 function todayDateShift(date,days){const d=new Date(date+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
 // Calendar dates, not elapsed hours: this also keeps DST and year boundaries stable.
 function weekDots(c,today=now()){
- const logged=todayLogDates(c),weekday=new Date(today+'T12:00:00Z').getUTCDay(),monday=todayDateShift(today,-((weekday+6)%7));
+ const logged=allLogDates(),weekday=new Date(today+'T12:00:00Z').getUTCDay(),monday=todayDateShift(today,-((weekday+6)%7));
  return Array.from({length:7},(_,i)=>{const date=todayDateShift(monday,i);return {date,logged:date<=today&&logged.has(date),isToday:date===today,isFuture:date>today}});
 }
 function streakDays(c,today=now()){
- const logged=todayLogDates(c);let date=logged.has(today)?today:todayDateShift(today,-1),days=0;
+ const logged=allLogDates();let date=logged.has(today)?today:todayDateShift(today,-1),days=0;
  while(logged.has(date)){days++;date=todayDateShift(date,-1)}return days;
 }
 
@@ -725,7 +727,7 @@ function yearForestItems(y,type){
 function yearBoardGeometry(y,items){
  const W=390,H=250,n=items.length,N=Math.max(2,Math.ceil(Math.sqrt(n)));
  const BW=Math.min(170,95+N*9),y0=46+(170-BW)/2,cx=W/2,rnd=k=>(hash(y+'|board|'+k)%100000)/100000;
- const ground=polyGround(cx,y0+BW/2,BW,BW/2,16,Math.max(3,Math.min(6,N+1)),'year'+y+N,bmFloorId()==='meadow'?'meadow':'basic');
+ const ground=polyGround(cx,y0+BW/2,BW,BW/2,16,Math.max(3,Math.min(6,N+1)),'year'+y+N,POLY_FLOORS[bmFloorId()]?bmFloorId():'basic');
  // cells back to front, centre-out along each diagonal
  const cellW=BW/N,cellH=cellW/2,cells=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)cells.push({r,c});
  cells.sort((p,q)=>(p.r+p.c)-(q.r+q.c)||Math.abs(p.c-p.r)-Math.abs(q.c-q.r)||p.c-q.c);

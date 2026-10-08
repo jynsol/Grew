@@ -595,7 +595,7 @@ function treeVisualProfile(c){
  if(growthKey)return {species:contentSpecies(c),shape:growthKey,radius:growthKey==='sprout'?14:growthKey==='bush'?17:18,scaleBias:growthKey==='sprout'?.42:growthKey==='bush'?.5:.6};
  if(typeof c==='object'&&c&&(c.hiddenTree==='A'||c.hiddenTree==='B'))return {species:contentSpecies(c),shape:'hidden',radius:c.hiddenTree==='A'?38:40,scaleBias:1};
  const sp=(typeof c==='object'&&c)?contentSpecies(c):TREE_SPECIES.find(t=>t.id===String(c||''))||TREE_SPECIES[0];
- const byId={birch:{radius:20,bias:.98},oak:{radius:31,bias:1.06},cherry:{radius:27,bias:1.0},zelkova:{radius:32,bias:1.04},ginkgo:{radius:22,bias:.97},metasequoia:{radius:17,bias:1.17},maple:{radius:27,bias:1.0},willow:{radius:26,bias:1.02},magnolia:{radius:25,bias:.99},crape:{radius:25,bias:.98},pine:{radius:30,bias:1.04},cedar:{radius:18,bias:1.16},hackberry:{radius:32,bias:1.04},fringe:{radius:24,bias:.98},fir:{radius:19,bias:1.13},cypress:{radius:16,bias:1.14},yew:{radius:20,bias:1.0},juniper:{radius:29,bias:1.03},paulownia:{radius:22,bias:.98},evergreen:{radius:27,bias:1.03}}; const base=byId[sp.id]||{radius:24,bias:1};
+ const byId={birch:{radius:20,bias:.98},oak:{radius:31,bias:1.06},cherry:{radius:27,bias:1.0},zelkova:{radius:32,bias:1.04},ginkgo:{radius:22,bias:.97},metasequoia:{radius:17,bias:1.17},maple:{radius:27,bias:1.0},willow:{radius:26,bias:1.02},magnolia:{radius:25,bias:.99},crape:{radius:25,bias:.98},pine:{radius:30,bias:1.04},cedar:{radius:18,bias:1.16},hackberry:{radius:32,bias:1.04},fringe:{radius:24,bias:.98},fir:{radius:19,bias:1.13},cypress:{radius:16,bias:1.14},yew:{radius:20,bias:1.0},juniper:{radius:29,bias:1.03},paulownia:{radius:22,bias:.98},evergreen:{radius:27,bias:1.03}}; const base=byId[sp.id.replace(/^winter/,'')]||{radius:24,bias:1};
  return {species:sp,shape:sp.shape,radius:base.radius,scaleBias:base.bias};
 }
 function hiddenTreeScale(kind,theme='basic'){
@@ -904,7 +904,9 @@ function forestOverlapEdges(points,cfg,theme){
 // with soft moss patches and a few small flowers.
 const POLY_FLOORS={
  basic:{greens:['#B2D68F','#AED38B','#B6D993','#ABD088','#B0D58D'],soil:['#B08A63','#86663F'],lip:['#98C277','#82AD62'],speck:['#8E6B4C','#73563D'],dot:'#C6E3A6'},
- meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#C4A67C','#9A7F5B'],lip:['#C9D394','#B1BE7C'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'}
+ meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#C4A67C','#9A7F5B'],lip:['#C9D394','#B1BE7C'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'},
+ // 눈 덮인 숲: snow on top (white with faint blue facets), snow overhang on frozen earth
+ snow:{greens:['#F6F9FB','#EEF4F8','#F9FBFC','#E8F0F5','#F2F7FA'],soil:['#A7927D','#7E6B59'],lip:['#FFFFFF','#E2EBF1'],speck:['#8C7865','#6D5C4C'],dot:'#DCE7EE'}
 };
 function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
  const pal=POLY_FLOORS[floor]||POLY_FLOORS.basic,rnd=k=>(hash(seed+'|'+k)%100000)/100000,cw=rx/K;
@@ -931,6 +933,13 @@ function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
   // a,b span the whole top face (a square in board space); favour the outer ring a little
   for(let n=0;n<K*K*4;n++){const a=rnd('fa'+n)*2-1,b=rnd('fb'+n)*2-1,m=Math.max(Math.abs(a),Math.abs(b));if(m>.9||(m<.5&&n%3))continue;flower(cx+(a-b)*rx/2,cy+(a+b)*ry/2,(4+rnd('fz'+n)*1.6)*k,rnd('fc'+n)<.3)}
  }
+ if(floor==='snow'){
+  // soft blue hollows in the snow, small drifts, and a scatter of glints
+  for(let n=0;n<K*4;n++){const a=rnd('sa'+n)*1.7-.85,b=rnd('sb'+n)*1.7-.85;if(n%2)continue;extras.push({x:cx+(a-b)*rx/2,y:cy+(a+b)*ry/2,rx:cw*(.4+rnd('sw'+n)*.3),ry:cw*.2,fill:'#D6E4EE',opacity:.55})}
+  for(let n=0;n<K*K*2;n++){const a=rnd('da'+n)*2-1,b=rnd('db'+n)*2-1;if(Math.max(Math.abs(a),Math.abs(b))>.88)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2,z=(3.2+rnd('dz'+n)*2)*k;
+   extras.push({x,y:y+z*.25,rx:z*1.2,ry:z*.42,fill:'#DCE7EF'},{x,y,rx:z,ry:z*.5,fill:'#FFFFFF'})}
+  for(let n=0;n<K*K*3;n++){const a=rnd('ga'+n)*2-1,b=rnd('gb'+n)*2-1;if(Math.max(Math.abs(a),Math.abs(b))>.9)continue;const z=(1+rnd('gz'+n)*.8)*k;extras.push({x:cx+(a-b)*rx/2,y:cy+(a+b)*ry/2,rx:z,ry:z*.6,fill:'#BFD6E6',opacity:.8})}
+ }
  // silhouette for the sticker edge: back edges, then the dropped front edges
  const backL=V.map(r=>r[0]);
  const sil=[...V[0],...right.map((p,n)=>drop(p,'r'+n)).reverse(),...left.map((p,n)=>drop(p,'l'+n)).reverse(),...backL.slice().reverse()];
@@ -947,7 +956,7 @@ function polyGroundArtwork(cfg,cx=360,cy=286,floor='basic'){
  const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.max(18,rx*.2),k=rx/189,K=Math.max(3,Math.min(6,cfg.cols+1));
  const g=polyGround(cx,cy,rx,ry,depth,K,'month'+cfg.cols,floor),f=n=>n.toFixed(1),P=pts=>pts.map(p=>f(p[0])+','+f(p[1])).join(' ');
  let tufts='';for(let n=0;n<Math.round(rx/14);n++){const a=(hash('tuft|a'+n)%1000)/500-1,b=(hash('tuft|b'+n)%1000)/500-1;if(Math.abs(a)+Math.abs(b)>.85)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2,w=4*k;
-  tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="${floor==='meadow'?'#93AE7C':'#86B06A'}" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
+  tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="${floor==='meadow'?'#93AE7C':floor==='snow'?'#C3D4DF':'#86B06A'}" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
  const id='poly-ground-'+floor+'-'+Math.round(rx);
  const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="${f(9*k)}"/></filter>`;
  const body=`<g data-forest-ground="terrain" data-floor="${floor}" pointer-events="none"><polygon points="${P(g.silhouette)}" transform="translate(0 ${f(14*k)})" fill="rgba(30,42,34,.3)" filter="url(#${id}-shadow)"/><polygon points="${P(g.silhouette)}" fill="#fff" stroke="#fff" stroke-width="${f(7*k)}" stroke-linejoin="round"/>${polyGroundSVG(g,k)}<polygon data-ground-surface="true" points="${P([...g.V[0],...g.V.map(r=>r[g.K]).slice(1),...g.V[g.K].slice().reverse().slice(1),...g.V.map(r=>r[0]).reverse().slice(1)])}" fill="none"/>${tufts}</g>`;
@@ -971,7 +980,7 @@ function stickerGroundArtwork(cfg,cx=360,cy=286){
  return {defs,body};
 }
 function forestGroundArtwork(cfg, theme, cx = 360, cy = 286, floor = 'basic') {
-  if(theme!=='snow')return polyGroundArtwork(cfg,cx,cy,floor==='meadow'?'meadow':'basic');
+  if(theme!=='snow')return polyGroundArtwork(cfg,cx,cy,POLY_FLOORS[floor]?floor:'basic');
   const snow = theme === 'snow';
   const rx = cfg.boardW / 2 + 44;
   const ry = cfg.boardH / 2 + 34;
@@ -1039,11 +1048,11 @@ function forestSVG(items,theme='basic',animated=true,options={}){
  const visibleItems=sortedItems.slice(-FOREST_VISIBLE_LIMIT);
  const layout=forestPlacements(visibleItems,cfg);if(layout.changed&&!options.preview&&!options.transient)persist();
  const points=layout.placements.map(p=>({...project(p.slot),c:p.item,profile:p.profile,scale:p.scale})).sort((a,b)=>a.y-b.y||a.c.id.localeCompare(b.c.id));
- const groundArtwork=forestGroundArtwork(cfg,theme,cx,cy,options.floor||bmFloorId());
+ const floorId=options.floor||bmFloorId(),groundArtwork=forestGroundArtwork(cfg,theme,cx,cy,floorId);
  const decorations=forestDecorations(cfg,project,theme,layout.emptySlots,layout.featureSlots,forestTreeObstacles(points,cfg,theme));
  // Raster trees already carry soft shading. Avoid per-tree blur/mask copies of large images.
  const overlap=points.every(p=>!!illustratedTreeAsset(p.c,theme))?{defs:'',edges:points.map(()=> '')}:forestOverlapEdges(points,cfg,theme);
- const trees=points.map((p,i)=>{const hiddenKind=forestGrowthKey(p.c)?null:p.c?.hiddenTree,hiddenBoost=hiddenKind?hiddenTreeScale(hiddenKind,theme):1,sc=((p.scale||cfg.treeScale)*hiddenBoost).toFixed(3),shadowRx=((p.profile?.radius||24)*.70*hiddenBoost).toFixed(1),shadowRy=(Math.max(3.6,(p.profile?.radius||24)*.13*hiddenBoost)).toFixed(1),snowBase=theme==='snow'?'<ellipse cx="0" cy="13" rx="'+Math.max(9,(p.profile?.radius||24)*.5*hiddenBoost).toFixed(1)+'" ry="4.1" fill="#F8FBFC" opacity=".92"/>':'';return '<g data-tree="'+esc(p.c.id)+'" data-growth="'+(forestGrowthKey(p.c)||'mature')+'" role="button" tabindex="0" aria-label="'+esc(p.c.title+' · '+String(p.c.genre||category(p.c).label))+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+') scale('+sc+')"><ellipse cx="4" cy="10" rx="'+shadowRx+'" ry="'+shadowRy+'" fill="#708579" opacity="'+(illustratedTreeAsset(p.c,theme)?'0':'.11')+'"/>'+snowBase+treeHitArea(p.c,theme)+overlap.edges[i]+'<g class="tree-art">'+treeArt(p.c,theme)+'</g></g>'});
+ const trees=points.map((p,i)=>{const hiddenKind=forestGrowthKey(p.c)?null:p.c?.hiddenTree,hiddenBoost=hiddenKind?hiddenTreeScale(hiddenKind,theme):1,sc=((p.scale||cfg.treeScale)*hiddenBoost).toFixed(3),shadowRx=((p.profile?.radius||24)*.70*hiddenBoost).toFixed(1),shadowRy=(Math.max(3.6,(p.profile?.radius||24)*.13*hiddenBoost)).toFixed(1),snowBase=theme==='snow'?'<ellipse cx="0" cy="13" rx="'+Math.max(9,(p.profile?.radius||24)*.5*hiddenBoost).toFixed(1)+'" ry="4.1" fill="#F8FBFC" opacity=".92"/>':'';return '<g data-tree="'+esc(p.c.id)+'" data-growth="'+(forestGrowthKey(p.c)||'mature')+'" role="button" tabindex="0" aria-label="'+esc(p.c.title+' · '+String(p.c.genre||category(p.c).label))+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+') scale('+sc+')"><ellipse cx="4" cy="10" rx="'+shadowRx+'" ry="'+shadowRy+'" fill="#708579" opacity="'+(illustratedTreeAsset(p.c,theme)?'0':'.11')+'"/>'+snowBase+treeHitArea(p.c,theme)+overlap.edges[i]+'<g class="tree-art">'+treeArt(p.c,hiddenKind&&floorId==='snow'?'snow':theme)+'</g></g>'});
  const scene=[...trees.map((art,i)=>({y:points[i].y,art})),...decorations].sort((a,b)=>a.y-b.y).map(entry=>entry.art).join('');
  const visitor=n?forestVisitorArt(items,animated):'';
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 540" data-count="'+n+'"'+(options.grid?' data-grid="'+options.grid+'"':'')+' role="group" aria-label="'+n+'그루의 '+({basic:'기본',snow:'설산'}[theme])+' 숲"><defs>'+overlap.defs+'<filter id="forestTreeEdge" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="spread"/><feGaussianBlur in="spread" stdDeviation=".85" result="edge"/><feFlood flood-color="'+(theme==='snow'?'#BCCFD5':'#B9CE98')+'" flood-opacity=".72"/><feComposite in2="edge" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+groundArtwork.defs+'</defs><rect width="720" height="540" fill="transparent"/>'+(theme==='snow'?'<path d="M55 224 177 58 275 191 368 31 541 221 598 99 720 247" fill="#c4d4db"/><path d="M135 115L177 58 217 112 188 100 175 117 163 100Z M317 99L368 31 423 104 384 86 365 108 348 85Z" fill="#f8fbfc"/>':'')+'<g id="forest-world">'+groundArtwork.body+scene+visitor+'</g></svg>';
