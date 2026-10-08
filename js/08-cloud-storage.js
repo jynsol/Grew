@@ -678,39 +678,49 @@ function forestCalendarHTML(period){
 // spread over the plot instead of filling it row by row.
 // Trees scatter over each month plot: every tree takes the most open of a dozen seeded random
 // spots inside the diamond, so the plot fills evenly without lining up in rows.
-function islandPlantings(period,items){
- const plot=(i=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}})(Number(period.slice(5))-1),placed=[];
- const rand=key=>(hash(period+'|'+key)%100000)/100000;
- return items.slice(0,25).map((c,k)=>{
-  let best=null,bestD=-1;
-  for(let t=0;t<14;t++){
-   const u=rand(k+'u'+t)*2-1,v=rand(k+'v'+t)*2-1;if(Math.abs(u)+Math.abs(v)>.8)continue;
-   const x=plot.x+u*45,y=plot.y+v*22.5,d=placed.length?Math.min(...placed.map(q=>Math.hypot(q.x-x,(q.y-y)*2))):99;
-   if(d>bestD){best={x,y};bestD=d}
-  }
-  best??={x:plot.x,y:plot.y};placed.push(best);
-  const stage=c.completed?3:Model.stage(c);
-  return {x:best.x,y:best.y,src:stickerTreeSrc(c,stage),size:stage===3?24:stage===2?16:11};
- });
+// Year forest: one square, slightly bumpy low-poly board. Every tree from the year is planted in order,
+// from the back corner forward, so the board fills up as the year goes on.
+function yearForestItems(y,type){
+ const current=now().slice(0,7);
+ const items=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&Model.stage(c)>0&&(c.completed?forestRecordYear(c)===y:y===current.slice(0,4)));
+ const key=c=>c.completed&&c.completed!=='unknown'?c.completed:'9999'+(c.logs.map(l=>l.date).sort().at(-1)||c.startedAt||'');
+ return items.sort((a,b)=>key(a).localeCompare(key(b)));
 }
-function islandTufts(period,p){let out='';for(let i=0;i<5;i++){const a=hash(period+'t'+i)%1000/1000*1.6-.8,b=hash(period+'u'+i)%1000/1000*1.6-.8;if(Math.abs(a)+Math.abs(b)>.85)continue;const x=p.x+(a-b)*22,y=p.y+(a+b)*11;out+='<path d="M'+(x-2.4).toFixed(1)+' '+y.toFixed(1)+'L'+(x-.8).toFixed(1)+' '+(y-3).toFixed(1)+'L'+x.toFixed(1)+' '+(y-.9).toFixed(1)+'L'+(x+.8).toFixed(1)+' '+(y-3.3).toFixed(1)+'L'+(x+2.4).toFixed(1)+' '+y.toFixed(1)+'" fill="none" stroke="#6E9C58" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round" opacity=".75" pointer-events="none"/>'}return out}
+function yearBoardGeometry(y,items){
+ const W=390,H=250,n=items.length,N=Math.max(3,Math.ceil(Math.sqrt(n/.8))),K=Math.min(N,6);
+ const BW=Math.min(170,95+N*9),y0=46+(170-BW)/2,cx=W/2,rnd=k=>(hash(y+'|board|'+k)%100000)/100000;
+ const HW=BW/K,HH=HW/2,ideal=(i,j)=>[cx+(i-j)*HW,y0+(i+j)*HH];
+ // lattice with jitter: interior points wobble, edge points bump in or out
+ const V=[];for(let j=0;j<=K;j++){V[j]=[];for(let i=0;i<=K;i++){let [x,yy]=ideal(i,j);const edge=i===0||j===0||i===K||j===K,corner=(i===0||i===K)&&(j===0||j===K);
+  if(corner){x+=(rnd('cx'+i+j)-.5)*4;yy+=(rnd('cy'+i+j)-.5)*3}
+  else if(edge){const b=(rnd('b'+i+'.'+j)-.35)*HW*.32,nx=(i===0?-1:i===K?1:0)-(j===0?-1:j===K?1:0),ny=(i===0||j===0?-1:1);x+=nx*b;yy+=ny*b*.5}
+  else{x+=(rnd('x'+i+'.'+j)-.5)*HW*.34;yy+=(rnd('y'+i+'.'+j)-.5)*HH*.4}
+  V[j][i]=[x,yy]}}
+ const greens=['#8CBB72','#86B26F','#92C178','#80AC69','#8AB871','#95C27B'],facets=[];
+ for(let j=0;j<K;j++)for(let i=0;i<K;i++){const a=V[j][i],b=V[j][i+1],c=V[j+1][i+1],d=V[j+1][i],flip=rnd('f'+i+'.'+j)>.5;
+  const t1=flip?[a,b,c]:[a,b,d],t2=flip?[a,c,d]:[b,c,d];
+  facets.push({pts:t1,fill:greens[Math.floor(rnd('g1'+i+'.'+j)*greens.length)]},{pts:t2,fill:greens[Math.floor(rnd('g2'+i+'.'+j)*greens.length)]})}
+ // front sides: left (j=K, i 0..K) and right (i=K, j K..0)
+ const D=16,sides=[],left=V[K],right=V.map(r=>r[K]).reverse(),drop=(p,k)=>[p[0],p[1]+D+(rnd('d'+k)-.5)*5];
+ for(let k=0;k<K;k++){const p1=left[k],p2=left[k+1];sides.push({pts:[p1,p2,drop(p2,'l'+(k+1)),drop(p1,'l'+k)],fill:'#A9825E'},{pts:[p1,p2,[p2[0],p2[1]+3.5],[p1[0],p1[1]+3.5]],fill:'#6F9B58'})}
+ for(let k=0;k<K;k++){const p1=right[k],p2=right[k+1];sides.push({pts:[p1,p2,drop(p2,'r'+(k+1)),drop(p1,'r'+k)],fill:'#8B6A4C'},{pts:[p1,p2,[p2[0],p2[1]+3.5],[p1[0],p1[1]+3.5]],fill:'#62904F'})}
+ const specks=[];for(let k=0;k<14;k++){const lft=k%2===0,e=lft?left:right,t=rnd('s'+k)*K,q=Math.min(K-1,Math.floor(t)),f=t-q,p1=e[q],p2=e[q+1];specks.push({x:p1[0]+(p2[0]-p1[0])*f,y:p1[1]+(p2[1]-p1[1])*f+6+rnd('sy'+k)*8,r:.9+rnd('sr'+k)*.9,fill:lft?'#8E6B4C':'#73563D'})}
+ // cells back to front, centre-out along each diagonal
+ const cellW=BW/N,cellH=cellW/2,cells=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)cells.push({r,c});
+ cells.sort((p,q)=>(p.r+p.c)-(q.r+q.c)||Math.abs(p.c-p.r)-Math.abs(q.c-q.r)||p.c-q.c);
+ const center=({r,c})=>[cx+(c-r)*cellW,y0+(c+r+1)*cellH];
+ const trees=items.map((it,k)=>{const cell=cells[k],[x,yy]=center(cell),stage=it.completed?3:Model.stage(it),base=cellW*2.25;
+  return {x:x+(rnd('tx'+it.id)-.5)*cellW*.5,y:yy+(rnd('ty'+it.id)-.5)*cellH*.5,src:stickerTreeSrc(it,stage),size:+(base*(stage===3?1:stage===2?.62:.45)).toFixed(1),id:it.id}});
+ const dots=cells.slice(n).filter((_,k)=>k%2===0).map(cell=>{const [x,yy]=center(cell);return {x,y:yy}});
+ return {W,H,facets,sides,specks,trees:trees.sort((a,b)=>a.y-b.y),dots,cellW};
+}
 function forestYearIsland(y,type){
- const W=390,current=now().slice(0,7),parts=[],trees=[],labels=[];
- const plot=(i)=>{const r=Math.floor(i/3),c=i%3;return {x:220+50*c-50*r,y:55+25*c+25*r}};
- const diamond=(cx,cy,hw,hh)=>[cx+','+(cy-hh),(cx+hw)+','+cy,cx+','+(cy+hh),(cx-hw)+','+cy].join(' ');
- parts.push('<polygon points="220,30 370,105 170,205 20,130" fill="#86B26F"/><polygon points="20,130 170,205 170,215 20,140" fill="#A9825E"/><polygon points="170,205 370,105 370,115 170,215" fill="#8B6A4C"/><polygon points="20,130 170,205 170,209 158,203.5 146,200 134,192.5 122,190 110,182.5 98,180 86,172.5 74,170 62,162.5 50,160 38,152.5 26,150 20,134" fill="#7FAE68"/><polygon points="370,105 170,205 170,208.5 182,201.5 194,199 206,191.5 218,189 230,181.5 242,179 254,171.5 266,169 278,161.5 290,159 302,151.5 314,149 326,141.5 338,139 350,131.5 362,129 370,109" fill="#6C9A57"/>');
- for(let i=0;i<12;i++){
-  const period=y+'-'+String(i+1).padStart(2,'0'),p=plot(i),future=period>current,items=future?[]:forestMonthItems(period,type);
-  // This month's plot is raised one step like a block, with a pin naming it.
-  const now_=period===current,up=now_?7:0,top={x:p.x,y:p.y-up};
-  const raise=now_?'<polygon points="'+(p.x-45)+','+(p.y-up)+' '+p.x+','+(p.y+22.5-up)+' '+p.x+','+(p.y+22.5)+' '+(p.x-45)+','+p.y+'" fill="#7FA866"/><polygon points="'+p.x+','+(p.y+22.5-up)+' '+(p.x+45)+','+(p.y-up)+' '+(p.x+45)+','+p.y+' '+p.x+','+(p.y+22.5)+'" fill="#6E9858"/>':'';
-  parts.push('<g class="island-plot'+(future?' is-future':'')+(now_?' is-current':'')+'"'+(future?'':' data-action="forestMonthView" data-month="'+period+'" role="button" tabindex="0" aria-label="'+(i+1)+'월의 숲'+(now_?' (이번 달)':'')+', '+items.length+'그루"')+'>'+raise+'<polygon points="'+diamond(top.x,top.y,45,22.5)+'" fill="'+(future?'#CFE0C2':now_?'#A9D38F':'#9FC888')+'"/></g>');
-  islandPlantings(period,items).forEach(t=>trees.push({y:t.y,html:'<image href="'+esc(t.src)+'" x="'+(t.x-t.size/2).toFixed(1)+'" y="'+(t.y-t.size*.875-up).toFixed(1)+'" width="'+t.size+'" height="'+t.size+'" pointer-events="none"/>'}));
-  if(!future)parts.push(islandTufts(period,top));
-  if(now_){const w=(i+1)>=10?42:36,tipY=top.y-24;labels.push('<g class="island-pin" pointer-events="none"><path d="M'+(p.x-w/2)+' '+(tipY-24)+'h'+w+'a9 9 0 0 1 9 9v0a9 9 0 0 1-9 9h-'+(w/2-6)+'l-6 6-6-6h-'+(w/2-6)+'a9 9 0 0 1-9-9v0a9 9 0 0 1 9-9z" fill="#1E2A22"/><text x="'+p.x+'" y="'+(tipY-11.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">'+(i+1)+'월</text></g>')}
- }
- trees.sort((a,b)=>a.y-b.y);
- return '<svg class="forest-island" viewBox="0 0 '+W+' 230" role="group" aria-label="'+y+'년의 숲">'+parts.join('')+trees.map(t=>t.html).join('')+labels.join('')+'</svg>';
+ const g=yearBoardGeometry(y,yearForestItems(y,type)),P=pts=>pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+ return '<svg class="forest-island forest-year-board" viewBox="0 0 '+g.W+' '+g.H+'" role="img" aria-label="'+y+'년의 숲, '+g.trees.length+'그루">'+
+  g.sides.map(f=>'<polygon points="'+P(f.pts)+'" fill="'+f.fill+'"/>').join('')+g.specks.map(d=>'<circle cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" r="'+d.r.toFixed(1)+'" fill="'+d.fill+'"/>').join('')+
+  g.facets.map(f=>'<polygon points="'+P(f.pts)+'" fill="'+f.fill+'" stroke="'+f.fill+'" stroke-width=".6" stroke-linejoin="round"/>').join('')+
+  g.dots.map(d=>'<ellipse cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" rx="'+(g.cellW*.16).toFixed(1)+'" ry="'+(g.cellW*.08).toFixed(1)+'" fill="#A9D190"/>').join('')+
+  g.trees.map(t=>'<image href="'+esc(t.src)+'" x="'+(t.x-t.size/2).toFixed(1)+'" y="'+(t.y-t.size*.875).toFixed(1)+'" width="'+t.size+'" height="'+t.size+'" pointer-events="none"/>').join('')+'</svg>';
 }
 function renderForestYear(){
  const type=forestTypeFilter,current=now().slice(0,7),all=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&Model.stage(c)>0&&(c.completed?forestRecordYear(c)===year:year===current.slice(0,4)));
