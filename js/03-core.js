@@ -722,7 +722,7 @@ function bmCouponBoardHTML(){
  (bmPendingProduct?button(bmTreeName(bmPendingProduct.id)+'로 돌아가기','bmReturnProduct','bm-coupon-return'):'')+
  '<ul class="bm-coupon-notes"><li>광고 1회에 쿠폰 1장, 하루 최대 2장이에요.</li><li>쿠폰 14장으로 스페셜 나무 1종을 영구로 열어요.</li><li>매일 모으면 7일에 한 그루씩 열 수 있어요.</li></ul>';
 }
-function bmShopChips(current){const chips=[['inventory','나무'],['book','책'],['movie','영화'],['floors','바닥'],...(BM_STORE_OPEN?[['coupons','쿠폰']]:[])];return '<div class="bm-filter-chips bm-shop-chips" role="group" aria-label="상점 분류">'+chips.map(([id,label])=>button(label,'collectionTab',id===current?'active':'','data-tab="'+id+'" aria-pressed="'+(id===current)+'"')).join('')+'</div>'}
+function bmShopChips(current){const chips=[['inventory','나무'],['book','책'],['movie','영화'],['floors','바닥']];return '<div class="bm-filter-chips bm-shop-chips" role="group" aria-label="상점 분류">'+chips.map(([id,label])=>button(label,'collectionTab',id===current?'active':'','data-tab="'+id+'" aria-pressed="'+(id===current)+'"')).join('')+'</div>'}
 function renderShopPage(){
  bmRefresh(state);const tab=['floors',...(BM_STORE_OPEN?['coupons']:[])].includes(bmCollectionTab)?bmCollectionTab:'inventory';
  return '<section class="bm-page"><div class="bm-page-heading"><h1 class="page-title">상점</h1></div>'+bmShopChips(tab==='inventory'?(bmShopFilter==='all'?'inventory':bmShopFilter):tab)+
