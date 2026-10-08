@@ -902,35 +902,34 @@ function forestOverlapEdges(points,cfg,theme){
 // Low-poly ground shared by the month board, the year board and the share image.
 // A K×K lattice whose inner points wobble and whose edge points bump in and out, cut into
 // triangles of slightly different greens. 'meadow' (꽃이끼 정원) is the same shape in pale moss
-// with white flowers along the lip.
+// with soft moss patches and a few small flowers.
 const POLY_FLOORS={
- basic:{greens:['#8CBB72','#86B26F','#92C178','#80AC69','#8AB871','#95C27B'],soil:['#A9825E','#8B6A4C'],lip:['#6F9B58','#62904F'],speck:['#8E6B4C','#73563D'],dot:'#A9D190'},
- meadow:{greens:['#DCE3AE','#D2DCA2','#E3E7BA','#C9D69B','#D7DFA8','#E6E3B6'],soil:['#BFA27A','#A58A66'],lip:['#86AD82','#779E7A'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'}
+ basic:{greens:['#8DBA73','#89B670','#91BE77','#87B46E','#8BB872'],soil:['#A9825E','#8B6A4C'],lip:['#6F9B58','#62904F'],speck:['#8E6B4C','#73563D'],dot:'#A9D190'},
+ meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#BFA27A','#A58A66'],lip:['#86AD82','#779E7A'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'}
 };
 function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
  const pal=POLY_FLOORS[floor]||POLY_FLOORS.basic,rnd=k=>(hash(seed+'|'+k)%100000)/100000,cw=rx/K;
  const ideal=(i,j)=>[cx+(i-j)/K*rx,cy-ry+(i+j)/K*ry];
  const V=[];for(let j=0;j<=K;j++){V[j]=[];for(let i=0;i<=K;i++){let [x,y]=ideal(i,j);const edge=i===0||j===0||i===K||j===K,corner=(i===0||i===K)&&(j===0||j===K);
-  if(corner){x+=(rnd('cx'+i+j)-.5)*cw*.12;y+=(rnd('cy'+i+j)-.5)*cw*.08}
-  else if(edge){const b=(rnd('b'+i+'.'+j)-.35)*cw*.3,nx=(i===0?-1:i===K?1:0)-(j===0?-1:j===K?1:0),ny=(i===0||j===0?-1:1);x+=nx*b;y+=ny*b*.5}
-  else{x+=(rnd('x'+i+'.'+j)-.5)*cw*.34;y+=(rnd('y'+i+'.'+j)-.5)*cw*.2}
+  if(corner){x+=(rnd('cx'+i+j)-.5)*cw*.05;y+=(rnd('cy'+i+j)-.5)*cw*.03}
+  else if(edge){const b=(rnd('b'+i+'.'+j)-.45)*cw*.13,nx=(i===0?-1:i===K?1:0)-(j===0?-1:j===K?1:0),ny=(i===0||j===0?-1:1);x+=nx*b;y+=ny*b*.5}
+  else{x+=(rnd('x'+i+'.'+j)-.5)*cw*.2;y+=(rnd('y'+i+'.'+j)-.5)*cw*.1}
   V[j][i]=[x,y]}}
  const facets=[],pick=k=>pal.greens[Math.floor(rnd(k)*pal.greens.length)];
  for(let j=0;j<K;j++)for(let i=0;i<K;i++){const a=V[j][i],b=V[j][i+1],c=V[j+1][i+1],d=V[j+1][i],flip=rnd('f'+i+'.'+j)>.5;
   facets.push({pts:flip?[a,b,c]:[a,b,d],fill:pick('g1'+i+'.'+j)},{pts:flip?[a,c,d]:[b,c,d],fill:pick('g2'+i+'.'+j)})}
- const left=V[K],right=V.map(r=>r[K]).reverse(),k=cw/34,lipH=(n,side)=>(n%2?3:5.5+rnd(side+'lp'+n)*2.5)*k*1.4;
- const drop=(p,key)=>[p[0],p[1]+depth+(rnd('d'+key)-.5)*depth*.25];
+ const left=V[K],right=V.map(r=>r[K]).reverse(),k=cw/34,lipH=(n,side)=>(n%2?3.6:4.8+rnd(side+'lp'+n)*1.2)*k*1.4;
+ const drop=(p,key)=>[p[0],p[1]+depth+(rnd('d'+key)-.5)*depth*.08];
  const sides=[],lips=[],extras=[];
  [[left,0,'l'],[right,1,'r']].forEach(([e,s,key])=>{for(let n=0;n<K;n++){const p1=e[n],p2=e[n+1];sides.push({pts:[p1,p2,drop(p2,key+(n+1)),drop(p1,key+n)],fill:pal.soil[s]});
   const m=[(p1[0]+p2[0])/2,(p1[1]+p2[1])/2];lips.push({pts:[p1,m,p2,[p2[0],p2[1]+lipH(2*n+2,key)],[m[0],m[1]+lipH(2*n+1,key)],[p1[0],p1[1]+lipH(2*n,key)]],fill:pal.lip[s]})}});
  const specks=[];for(let n=0;n<Math.round(K*4);n++){const lft=n%2===0,e=lft?left:right,t=rnd('s'+n)*K,q=Math.min(K-1,Math.floor(t)),f=t-q,p1=e[q],p2=e[q+1];
   specks.push({x:p1[0]+(p2[0]-p1[0])*f,y:p1[1]+(p2[1]-p1[1])*f+depth*(.35+rnd('sy'+n)*.5),r:(1+rnd('sr'+n))*k*1.3,fill:pal.speck[lft?0:1]})}
  if(floor==='meadow'){
-  // white clover-like flowers along the lip and scattered on the moss
+  // soft moss patches with a few small white flowers on top
   const flower=(x,y,z)=>{[[0,-1],[1,0],[0,1],[-1,0]].forEach(([dx,dy])=>extras.push({x:x+dx*z*.9,y:y+dy*z*.55,rx:z*.75,ry:z*.5,fill:'#FBF7E4'}));extras.push({x,y,rx:z*.38,ry:z*.28,fill:'#F2C94C'})};
-  [left,right].forEach((e,s)=>{for(let n=0;n<=K*2;n++){if(rnd('fl'+s+n)<.35)continue;const t=n/2,q=Math.min(K-1,Math.floor(t)),f=t-q,p1=e[q],p2=e[q+1];flower(p1[0]+(p2[0]-p1[0])*f,p1[1]+(p2[1]-p1[1])*f+4*k,3.2*k)}});
   for(let n=0;n<K*3;n++){const a=rnd('ma'+n)*1.7-.85,b=rnd('mb'+n)*1.7-.85;if(Math.abs(a)+Math.abs(b)>.8)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2;
-   if(n%3===0)extras.push({x,y,rx:cw*.55,ry:cw*.3,fill:'#B9CC93',opacity:.35});else flower(x,y,2.4*k)}
+   if(n%2===0)extras.push({x,y,rx:cw*.55,ry:cw*.3,fill:'#C3D39C',opacity:.3});else if(n%4===1)flower(x,y,2.4*k)}
  }
  // silhouette for the sticker edge: back edges, then the dropped front edges
  const backL=V.map(r=>r[0]);
