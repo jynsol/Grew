@@ -681,11 +681,12 @@ const FOREST_EXPANSION_STAGES=[
 ];
 // A month is one 4x4 plot (design 11a): one tree per cell, and the plot grows by a row
 // only when a month holds more than it can fit.
-function forestMonthConfig(n){
- const cols=Math.max(4,Math.ceil(Math.sqrt(Math.max(0,n||0))));
+// The month board fits its trees: the smallest square that holds them all (2×2 at least).
+function forestMonthConfig(n,minCols=2){
+ const cols=Math.max(minCols,Math.ceil(Math.sqrt(Math.max(0,n||0))));
  return {id:'month'+cols,label:'',tier:1,month:true,cols,rows:cols,boardW:56*cols,boardH:31.5*cols,treeScale:+(.8*Math.pow(4/cols,.3)).toFixed(3),maxTrees:cols*cols,capacity:cols*cols,nextExpandAt:null,remainingToExpand:0};
 }
-function forestBoardConfig(n,grid){return grid==='month'?forestMonthConfig(n):forestLayoutConfig(n)}
+function forestBoardConfig(n,grid,minCols){return grid==='month'?forestMonthConfig(n,minCols):forestLayoutConfig(n)}
 function forestLayoutConfig(n){
  const count=Math.max(0,n||0);
  let idx=FOREST_EXPANSION_STAGES.findIndex(s=>count<=s.maxTrees);
@@ -1002,7 +1003,7 @@ function forestGroundArtwork(cfg, theme, cx = 360, cy = 286, floor = 'basic') {
 
 function forestSVG(items,theme='basic',animated=true,options={}){
  theme=(theme==='snow'||theme==='winter')?'snow':'basic';
- const n=items.length,cfg=forestBoardConfig(n,options.grid),origin=forestStageOrigin(cfg);
+ const n=items.length,cfg=forestBoardConfig(n,options.grid,options.minCols),origin=forestStageOrigin(cfg);
  const rawAll=[];for(let r=0;r<cfg.rows;r++)for(let c=0;c<cfg.cols;c++)rawAll.push({rx:c-r,ry:c+r});
  const minRX=Math.min(...rawAll.map(p=>p.rx)),maxRX=Math.max(...rawAll.map(p=>p.rx)),minRY=Math.min(...rawAll.map(p=>p.ry)),maxRY=Math.max(...rawAll.map(p=>p.ry));
  const cx=360,cy=286,marginX=44,marginY=34;

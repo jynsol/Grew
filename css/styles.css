@@ -4244,3 +4244,6 @@ button.primary:disabled,button.primary[disabled]{background:var(--fill-strong)!i
 .today-empty{background:none!important;box-shadow:none!important}
 /* search clear: small grey disc, iOS-like */
 body input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;width:18px;height:18px;margin-right:2px;border-radius:50%;cursor:pointer;background:rgba(30,42,34,.3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2.5 2.5l5 5M7.5 2.5l-5 5' stroke='%23fff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center/10px no-repeat}
+/* floors: same mint ground as the picker; quiet buttons like tree prices */
+.bm-floor-art,.bm-floor-card:nth-child(2n) .bm-floor-art{background:#BFE7CB!important}
+.bm-card-buy{background:var(--fill)!important;color:var(--text-1)!important;box-shadow:none!important}

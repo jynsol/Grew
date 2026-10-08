@@ -679,7 +679,7 @@ function forestCalendarHTML(period){
 // Trees scatter over each month plot: every tree takes the most open of a dozen seeded random
 // spots inside the diamond, so the plot fills evenly without lining up in rows.
 // Year forest: one square, slightly bumpy low-poly board. Every tree from the year is planted in order,
-// from the back corner forward, so the board fills up as the year goes on.
+// from the back corner forward. The board is the smallest square that holds them, so it never looks empty.
 function yearForestItems(y,type){
  const current=now().slice(0,7);
  const items=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&Model.stage(c)>0&&(c.completed?forestRecordYear(c)===y:y===current.slice(0,4)));
@@ -687,7 +687,7 @@ function yearForestItems(y,type){
  return items.sort((a,b)=>key(a).localeCompare(key(b)));
 }
 function yearBoardGeometry(y,items){
- const W=390,H=250,n=items.length,N=Math.max(3,Math.ceil(Math.sqrt(n/.8))),K=Math.min(N,6);
+ const W=390,H=250,n=items.length,N=Math.max(2,Math.ceil(Math.sqrt(n))),K=Math.min(N,6);
  const BW=Math.min(170,95+N*9),y0=46+(170-BW)/2,cx=W/2,rnd=k=>(hash(y+'|board|'+k)%100000)/100000;
  const HW=BW/K,HH=HW/2,ideal=(i,j)=>[cx+(i-j)*HW,y0+(i+j)*HH];
  // lattice with jitter: interior points wobble, edge points bump in or out
