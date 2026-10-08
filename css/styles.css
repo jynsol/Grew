@@ -3415,33 +3415,47 @@ body[data-view="detail"] .page { padding-bottom:calc(120px + env(safe-area-inset
 .share-go { flex:1.3;background:var(--sb-ink);color:#fff; }
 
 /* Intro (redesign 18a): full-bleed pastel gradients, burst behind a cut-out collage, heavy titles. */
-.sticker-intro { background:radial-gradient(120% 70% at 85% 10%,#FFF6D6 0,rgba(255,246,214,0) 55%),linear-gradient(165deg,#DCCFF7 0%,#E9DDF8 40%,#F9D3C2 100%); }
-.sticker-intro[data-step="1"] { background:radial-gradient(110% 70% at 15% 12%,#fff 0,rgba(255,255,255,0) 50%),linear-gradient(170deg,#FBEFB4 0%,#F8DFA8 45%,#F6B8A4 100%); }
-.sticker-intro[data-step="2"] { background:radial-gradient(100% 60% at 50% 30%,#FFFBE6 0,rgba(255,251,230,0) 60%),linear-gradient(170deg,#BEE6CB 0%,#CDEBD7 40%,#BFDDF2 100%); }
+.sticker-intro { background:linear-gradient(165deg,#EADFFC 0%,#DCCFF4 42%,#F7D6E6 100%); }
+.sticker-intro[data-step="1"] { background:linear-gradient(170deg,#FCF0C2 0%,#F4E3A0 45%,#F8CDB3 100%); }
+.sticker-intro[data-step="2"] { background:linear-gradient(160deg,#D2EED8 0%,#B9E0C2 45%,#E5F2C2 100%); }
 .intro-shapes>.intro-ring { border:2px dashed; }
+.intro-stage>.intro-shapes { inset:0; }
+/* Intro (redesign, onboarding board): progress bar on top, eyebrow over the title, back + wide next button. */
+.intro-progress { position:relative;z-index:3;display:flex;gap:6px;margin:9px 24px 0; }
+.intro-progress i { flex:1;height:4px;border-radius:2px;background:rgba(30,42,34,.18); }
+.intro-progress i.on { background:var(--sb-ink); }
+.sticker-intro .intro-top { z-index:3;margin-top:12px;padding:0 16px 0 24px;height:44px; }
 .intro-wordmark { font:720 16px/1 var(--sb-label);font-stretch:125%; }
-.page .intro-skip { font:620 14px/1 var(--font-family); }
-.intro-stage { height:470px; }
+.sticker-intro .intro-wordmark { font:900 15px/1 var(--sb-label); }
+.page .intro-skip { position:relative;height:34px;min-height:34px;padding:0 14px;border-radius:17px;background:rgba(255,255,255,.72);font:650 14px/1 var(--font-family); }
+.page .intro-skip::after { content:"";position:absolute;inset:-5px 0; }
+.intro-stage { height:470px;margin-top:-20px; }
 .intro-card { width:140px;height:194px;border-radius:14px;border:5px solid #fff;box-shadow:0 0 0 1px rgba(30,42,34,.06),0 12px 18px -8px rgba(30,42,34,.35); }
 .intro-card span { font:700 10px/1 var(--sb-label);letter-spacing:.08em; }
 .intro-chip { border-width:4px;padding:10px 16px;font:780 15px/1 var(--font-family);box-shadow:0 0 0 1px rgba(30,42,34,.06),0 12px 18px -8px rgba(30,42,34,.35); }
 .intro-stamp { width:166px;height:166px;border:5px solid #fff;box-shadow:0 0 0 1px rgba(30,42,34,.08),0 18px 28px -10px rgba(30,42,34,.55);transform:rotate(11deg);gap:4px;font:780 18px/1.15 var(--font-family); }
 .intro-stamp .stamp-ring { inset:8px; }
-.intro-week { left:22px;right:22px;top:296px;display:flex;justify-content:space-between;padding:12px 14px;border-radius:26px;background:#fff;border:4px solid #fff;box-shadow:0 0 0 1px rgba(30,42,34,.06),0 12px 18px -8px rgba(30,42,34,.35);transform:rotate(-4deg); }
+.intro-week { left:22px;right:22px;top:296px;display:flex;justify-content:space-between;padding:12px 14px;border-radius:26px;background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.06),0 14px 22px -12px rgba(30,42,34,.35); }
 .intro-week span { width:38px;height:38px;flex:none;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:560 13px/1 var(--font-family);color:var(--sb-faint); }
-.intro-week span.is-done { background:var(--sb-ink);border:2.5px solid #fff;box-shadow:0 4px 6px -3px rgba(30,42,34,.5); }
+.intro-week span.is-done { background:var(--sb-ink); }
 .intro-week span.is-today { border:2px dashed var(--sb-coral);color:var(--sb-coral);font-weight:780; }
 .intro-board-wrap { left:0;top:110px;width:390px;height:329px;transform:scale(.8);transform-origin:50% 0;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 12px rgba(30,42,34,.2)); }
 .intro-board-wrap>* { position:absolute; }
 .intro-board { left:0;top:0;width:390px;height:329px; }
 .intro-board-wrap .intro-cut { filter:none; }
-.intro-bottom { gap:14px;left:26px;right:26px; }
-.page .intro-bottom h1 { font:860 36px/1.28 var(--font-family);letter-spacing:-.045em; }
-.intro-bottom mark { box-shadow:0 6px 12px -6px rgba(30,42,34,.3); }
-.intro-bottom mark.is-ink { background:var(--sb-ink);color:#fff; }
-.intro-bottom p { font:560 15px/1.55 var(--font-family);color:#3E3E3B; }
-.page .intro-next, .page .intro-next.is-start { width:auto;min-width:0;height:64px;padding:0 26px;border-radius:32px;border:3px solid #fff;background:var(--sb-ink);color:#fff;box-shadow:0 14px 24px -10px rgba(30,42,34,.5);display:flex;align-items:center;gap:8px;font:680 17px/1 var(--font-family);transform:none; }
+.intro-bottom { gap:14px;left:26px;right:26px;bottom:calc(max(20px, env(safe-area-inset-bottom)) + 14px); }
+.intro-eyebrow { font:800 12px/1 var(--sb-label);font-stretch:125%;letter-spacing:.08em;color:var(--sb-ink); }
+.page .intro-bottom h1 { font:860 34px/1.3 var(--font-family);letter-spacing:-.045em; }
+.intro-bottom mark { box-shadow:0 0 0 1px rgba(30,42,34,.07),0 8px 16px -8px rgba(30,42,34,.25); }
+.intro-bottom mark.is-ink { background:var(--sb-ink);color:#fff;box-shadow:0 8px 16px -8px rgba(30,42,34,.4); }
+.intro-bottom p { font:500 16px/1.6 var(--font-family);color:#3b3a33; }
+.intro-footer { gap:10px;margin-top:10px; }
+.page .intro-prev { flex:none;width:60px;height:60px;min-width:0;min-height:0;padding:0;border:0;border-radius:30px;background:rgba(255,255,255,.72);color:var(--sb-ink);display:flex;align-items:center;justify-content:center; }
+.page .intro-next, .page .intro-next.is-start { flex:1;width:auto;min-width:0;height:60px;min-height:0;padding:0;border:0;border-radius:30px;background:var(--sb-ink);color:#fff;box-shadow:0 12px 20px -10px rgba(30,42,34,.45);display:flex;align-items:center;justify-content:center;gap:10px;font:780 17px/1 var(--font-family);transform:none; }
 .page .intro-next span { color:var(--sb-butter);display:flex; }
+.page .sticker-intro .intro-bottom h1 { font-size:34px; }
+.page .sticker-intro .intro-bottom p { font-size:16px; }
+.page .sticker-intro .intro-next { font-size:17px; }
 @media (max-height:760px) { .intro-stage { height:420px;transform:scale(.9);transform-origin:top center; } }
 
 /* Today actions fit narrow phones: the week row shrinks, the stamp scales. */
