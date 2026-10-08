@@ -173,8 +173,8 @@ const TREE_SPECIES=[
 // Paid trees, floors, the pack and ad coupons stay closed until real payments and ads are connected.
 // Flip to true then; while false the shop is a catalogue and nothing pretends to charge.
 const BM_STORE_OPEN=false;
-const BM_CONFIG=Object.freeze({mode:'preview',future:Object.freeze({regularTrees:26,mysteryTrees:4,totalTrees:30,paidFloorCount:3,treePriceKRW:1100,floorPriceKRW:2200,packagePriceKRW:9900,packageTreeCount:10,rewardedViewsPerDay:2,viewsPerCoupon:1,couponCostPerTree:14,collectionMysteryAt:20,cashMysteryAt:10})});
-const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false},{id:'floor-reserved-02',name:'새 바닥',ready:false,free:false},{id:'floor-reserved-03',name:'새 바닥',ready:false,free:false}];
+const BM_CONFIG=Object.freeze({mode:'preview',future:Object.freeze({regularTrees:26,mysteryTrees:4,totalTrees:30,paidFloorCount:2,treePriceKRW:1100,floorPriceKRW:2200,packagePriceKRW:9900,packageTreeCount:10,rewardedViewsPerDay:2,viewsPerCoupon:1,couponCostPerTree:14,collectionMysteryAt:20,cashMysteryAt:10})});
+const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false}];
 const BM_BASE_IDS=['oak','birch','fir'];
 const BM_RECORD_IDS=['zelkova','ginkgo','metasequoia','yew','cedar','evergreen','cypress'];
 const BM_EXISTING_SHOP_IDS=['cherry','maple','magnolia','crape','fringe','hackberry','willow','pine','juniper','paulownia'];
@@ -384,10 +384,10 @@ function bmPreviewBuyFloor(id,s=state){
 }
 // The pack is a first-purchase offer: once anything has been bought with money it is gone for good.
 // Packs: 25% off the single prices. The first is a first-purchase-only offer; the second (the 10 trees
-// and 3 floors still being drawn) shows up by itself once all of its art is ready.
+// and the third floor still being drawn) shows up by itself once all of its art is ready.
 const BM_PACKS=[
  {id:'first',name:'첫 숲 패키지',trees:BM_EXISTING_SHOP_IDS,floors:['meadow'],price:9900,list:13200,firstOnly:true},
- {id:'second',name:'두 번째 숲 패키지',trees:BM_RESERVED_IDS,floors:['floor-reserved-01','floor-reserved-02','floor-reserved-03'],price:13200,list:17600,firstOnly:false}
+ {id:'second',name:'두 번째 숲 패키지',trees:BM_RESERVED_IDS,floors:['floor-reserved-01'],price:9900,list:13200,firstOnly:false}
 ];
 let bmActivePack='first';
 function bmPackDef(id=bmActivePack){return BM_PACKS.find(p=>p.id===id)||BM_PACKS[0]}
