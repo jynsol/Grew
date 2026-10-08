@@ -172,7 +172,7 @@ const TREE_SPECIES=[
 // Production entitlements must be issued and verified by a server before release.
 // Paid trees, floors, the pack and ad coupons stay closed until real payments and ads are connected.
 // Flip to true then; while false the shop is a catalogue and nothing pretends to charge.
-const BM_STORE_OPEN=false;
+const BM_STORE_OPEN=true;
 const BM_CONFIG=Object.freeze({mode:'preview',future:Object.freeze({regularTrees:26,mysteryTrees:4,totalTrees:30,paidFloorCount:2,treePriceKRW:1100,floorPriceKRW:2200,packagePriceKRW:9900,packageTreeCount:10,rewardedViewsPerDay:2,viewsPerCoupon:1,couponCostPerTree:14,collectionMysteryAt:20,cashMysteryAt:10})});
 const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false}];
 const BM_BASE_IDS=['oak','birch','fir'];
