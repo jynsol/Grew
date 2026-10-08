@@ -4015,3 +4015,11 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-visitor.is-locked strong{color:var(--text-2)}
 .bm-codex-hero.is-visitors .bm-codex-hero-art .bm-visitor-art{width:76px;height:76px}
 .bm-codex-hero-art.is-locked .bm-visitor-art{filter:brightness(0) invert(.84)!important}
+/* Coupon stamps: flat fills, a plain check when collected */
+.bm-stamp{border:0!important;background:var(--fill);color:var(--text-3);font:600 12px/1 var(--font-family)}
+.bm-stamp.is-filled{background:var(--sb-mint)}
+.bm-stamp.is-filled::before{content:none}
+.bm-stamp.is-filled svg{width:22px;height:22px;stroke:var(--sb-ink)}
+.bm-stamp.is-goal{background:var(--sb-butter);border:0!important}
+.bm-ad-button:disabled{opacity:1;background:var(--fill);color:var(--text-2)}
+.bm-ad-button:disabled svg{display:none}
