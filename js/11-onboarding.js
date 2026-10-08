@@ -86,15 +86,6 @@ const INTRO_SEEN_KEY='grew.intro-seen.v1';
 function introSeen(){try{return localStorage.getItem(INTRO_SEEN_KEY)==='1'}catch{return true}}
 function markIntroSeen(){try{localStorage.setItem(INTRO_SEEN_KEY,'1')}catch{}}
 // Small sticker forest shared by the welcome and ready screens.
-function entryStickerArt(label='책과 영화로 자라난 작은 숲'){
- if(!window.INTRO_LIVE_ART)return '<div class="entry-sticker-art" role="img" aria-label="'+esc(label)+'"><img class="entry-art" src="./assets/images/onboarding/welcome.webp?v=1" alt="" decoding="async"></div>';
- return '<div class="entry-sticker-art" role="img" aria-label="'+esc(label)+'">'+
- introSticker('trees/cherry.webp','left:4%;top:18px;width:46%;transform:rotate(-4deg)')+
- introSticker('trees/oak.webp','right:2%;top:0;width:54%;transform:rotate(3deg)')+
- introSticker('trees/sprout.webp','left:38%;top:132px;width:28%;transform:rotate(-6deg)')+
- introVisitor('rabbit','right:6%;top:150px;width:96px;height:96px;transform:rotate(4deg)')+
- introSticker('forest/decor-flower-peach.webp','left:6%;top:170px;width:56px;transform:rotate(8deg)')+'</div>';
-}
 // Intro slides (redesign 5a): cut-out stickers on a coloured page, one big title, one action.
 const INTRO_STAR4='polygon(50% 0,59% 41%,100% 50%,59% 59%,50% 100%,41% 59%,0 50%,41% 41%)';
 function introStar(points,inner){const pts=[];for(let i=0;i<points*2;i++){const r=i%2?inner:50,a=Math.PI*i/points-Math.PI/2;pts.push((50+r*Math.cos(a)).toFixed(1)+'% '+(50+r*Math.sin(a)).toFixed(1)+'%')}return 'polygon('+pts.join(',')+')'}

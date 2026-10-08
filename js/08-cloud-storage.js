@@ -436,7 +436,6 @@ function render(){
  updateForestSoundUI();
  if(!storageOK&& !$('storageAlert').innerHTML)$('storageAlert').innerHTML='<div class="storage-alert">이 환경에서는 자동 저장을 사용할 수 없어요.</div>';
 }
-function todayTone(c){return c?.type==='book'?'lavender':'lemon'}
 function todayLogDates(c){
  return new Set((c.logs||[]).map(l=>l.date).filter(date=>typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&Number.isFinite(Date.parse(date+'T12:00:00Z'))&&new Date(date+'T12:00:00Z').toISOString().slice(0,10)===date));
 }
@@ -556,14 +555,6 @@ function todayBoard(c){
  '</article>'+
  '<article class="tv-week sticker-actions"><div class="sticker-actions-left">'+todayStickerWeek(c)+'<div class="sticker-links">'+button(completeLabel,'complete','textbtn sticker-complete',attr(c.id))+(todayLogOf(c)?button('기록 취소','undoLog','textbtn',attr(c.id)):'')+'</div></div>'+todayStamp(c)+'</article>'+
  '</section>';
-}
-function recordActions(c,inDetail=false){
- if(c.completed)return '<p class="muted">완료 · '+(c.completed==='unknown'?'날짜 미상':esc(c.completed))+'</p>'+button(c.rating?'평가 '+c.rating+'점 · 수정':'평가하기','rating','textbtn',attr(c.id))+button('완료일 수정','editCompletion','textbtn',attr(c.id));
- const stage=Model.stage(c);
- if(stage===0)return '<div class="record-actions">'+button(c.type==='movie'?'보기 시작하기':'읽기 시작하기','startExperience','primary ink-button',attr(c.id))+button(c.type==='movie'?'이미 다 봤어요':'이미 다 읽었어요','complete','textbtn completion-action',attr(c.id))+'</div>';
- const log=c.logs.find(l=>l.date===now());
- const normalLabel={book:'오늘 읽었어요',album:'오늘 들었어요',movie:'오늘 봤어요'}[c.type];
- return '<div class="record-actions">'+(log?'<div class="row between"><strong>오늘 기록했어요</strong>'+button('취소','undoLog','textbtn',attr(c.id))+'</div>'+button(!inDetail&&c.type==='book'?(log.memo?'메모 수정':'메모 남기기'):'기록 수정',!inDetail&&c.type==='book'?'editMemo':'editLog','textbtn',attr(c.id)+' data-log="'+log.id+'"'):button(normalLabel,'record','primary ink-button',attr(c.id)))+button(c.type==='movie'?'다 봤어요':typeName[c.type]+(c.type==='book'?'을 다 읽었어요':'을 다 들었어요'),'complete','textbtn completion-action',attr(c.id))+'</div>';
 }
 
 // Scrap rows (redesign 11a): cover, title, type · creator, status chip, the work's tree sticker.

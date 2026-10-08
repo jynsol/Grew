@@ -695,10 +695,6 @@ function forestLayoutConfig(n){
  const nextExpandAt=next?stage.maxTrees+1:null;
  return {...stage,tier:idx,capacity:stage.cols*stage.rows,nextExpandAt,remainingToExpand:next?Math.max(0,nextExpandAt-count):0};
 }
-function forestExpansionMeta(n){
- const cfg=forestLayoutConfig(n);
- return {label:cfg.label,cols:cfg.cols,rows:cfg.rows,tiles:cfg.capacity,nextAt:cfg.nextExpandAt,remaining:cfg.remainingToExpand};
-}
 function forestStageOrigin(cfg){
  return {x:Math.floor((FOREST_GRID_SIZE-cfg.cols)/2),y:Math.floor((FOREST_GRID_SIZE-cfg.rows)/2)};
 }
