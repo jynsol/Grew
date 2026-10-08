@@ -4044,3 +4044,13 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-hero-track.is-multi .bm-hero-price strong{font-size:22px}
 .bm-hero-buy{flex:none;white-space:nowrap}
 .bm-hero.is-sky{background:var(--sb-sky)}
+/* Decorate bar: floor swatches scroll sideways */
+.forest-edit-bar{max-width:calc(100% - 2*var(--page-gutter));overflow:visible}
+.forest-edit-floors{display:flex;gap:4px;min-width:0;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+.forest-edit-floors::-webkit-scrollbar{display:none}
+.forest-edit-bar .forest-edit-floor{position:relative;flex:none;width:56px;height:44px;padding:0;border-radius:16px;justify-content:center;scroll-snap-align:start}
+.forest-edit-swatch{display:block;width:50px;height:40px}
+.forest-edit-swatch svg{display:block;width:100%;height:100%}
+.forest-edit-floor.is-locked .forest-edit-swatch{opacity:.55}
+.forest-edit-bar .forest-edit-floor .forest-edit-lock{position:absolute;right:3px;bottom:3px;width:16px;height:16px;padding:3px;border-radius:50%;background:#fff;color:var(--text-2)}
+.forest-edit-bar .forest-edit-reset{flex:none;height:44px}
