@@ -750,7 +750,7 @@ function bmCodexTreeCard(id){
  return '<div class="bm-codex-tree'+(owned?'':' is-locked')+'">'+(bmTreeReady(id)?button(bmTreeImg(id,owned?'is-sticker':'',owned?'sticker':'thumb'),'bmPreviewTree','bm-codex-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"'):'<div class="bm-codex-art is-mystery"><span aria-hidden="true">?</span></div>')+(owned||!bmTreeReady(id)?'':'<span class="bm-codex-lock">'+BM_PAGE_ICONS.lock+'</span>')+'<strong>'+esc(bmTreeName(id))+'</strong><small>'+esc(note)+'</small></div>';
 }
 // Hidden trees' winter looks: open once the hidden tree is open and you have the snow floor. Never sold.
-function bmWinterLooks(){const snow=bmFloorOwned('snow');return bmMysteries().filter(t=>t.ready).map(t=>({id:'winter'+(t.id==='A'?'shining':'moonlight'),name:'겨울 '+t.name,base:t,open:t.unlocked&&snow,note:t.unlocked&&snow?'눈 덮인 숲에서':!t.unlocked?t.name+'를 열면':'눈 덮인 숲 바닥이 있으면'}))}
+function bmWinterLooks(){const snow=bmFloorOwned('snow');return bmMysteries().filter(t=>t.ready).map(t=>({id:'winter'+(t.id==='A'?'shining':'moonlight'),name:t.id==='A'?'반짝이는 트리':'눈꽃 달빛나무',base:t,open:t.unlocked&&snow,note:t.unlocked&&snow?'눈 덮인 숲에서':!t.unlocked?t.name+'를 열면':'눈 덮인 숲 바닥이 있으면'}))}
 function bmWinterLookCard(w){const src='./assets/images/trees/'+(w.open?'sticker':'thumb')+'/'+w.id+'.webp';return '<div class="bm-codex-tree'+(w.open?'':' is-locked')+'"><div class="bm-codex-art"><img class="bm-img'+(w.open?' is-sticker':'')+'" src="'+src+'" alt="" decoding="async" loading="lazy"></div>'+(w.open?'':'<span class="bm-codex-lock">'+BM_PAGE_ICONS.lock+'</span>')+'<strong>'+esc(w.name)+'</strong><small>'+esc(w.note)+'</small></div>'}
 function renderCodexPage(){
  bmRefresh(state);const tab=bmCodexTab==='visitors'?'visitors':'trees';
