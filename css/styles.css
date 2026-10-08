@@ -4173,3 +4173,14 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .month-pick-cell.is-selected{background:var(--sb-ink);color:#fff}
 .month-pick-cell.is-selected small{color:rgba(255,255,255,.7)}
 .month-pick-cell:disabled{background:none;color:var(--text-3);opacity:1}
+/* month dropdown under the forest title */
+.forest-month .forest-top{position:relative}
+.forest-title-btn .month-pick-chev{transition:transform .18s ease}
+.forest-title-btn.is-open .month-pick-chev{transform:rotate(180deg)}
+.month-pop-scrim{position:fixed;inset:0;z-index:40;min-height:0;height:auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.month-pop{position:absolute;left:0;top:calc(100% + 8px);z-index:41;width:min(320px,calc(100vw - 32px));padding:14px;border:1px solid rgba(30,42,34,.1);border-radius:20px;background:#fff;box-shadow:0 12px 32px rgba(30,42,34,.12);animation:monthPopIn .16s ease-out;transform-origin:top left}
+@keyframes monthPopIn{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:none}}
+.month-pop .month-pick-year{margin:0 0 12px}
+.month-pop .forest-nav-btn{width:36px;height:36px}
+.month-pop .month-pick-grid{gap:6px;padding:0}
+.month-pop .month-pick-cell{height:54px;padding:10px 12px;border-radius:14px}
