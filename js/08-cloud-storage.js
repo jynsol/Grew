@@ -74,6 +74,27 @@ async function readRecoveryLink(raw){
  const user=await cloudRequest('/auth/v1/user',{method:'GET',token});
  passwordRecoveryToken=token;passwordRecoveryEmail=user.email||'';passwordRecoveryError='';
 }
+// Social login (Kakao, Apple, Google) through Supabase Auth. Each provider is switched on in the
+// Supabase dashboard; the provider sends the user back here with the session tokens in the URL hash.
+const OAUTH_PENDING='grew.oauth.pending',OAUTH_NAMES={kakao:'카카오',apple:'Apple',google:'Google'};
+function cloudOAuthStart(provider){
+ if(!OAUTH_NAMES[provider])return;
+ try{sessionStorage.setItem(OAUTH_PENDING,provider)}catch{}
+ location.assign(SUPABASE_URL+'/auth/v1/authorize?provider='+encodeURIComponent(provider)+'&redirect_to='+encodeURIComponent(location.origin+location.pathname));
+}
+async function finishOAuthReturn(){
+ let provider='';try{provider=sessionStorage.getItem(OAUTH_PENDING)||''}catch{}
+ const hash=new URLSearchParams(location.hash.slice(1)),query=new URLSearchParams(location.search);
+ if(!provider||(!hash.has('access_token')&&!hash.has('error')&&!query.has('error')))return '';
+ try{sessionStorage.removeItem(OAUTH_PENDING)}catch{}
+ try{history.replaceState(null,'',location.pathname)}catch{}
+ if(hash.has('error')||query.has('error')){loginError=OAUTH_NAMES[provider]+' 로그인을 마치지 못했어요. 다시 시도해주세요.';return ''}
+ try{
+  const token=hash.get('access_token'),user=await cloudRequest('/auth/v1/user',{token}),expires=Number(hash.get('expires_in'))||3600;
+  saveCloudSession({access_token:token,refresh_token:hash.get('refresh_token')||'',token_type:hash.get('token_type')||'bearer',expires_in:expires,expires_at:Math.floor(Date.now()/1000)+expires,user});
+  return provider;
+ }catch{loginError=OAUTH_NAMES[provider]+' 로그인을 확인하지 못했어요. 다시 시도해주세요.';return ''}
+}
 async function beginPasswordRecovery(){
  const hash=new URLSearchParams(location.hash.slice(1)),query=new URLSearchParams(location.search);
  if(hash.get('type')!=='recovery'&&query.get('type')!=='recovery'&&!hash.has('error')&&!query.has('code'))return false;
@@ -271,17 +292,19 @@ async function cloudLoadForSignedInUser(){
  notificationDataOwner=owner;showStorageStatus();
 }
 async function cloudBootstrap(){
- if(await beginPasswordRecovery())return;
+ const oauth=await finishOAuthReturn();
+ if(!oauth&&await beginPasswordRecovery())return;
  cloudSession=loadCloudSession();activateDataOwner(cloudSession?.user?.id||'local');
  const bootGeneration=dataGeneration;
- if(!cloudSession?.access_token){authSession={signedIn:false,finished:false};authRoute='entry';return}
- authSession={signedIn:true,finished:state.onboarded===true,name:state.profile?.name||'',method:'이메일'};
+ if(!cloudSession?.access_token){authSession={signedIn:false,finished:false};authRoute=loginError?'login':'entry';return}
+ authSession={signedIn:true,finished:state.onboarded===true,name:state.profile?.name||'',method:oauth?OAUTH_NAMES[oauth]:'이메일'};
  try{await cloudLoadForSignedInUser()}
  catch(err){if(bootGeneration!==dataGeneration)return;cloudSyncStatus=err.status===401||err.status===403?'reauth':'error';notificationDataOwner=dataOwner;showStorageStatus()}
  if(bootGeneration!==dataGeneration)return;
  if(dataOwner!==(cloudSession?.user?.id||'local'))return;
  authSession.name=state.profile?.name||'';authSession.finished=state.onboarded===true;saveSession();
- authRoute=authSession.finished?'app':'profile';
+ // A first social login still asks for the terms consent before starting.
+ authRoute=authSession.finished?'app':oauth?'socialTerms':'profile';
 }
 async function handleCloudStorage(event){
  if(event.key===CLOUD_SESSION_STORAGE||event.key===null){
@@ -398,7 +421,7 @@ function render(){
  const tab=['sound','notifications'].includes(parentTab)?'my':['calendar','shop','codex'].includes(parentTab)?'forest':parentTab;
  $('tabs').innerHTML=['today','scrap','forest','my'].map((t,i)=>'<button class="'+(tab===t?'active':'')+'" data-action="tab" data-tab="'+t+'" aria-current="'+(tab===t?'page':'false')+'">'+icon(t)+'<span class="tab-label">'+['오늘','스크랩','숲','마이'][i]+'</span></button>').join('');
  $('head').hidden=!['detail','calendar','sound','notifications','shop','codex'].includes(view);
- $('head').innerHTML=!$('head').hidden?'<div class="row">'+button(icon('back'),'back','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+(['shop','codex'].includes(view)?'나의 숲':['sound','notifications'].includes(view)?'설정':view==='calendar'?'나의 숲 · 월간 기록':({today:'오늘',scrap:'스크랩',forest:'숲',calendar:'숲',my:'마이'}[detailOrigin]||'스크랩'))+'</span></div>'+(view==='detail'&&!candidatePreview&&get(detailId)?detailMenu(get(detailId)):view==='shop'?(()=>{const q=bmCouponStatus();return button(BM_PAGE_ICONS.coupon+'쿠폰 '+q.balance+'장<span class="bm-wallet-go">'+BM_PAGE_ICONS.arrow+'</span>','collectionTab','bm-wallet-pill','data-tab="coupons" aria-label="쿠폰 '+q.balance+'장, 쿠폰 모으기"')})():''):'';
+ $('head').innerHTML=!$('head').hidden?'<div class="row">'+button(icon('back'),'back','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+(['shop','codex'].includes(view)?'나의 숲':['sound','notifications'].includes(view)?'설정':view==='calendar'?'나의 숲 · 월간 기록':({today:'오늘',scrap:'스크랩',forest:'숲',calendar:'숲',my:'마이'}[detailOrigin]||'스크랩'))+'</span></div>'+(view==='detail'&&!candidatePreview&&get(detailId)?detailMenu(get(detailId)):view==='shop'&&BM_STORE_OPEN?(()=>{const q=bmCouponStatus();return button(BM_PAGE_ICONS.coupon+'쿠폰 '+q.balance+'장<span class="bm-wallet-go">'+BM_PAGE_ICONS.arrow+'</span>','collectionTab','bm-wallet-pill','data-tab="coupons" aria-label="쿠폰 '+q.balance+'장, 쿠폰 모으기"')})():''):'';
  $('tabs').hidden=view==='detail';
  $('page').innerHTML=({today:renderToday,scrap:renderScrap,forest:renderForest,calendar:renderCalendar,my:renderMy,sound:renderForestSoundSettings,notifications:renderNotificationSettings,detail:renderDetail,shop:renderShopPage,codex:renderCodexPage}[view]||renderToday)();
  if(view==='my'){
@@ -700,7 +723,8 @@ function forestCalendarHTML(period){
 // from the back corner forward. The board is the smallest square that holds them, so it never looks empty.
 function yearForestItems(y,type){
  const current=now().slice(0,7);
- const items=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&Model.stage(c)>0&&(c.completed?forestRecordYear(c)===y:y===current.slice(0,4)));
+ // Only finished works count as planted trees here (and in shares); growing ones live in the month forest.
+ const items=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&c.completed&&forestRecordYear(c)===y);
  const key=c=>c.completed&&c.completed!=='unknown'?c.completed:'9999'+(c.logs.map(l=>l.date).sort().at(-1)||c.startedAt||'');
  return items.sort((a,b)=>key(a).localeCompare(key(b)));
 }
@@ -726,12 +750,12 @@ function forestYearIsland(y,type){
 function renderForestYear(){
  const treeYears=forestTreeYears();
  if(!treeYears.length)return '<section class="forest-page-section forest-year"><div class="forest-top">'+button('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>'+Number(month.slice(5))+'월의 숲','forestMonthView','forest-back','data-month="'+month+'"')+'</div><div class="empty"><span class="empty-icon" aria-hidden="true">'+icon('forest')+'</span><h3>아직 심은 나무가 없어요</h3><p>작품을 다 읽거나 보면<br>올해의 숲에 나무가 생겨요.</p></div></section>';
- const type=forestTypeFilter,current=now().slice(0,7),all=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&Model.stage(c)>0&&(c.completed?forestRecordYear(c)===year:year===current.slice(0,4)));
+ const type=forestTypeFilter,current=now().slice(0,7),all=yearForestItems(year,type);
  const filters='<div class="forest-type-filter" role="group" aria-label="종류">'+[['all','전체'],['book','책'],['movie','영화']].map(([k,l])=>button(l,'forestType',k===type?'active':'','data-type="'+k+'" aria-pressed="'+(k===type)+'"')).join('')+'</div>';
  const head='<div class="forest-top">'+button('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>'+Number(month.slice(5))+'월의 숲','forestMonthView','forest-back','data-month="'+month+'"')+filters+'</div>'+
   '<div class="forest-title-row"><div><span class="forest-year-label">'+esc(year)+'</span><h1 class="page-title">올해의 숲</h1>'+forestTypeChips(all,'<span class="forest-reading">'+all.length+'그루</span>',forestTypeFilter)+'</div>'+forestNav('forestPrevYear','forestNextYear','지난해','다음 해',treeYears.some(y=>y>year),treeYears.some(y=>y<year))+'</div>';
  const cards=Array.from({length:12},(_,i)=>{const period=year+'-'+String(i+1).padStart(2,'0'),future=period>current,items=future?[]:forestMonthItems(period,type),done=items.filter(c=>c.completed),b=done.filter(c=>c.type==='book').length,m=done.filter(c=>c.type==='movie').length;
-  return future?'<div class="forest-month-card is-future"><strong>'+(i+1)+'월</strong><small>—</small></div>':button('<strong>'+(i+1)+'월<b>'+items.length+'</b></strong><small>'+(forestTypeFilter==='book'?'책 '+b+'권':forestTypeFilter==='movie'?'영화 '+m+'편':'책 '+b+' · 영화 '+m)+'</small>','forestMonthView','forest-month-card'+(period===current?' is-current':''),'data-month="'+period+'"')}).join('');
+  return future?'<div class="forest-month-card is-future"><strong>'+(i+1)+'월</strong><small>—</small></div>':button('<strong>'+(i+1)+'월<b>'+done.length+'</b></strong><small>'+(forestTypeFilter==='book'?'책 '+b+'권':forestTypeFilter==='movie'?'영화 '+m+'편':'책 '+b+' · 영화 '+m)+'</small>','forestMonthView','forest-month-card'+(period===current?' is-current':''),'data-month="'+period+'"')}).join('');
  return '<section class="forest-page-section forest-year">'+head+'<div class="forest-island-wrap">'+forestYearIsland(year,type)+'</div><div class="forest-month-grid">'+cards+'</div>'+
  (all.length?'<div class="forest-year-share">'+button('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>올해의 숲 자랑하기','shareForest','primary')+'</div>':'')+'</section>';
 }
@@ -832,7 +856,7 @@ function renderMy(){
  '<div class="my-stats"><div><strong>'+state.items.length+'</strong><span>스크랩</span></div><div><strong>'+state.items.filter(c=>!c.completed&&Model.stage(c)>0).length+'</strong><span>'+statusName.active+'</span></div><div><strong>'+stats.n+'</strong><span>'+statusName.done+'</span></div></div></div>'+
  '<div class="settings-group"><h2>나의 설정</h2><div class="settings-card">'+row('취향 관리','tastes')+button('<span>숲의 소리</span><span class="menu-row-value forest-sound-menu-value"><span id="forestSoundSummary">'+(forestSoundPrefs.enabled?forestSoundCurrent().name:'꺼짐')+'</span> ›</span>','forestSoundSettings','menu-row')+row('알림','notifications')+'</div></div>'+
  '<div class="settings-group"><div class="settings-group-head"><h2>기록 관리</h2><p id="cloudSaveStatus" class="save-status" role="status" aria-live="polite">'+cloudSaveStatusLabel()+'</p></div><div class="settings-card">'+row('데이터 백업','backup','↓')+row('백업 복원','restore','↑')+'</div><input id="restoreFile" aria-label="백업 파일 선택" class="offscreen" type="file" accept="application/json,.json"></div>'+
- '<div class="settings-group"><h2>서비스</h2><div class="settings-card">'+row('이용약관 및 개인정보','terms')+row('로그아웃','flowLogout')+button('<span>회원탈퇴</span>','deleteAccount','menu-row danger')+'</div></div></section>';
+ '<div class="settings-group"><h2>서비스</h2><div class="settings-card">'+row('이용약관','terms')+row('개인정보처리방침','privacy')+row('로그아웃','flowLogout')+button('<span>회원탈퇴</span>','deleteAccount','menu-row danger')+'</div></div></section>';
 }
 let modalReturnFocus=null,modalFocusTimer=null;
 function showModal(title,html,kind='generic'){

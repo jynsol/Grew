@@ -38,3 +38,16 @@ Some internal identifiers still contain `songrim` (for example localStorage keys
 ## Local preview
 
 Do not rely on opening `index.html` with `file://` for every browser feature. A local static server is safer, e.g. `python -m http.server 8000`, then open `http://localhost:8000`.
+
+## Before launch
+
+- **Store** — `BM_STORE_OPEN` in `js/03-core.js` is `false`: paid trees, floors, the pack and ad coupons
+  show "곧 열려요" and nothing charges. Set it to `true` only once real payments and ads are connected.
+  Hidden trees are never sold; they open at 30 / 50 / 75 / 100 planted trees (`BM_MYSTERY_AT`).
+- **Social login** — Kakao, Apple and Google go through Supabase Auth (`cloudOAuthStart`). Turn each
+  provider on in Supabase → Authentication → Providers, and add `https://jynsol.github.io/Grew/` to
+  Authentication → URL Configuration → Redirect URLs.
+- **Legal pages** — `legal/terms.html` and `legal/privacy.html`. Fill in `[운영자 이름]`, `[문의 이메일]`
+  and `[데이터 저장 지역]` (Supabase project region) before launch.
+- **Link preview** — `assets/images/og.jpg` (1200×630) with Open Graph tags in `index.html`. KakaoTalk
+  caches previews; after changing the image, clear it at developers.kakao.com → 도구 → 디버거.

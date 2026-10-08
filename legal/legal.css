@@ -1,0 +1,18 @@
+:root{--ink:#1E2A22;--text-2:rgba(30,42,34,.66);--line:rgba(30,42,34,.1);--bg:#F8F8F6}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.75 "Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;letter-spacing:-.01em;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+main{max-width:680px;margin:0 auto;padding:28px 20px 72px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:600;font-size:14px;text-decoration:none;padding:8px 14px;border-radius:999px;background:rgba(30,42,34,.06)}
+h1{margin:28px 0 6px;font-size:28px;line-height:1.25;font-weight:700;letter-spacing:-.03em}
+.meta{margin:0 0 28px;color:var(--text-2);font-size:13px}
+h2{margin:36px 0 10px;font-size:17px;font-weight:700;letter-spacing:-.02em}
+p,li{color:var(--text-2)}
+ul,ol{padding-left:20px}
+li{margin:4px 0}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:10px 8px;border-bottom:1px solid var(--line);color:var(--text-2)}
+th{color:var(--ink);font-weight:600;white-space:nowrap}
+.box{margin:20px 0;padding:16px 18px;border-radius:16px;background:#fff;border:1px solid var(--line)}
+.box p{margin:0}
+a{color:var(--ink)}

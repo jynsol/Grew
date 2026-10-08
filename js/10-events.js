@@ -151,7 +151,9 @@ document.addEventListener('click',async e=>{
  if(a==='profilePhotoRemove'){if(modal==='profile'&&profileEdit){profileEdit.request++;profileEdit.photo='';profileEdit.loading=false;$('profileError').textContent='';updateProfilePhotoPreview()}return}
  if(a==='tastes'){tasteStart();return}
  if(a==='notifications'){go('notifications');return}
- if(a==='terms'){showModal('서비스 이용 안내','<p>결제는 진행하지 않습니다. 로그인한 사용자의 스크랩·경험 기록은 브라우저에 저장하면서 Supabase에도 동기화합니다. 책·영화 검색어는 검색 결과를 받기 위해 '+esc(APP_BRAND.ko)+'의 Supabase Edge Function으로 전송됩니다.</p><div class="space"></div><p>외부 검색 링크를 누르면 해당 서비스로 이동합니다. 데이터 보관을 위해 MY에서 백업을 다운로드할 수 있습니다.</p><p class="creator">계정 서비스용 약관과 개인정보 처리방침은 정식 서비스에서 별도로 제공합니다.</p>','terms');return}
+ // Terms and privacy are real pages under ./legal; the app opens them in a new tab.
+ if(a==='terms'){window.open('./legal/terms.html','_blank','noopener');return}
+ if(a==='privacy'){window.open('./legal/privacy.html','_blank','noopener');return}
  if(a==='backup'){exportBackup();return}
  if(a==='restore'){$('restoreFile').click();return}
  if(a==='treeUnlockTest'){addTreeUnlockTestData();return}

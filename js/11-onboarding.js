@@ -42,7 +42,7 @@ function entryNote(){return cloudPublicKey()||!/[?&]debug\b/.test(location.searc
 
 /* Entry screens (onboarding redesign): forms align left, single-message screens centre. */
 // Required consents (만 14세 이상 / 이용약관 / 개인정보 수집·이용), shared by e-mail sign-up and the social sheet.
-const CONSENT_ITEMS=[['age14','만 14세 이상이에요',''],['terms','이용약관 동의','terms'],['privacy','개인정보 수집·이용 동의','terms']];
+const CONSENT_ITEMS=[['age14','만 14세 이상이에요',''],['terms','이용약관 동의','terms'],['privacy','개인정보 수집·이용 동의','privacy']];
 let consent={age14:false,terms:false,privacy:false},loginError='';
 const consentDone=()=>CONSENT_ITEMS.every(([k])=>consent[k]);
 const OB_SVG={
@@ -1152,7 +1152,7 @@ document.addEventListener('click',async e=>{
  if(a==='flowSignup'){flowCodeSent=false;flowTo('entry')}
  if(a==='cloudSetup'){cloudSetupModal()}
  if(a==='flowRecover'){passwordRecoveryToken='';passwordRecoveryError='';flowTo('recover');}
- if(['flowKakao','flowApple','flowGoogle'].includes(a)){toast('소셜 로그인은 다음 단계에서 연결할게요. 지금은 이메일 로그인을 사용해주세요.')}
+ if(['flowKakao','flowApple','flowGoogle'].includes(a)){cloudOAuthStart({flowKakao:'kakao',flowApple:'apple',flowGoogle:'google'}[a])}
  if(a==='flowSocialConfirm'&&consentDone())flowTo('start');
  if(a==='flowTaste')startTaste('initial',tastePreferredType||'book');
  if(a==='tasteClose'){closeAdditionalTaste();return}

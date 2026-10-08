@@ -885,16 +885,16 @@ async function drawShareCard(kind,format,target){
   ctx.textAlign='center';ctx.fillStyle=muted;ctx.font='600 34px '+F;ctx.fillText([days?days+'일':'',logs?'기록 '+logs+'회':'',(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요'].filter(Boolean).join(' · '),W/2,cy+r+(story?140:110));ctx.textAlign='left';
   foot();return canvas;
  }
- const isYear=kind==='year',items=isYear?state.items.filter(x=>['book','movie'].includes(x.type)&&Model.stage(x)>0&&(x.completed?forestRecordYear(x)===year:year===now().slice(0,4))):forestMonthItems(month);
+ const isYear=kind==='year',items=isYear?yearForestItems(year,'all'):forestMonthItems(month);
  const done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length,m=Number(month.slice(5));
  head(isYear?year+' FOREST':months[m-1]+' '+month.slice(0,4));
  const top=story?250:200;ctx.fillStyle=ink;ctx.font='700 46px '+F;ctx.fillText(name+'의 '+(isYear?'올해':m+'월')+' 숲',72,top);
- const big=String(isYear?done.length:items.length);ctx.font='800 '+(story?300:250)+'px '+L;ctx.fillText(big,60,top+(story?290:240));
- ctx.font='700 56px '+F;ctx.fillText(isYear||month<now().slice(0,7)?'그루를 심었어요':'그루가 자라고 있어요',72,top+(story?390:330));
+ const big=String(done.length);ctx.font='800 '+(story?300:250)+'px '+L;ctx.fillText(big,60,top+(story?290:240));
+ ctx.font='700 56px '+F;ctx.fillText('그루를 심었어요',72,top+(story?390:330));
  sharePill(ctx,'책 ',W-72,top-30,{fill:'#F7E7A1',size:34,bold:books+'권',boldSize:48,rotate:-6,align:'right'});
  sharePill(ctx,'영화 ',W-110,top+90,{fill:'#BFE7CB',size:34,bold:films+'편',boldSize:48,rotate:5,align:'right'});
  const bandTop=top+(story?520:400),bandH=story?820:560;
- if(isYear){const scale=Math.min((W-80)/390,bandH/250);await shareIsland(ctx,bandTop+(bandH-250*scale)/2,(W-390*scale)/2,scale,yearForestItems(year,'all').filter(c=>items.includes(c)))}
+ if(isYear){const scale=Math.min((W-80)/390,bandH/250);await shareIsland(ctx,bandTop+(bandH-250*scale)/2,(W-390*scale)/2,scale,items)}
  else{try{const board=items.map(x=>({...x,forestTile:''})),svg=await inlineSvgImages(shareCropSVG(selfContainedForestSVG(forestSVG(board,'basic',false,{preview:true,transient:true,grid:'month'})))),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=await loadImage(url),iw=img.naturalWidth||720,ih=img.naturalHeight||540,s=Math.min((W+60)/iw,bandH/ih);ctx.drawImage(img,(W-iw*s)/2,bandTop+(bandH-ih*s)/2,iw*s,ih*s)}finally{URL.revokeObjectURL(url)}}catch{}}
  if(isYear){
   const byMonth=Array.from({length:12},(_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length),best=byMonth.indexOf(Math.max(...byMonth)),rated=done.filter(x=>validRating(x.rating)),avg=rated.length?(rated.reduce((n,x)=>n+Number(x.rating),0)/rated.length).toFixed(1):'';
