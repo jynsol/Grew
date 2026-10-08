@@ -851,7 +851,7 @@ function shareStamp(ctx,cx,cy,r,date,rotate=10){
  const arc=(text,rr,top)=>{ctx.font='600 '+(10*k)+'px '+L;const sp=1.4*k,ws=[...text].map(ch=>ctx.measureText(ch).width+sp),total=ws.reduce((x,y)=>x+y,0)-sp;
   let pos=-total/2;ctx.textAlign='center';ctx.textBaseline='alphabetic';
   [...text].forEach((ch,i)=>{const mid=pos+(ws[i]-sp)/2,ang=mid/(rr*k);ctx.save();if(top){ctx.rotate(ang);ctx.fillText(ch,0,-rr*k)}else{ctx.rotate(-ang);ctx.fillText(ch,0,rr*k+7*k)}ctx.restore();pos+=ws[i]})};
- arc('GREW · TODAY',39,true);arc(String(date||now()).replace(/-/g,'.'),47,false);
+ arc('GREW · TODAY',39,true);arc(String(date||now()).replace(/-/g,'.'),39,false);
  ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.font='600 '+(7*k)+'px '+L;ctx.fillText('★  ★  ★',0,-13*k);
  ctx.font='700 '+(21*k)+'px '+L;ctx.letterSpacing=(.6*k)+'px';ctx.fillText('DONE',0,11*k);ctx.letterSpacing='0px';
  [-44,44].forEach(x=>{ctx.beginPath();ctx.arc(x*k,0,1.6*k,0,Math.PI*2);ctx.fill()});
