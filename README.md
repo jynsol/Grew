@@ -41,7 +41,7 @@ Do not rely on opening `index.html` with `file://` for every browser feature. A 
 
 ## Before launch
 
-- **Store** — `BM_STORE_OPEN` in `js/03-core.js` is `false`: paid trees, floors, the pack and ad coupons
+- **Store** — `BM_STORE_OPEN` in `js/03-core.js` is `false`: special (paid) trees, floors, the packs and ad coupons
   show "곧 열려요" and nothing charges. Set it to `true` only once real payments and ads are connected.
   Hidden trees are never sold; they open at 30 / 50 / 75 / 100 planted trees (`BM_MYSTERY_AT`).
 - **Social login** — Kakao and Google go through (Apple is hidden for now; see `OB_SOCIAL`) Supabase Auth (`cloudOAuthStart`). Turn each
