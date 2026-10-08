@@ -623,6 +623,9 @@ function animatedVisitorArt(id){
  return '<g class="visitor-track visitor-track--'+id+'"><ellipse class="visitor-shadow visitor-shadow--'+id+'" cx="0" cy="9" rx="'+(air?14:18)+'" ry="2.5" fill="#40553C" opacity=".1"/><g class="visitor-motion visitor-motion--'+id+'"><g class="visitor-facing visitor-facing--'+id+'">'+visitorArt(id,true)+'</g></g></g>';
 }
 
+// Visitors are not guaranteed: each time a visit could happen we roll this chance. Every visitor
+// milestone (completed works 1·6·10·15·20·25·30·40·50) raises it, from about 1 in 4 up to 4 in 5.
+function forestVisitorChance(){const n=completedAll().length,steps=FOREST_VISITORS.filter(v=>n>=v.need).length;return steps?Math.min(.8,.2+.065*steps):0}
 let forestVisitorBag=[],lastForestVisitor='';
 function nextForestVisitor(){
  const eligible=FOREST_VISITORS.filter(v=>completedAll().length>=v.need);

@@ -229,6 +229,7 @@ function setupForest(){
  document.addEventListener('visibilitychange',syncVisitorVisibility);syncVisitorVisibility();
  const cleanupForest=window.__songrimForestCleanup;
  window.__songrimForestCleanup=()=>{cleanupForest?.();document.removeEventListener('visibilitychange',syncVisitorVisibility)};
+ let visitorRolled=false;
  const spawnVisitor=()=>{
   if(!layer)return;
   const boxes=[...world.querySelectorAll('[data-tree]')].map(g=>{
@@ -237,7 +238,10 @@ function setupForest(){
   });
   const props=[...world.querySelectorAll('[data-decoration]')].map(g=>{const b=g.getBBox(),m=g.transform.baseVal.consolidate()?.matrix||{a:1,d:1,e:0,f:0};return {left:m.e+b.x*m.a,right:m.e+(b.x+b.width)*m.a,top:m.f+b.y*m.d,bottom:m.f+(b.y+b.height)*m.d}});
   const scale=cfg.treeScale*(cfg.month?.9:1.05),pos=visitorPosition(cfg,boxes,scale,props);
+  // No free spot yet: try again on the next tick without using up a visit.
   layer.innerHTML='';if(!pos)return;
+  // A visit may come up empty; the chance grows with each visitor milestone.
+  visitorRolled=true;visitorElapsed=0;if(Math.random()>=forestVisitorChance())return;
   const chosen=nextForestVisitor();if(!chosen)return;
 
   // Depth-sort the visitor with the trees: it goes just before the first tree standing in front of it.
@@ -252,7 +256,7 @@ function setupForest(){
   if(!document.hidden&&!vp.classList.contains('paused')){
    visitorElapsed+=elapsed;
    const peek=layer.querySelector('.forest-visitor')?.getAnimations().find(a=>a.animationName==='visitorPeek');
-   if(!layer.firstChild||(peek?peek.playState==='finished':visitorElapsed>=18000))spawnVisitor();
+   if(layer.firstChild?(peek?peek.playState==='finished':visitorElapsed>=18000):(!visitorRolled||visitorElapsed>=18000))spawnVisitor();
    const v=layer?.querySelector('[data-visitor]');
    if(v&&!collectionState().visitorsSeen.includes(v.dataset.visitor)){
     const b=v.getBoundingClientRect(),r=vp.getBoundingClientRect();
