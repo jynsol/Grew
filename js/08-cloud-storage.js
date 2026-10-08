@@ -129,7 +129,7 @@ async function deleteSongrimAccount(){
   localStorage.removeItem(CLOUD_LAST_EMAIL_STORAGE);
  }catch{}
  state=Model.empty();
- authRoute='welcome';
+ authRoute='entry';
  view='today';
  return true;
 }
@@ -271,7 +271,7 @@ async function cloudBootstrap(){
  if(await beginPasswordRecovery())return;
  cloudSession=loadCloudSession();activateDataOwner(cloudSession?.user?.id||'local');
  const bootGeneration=dataGeneration;
- if(!cloudSession?.access_token){authSession={signedIn:false,finished:false};authRoute='welcome';return}
+ if(!cloudSession?.access_token){authSession={signedIn:false,finished:false};authRoute='entry';return}
  authSession={signedIn:true,finished:state.onboarded===true,name:state.profile?.name||'',method:'이메일'};
  try{await cloudLoadForSignedInUser()}
  catch(err){if(bootGeneration!==dataGeneration)return;cloudSyncStatus=err.status===401||err.status===403?'reauth':'error';notificationDataOwner=dataOwner;showStorageStatus()}
@@ -285,7 +285,7 @@ async function handleCloudStorage(event){
   const next=loadCloudSession(),owner=next?.user?.id||'local';cloudSession=next;
   if(owner===dataOwner)return;
   // A pending response can no longer apply state after this generation change.
-  closeModal();activateDataOwner(owner);authSession={signedIn:owner!=='local',finished:false};authRoute='welcome';view='today';render();
+  closeModal();activateDataOwner(owner);authSession={signedIn:owner!=='local',finished:false};authRoute='entry';view='today';render();
   if(owner!=='local'){await cloudBootstrap();render()}return;
  }
  if(event.key!==accountDataKey(dataOwner))return;
@@ -374,11 +374,11 @@ function handleCoverError(event){
 }
 document.addEventListener('error',handleCoverError,true);
 function menu(c){return '<details class="more"><summary aria-label="콘텐츠 메뉴">⋯</summary><div class="more-menu">'+button('다른 스크랩으로 바꾸기','pick','')+button('콘텐츠 상세 보기','detail','',attr(c.id))+'</div></details>'}
-// Status bar tint follows the page colour (intro slides, cream sticker pages).
-const INTRO_THEME_COLORS=['#DCCFF7','#FBEFB4','#BEE6CB'];
+// Status bar tint follows the page colour (intro slides; every other screen uses the app background).
+const INTRO_THEME_COLORS=['#EADFFC','#FCF0C2','#D2EED8'];
 function syncThemeColor(){
  const meta=document.querySelector('meta[name="theme-color"]');if(!meta)return;
- const color=authRoute==='intro'?INTRO_THEME_COLORS[introductionStep]||'#FAF7F0':authRoute!=='app'?'#FAF7F0':'#F8F8F6';
+ const color=authRoute==='intro'?INTRO_THEME_COLORS[introductionStep]||'#F8F8F6':'#F8F8F6';
  meta.setAttribute('content',color);document.documentElement.style.backgroundColor=color;
 }
 function render(){

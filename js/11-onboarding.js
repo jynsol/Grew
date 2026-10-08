@@ -30,18 +30,54 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');
  if(a==='discoveryMore'){discoveryOffset+=3;render()}
  if(a==='discoverySave'){const candidate=discoveryShown[Number(b.dataset.index)];if(candidate&&['book','movie'].includes(candidate.type)){const id=Model.uid(),c=Model.add(state,candidate,id);saved(c,id)}}
 });
-let authSession={signedIn:false,finished:false},authRoute='welcome',tasteIndex=0,tasteOrigin='my',tasteOriginScroll=0,tastePool=[],tasteSeen=0,tasteReviewed=0,tasteMode='initial',tastePreferredType='book',flowCodeSent=false;
-const INITIAL_TASTE_TARGET=5;
+// Routes: intro | entry | socialTerms | signup | signupSent | login | recover | recoverSent | resetPassword | profile | start | taste | tasteType(MY > 취향 추가) | app
+let authSession={signedIn:false,finished:false},authRoute='entry',tasteIndex=0,tasteOrigin='my',tasteOriginScroll=0,tastePool=[],tasteSeen=0,tasteReviewed=0,tasteMode='initial',tastePreferredType='book',flowCodeSent=false;
+const INITIAL_TASTE_TARGET=3;
 try{const a=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');if(a&&typeof a==='object')authSession={signedIn:a.signedIn===true,finished:a.finished===true,name:String(a.name||''),method:String(a.method||'이메일')};}catch{}
-authRoute=authSession.signedIn?(authSession.finished?'app':'onboard'):'welcome';
+authRoute=authSession.signedIn?(authSession.finished?'app':'profile'):'entry';
 function saveSession(){try{localStorage.setItem(AUTH_KEY,JSON.stringify(authSession))}catch{toast('로그인 상태를 저장하지 못했어요.')}}
-function flowTo(route){closeModal();authRoute=route;render();scrollPageTop();if(route==='tasteType')void loadMusicClassicCatalog();focusPageHeading()}
-function entrySteps(n){return '<div class="entry-steps" aria-label="3단계 중 '+n+'단계">'+[1,2,3].map(i=>'<span class="'+(i<=n?'on':'')+'"></span>').join('')+'</div>'}
-function entryNote(){return cloudPublicKey()?'':'<div class="entry-note">'+button('연결 설정','cloudSetup','textbtn')+'</div>'}
-function loginFields(){
- let lastEmail='';try{lastEmail=localStorage.getItem(CLOUD_LAST_EMAIL_STORAGE)||''}catch{}
- return '<label for="flowEmail">이메일</label><input id="flowEmail" type="email" required autocomplete="email" value="'+esc(lastEmail)+'" placeholder="you@example.com"><label for="flowPassword">비밀번호</label><input id="flowPassword" type="password" required minlength="6" autocomplete="current-password" placeholder="6자 이상">'
+function flowTo(route){closeModal();if(route==='welcome')route='entry';if(route!==authRoute)loginError='';authRoute=route;render();scrollPageTop();if(route==='tasteType')void loadMusicClassicCatalog();focusPageHeading()}
+// The Supabase key form is a developer tool; it stays out of the screens unless ?debug is in the address.
+function entryNote(){return cloudPublicKey()||!/[?&]debug\b/.test(location.search)?'':'<div class="ob-note">'+button('연결 설정','cloudSetup','ob-link')+'</div>'}
+
+/* Entry screens (onboarding redesign): forms align left, single-message screens centre. */
+// Required consents (만 14세 이상 / 이용약관 / 개인정보 수집·이용), shared by e-mail sign-up and the social sheet.
+const CONSENT_ITEMS=[['age14','만 14세 이상이에요',''],['terms','이용약관 동의','terms'],['privacy','개인정보 수집·이용 동의','terms']];
+let consent={age14:false,terms:false,privacy:false},loginError='';
+const consentDone=()=>CONSENT_ITEMS.every(([k])=>consent[k]);
+const OB_SVG={
+ back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',
+ eye:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ eyeOff:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7c1.6 0 3 .4 4.3 1M22 12s-3.5 7-10 7c-1.6 0-3-.4-4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18"/></svg>',
+ chevron:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>',
+ mail:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+ // Reference marks only: swap for each provider's official button assets before release.
+ kakao:'<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="11" rx="10" ry="8" fill="#000"/><path d="M7 16.5 6 21l4.5-3z" fill="#000"/></svg>',
+ apple:'<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>',
+ google:'<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>'
+};
+const OB_SOCIAL=[['kakao','카카오','flowKakao'],['apple','Apple','flowApple'],['google','Google','flowGoogle']];
+// Header: a 44px round back button, optionally the "n / 3" count and a 2px progress line under it.
+function obHead(step=0,plain=false){
+ return '<div class="ob-head">'+button(OB_SVG.back,'flowBack','ob-back'+(plain?' is-plain':''),'aria-label="뒤로가기"')+(step?'<span class="ob-count" aria-label="3단계 중 '+step+'단계">'+step+' / 3</span>':'')+'</div>'+(step?'<div class="ob-bar" aria-hidden="true"><i style="width:'+(step*100/3).toFixed(1)+'%"></i></div>':'');
 }
+function obTitle(eyebrow,title,sub=''){return '<div class="ob-title">'+(eyebrow?'<span class="ob-eyebrow">'+eyebrow+'</span>':'')+'<h1>'+title+'</h1>'+(sub?'<p>'+sub+'</p>':'')+'</div>'}
+function obInput(id,attrs,extra=''){return '<span class="ob-input'+(extra.includes('ob-eye')?' has-eye':'')+'"><input id="'+id+'" '+attrs+'>'+extra+'</span>'}
+function obEye(){return button(OB_SVG.eye,'togglePassword','ob-eye','aria-label="비밀번호 보기" aria-pressed="false"')}
+function obField(id,label,attrs,extra='',aside=''){return '<div class="ob-field"><span class="ob-label"><label for="'+id+'">'+label+'</label>'+aside+'</span>'+obInput(id,attrs,extra)+'</div>'}
+function obPassword(id,label,autocomplete,placeholder,aside=''){return obField(id,label,'type="password" required minlength="6" autocomplete="'+autocomplete+'" placeholder="'+placeholder+'"',obEye(),aside)}
+function lastEmail(){try{return localStorage.getItem(CLOUD_LAST_EMAIL_STORAGE)||''}catch{return ''}}
+function obEmail(id='flowEmail',value=lastEmail()){return obField(id,'이메일','type="email" required autocomplete="email" value="'+esc(value)+'" placeholder="you@example.com"')}
+function obConsent(){
+ const box=(k,on)=>'<input type="checkbox" data-consent="'+k+'"'+(on?' checked':'')+'><i class="ob-tick" aria-hidden="true">'+OB_SVG.check+'</i>';
+ return '<div class="ob-consent" role="group" aria-label="약관 동의"><label class="ob-check is-all">'+box('all',consentDone())+'<b>전체 동의</b></label>'+
+  CONSENT_ITEMS.map(([k,label,view])=>'<div class="ob-consent-row"><label class="ob-check">'+box(k,consent[k])+'<span><b>[필수]</b> '+label+'</span></label>'+(view?button('보기 ›',view,'ob-view','aria-label="'+label.replace(' 동의','')+' 보기"'):'')+'</div>').join('')+'</div>';
+}
+function obFoot(inner,cls=''){return '<div class="ob-foot'+(cls?' '+cls:'')+'">'+inner+'</div>'}
+function obCta(label,action='',attrs=''){return action?button(label,action,'ob-cta',attrs):'<button class="ob-cta" type="submit" '+attrs+'>'+label+'</button>'}
+function obSeed(){return '<span class="ob-seed" aria-hidden="true"><img src="./assets/images/trees/seed.webp" alt="" decoding="async"></span>'}
+function obError(){return '<div id="flowError" class="ob-error" role="alert">'+esc(loginError)+'</div>'}
 
 let introductionStep=0,introFirstRun=false;
 // The intro opens by itself once per device; afterwards it stays behind the welcome link.
@@ -66,10 +102,16 @@ const INTRO_BOOK_ART='<svg viewBox="0 0 108 130" aria-hidden="true"><defs><clipP
 const INTRO_MOVIE_ART='<svg viewBox="0 0 108 130" aria-hidden="true"><g transform="rotate(-9 16 32)"><rect x="14" y="16" width="80" height="15" rx="3" fill="#1E2A22"/><path d="M24 16h10l-7 15H17zM44 16h10l-7 15H37zM64 16h10l-7 15H57zM84 16h10l-7 15H77z" fill="#FAF7F0"/></g><rect x="14" y="34" width="80" height="80" rx="7" fill="#1E2A22"/><rect x="22" y="42" width="64" height="44" rx="4" fill="#F4E3A0"/><circle cx="54" cy="64" r="13" fill="#FAF7F0"/><path d="M50 57.5 61 64l-11 6.5z" fill="#1E2A22"/><rect x="22" y="94" width="40" height="5" rx="2.5" fill="#FAF7F0" opacity=".85"/><rect x="22" y="103" width="24" height="4" rx="2" fill="#FAF7F0" opacity=".45"/><circle cx="80" cy="100" r="5" fill="#E85A47"/></svg>';
 function introSticker(src,style){return '<img class="intro-cut" src="./assets/images/'+src+'" alt="" style="'+style+'">'}
 function introVisitor(id,style){return '<i class="intro-cut intro-visitor" style="background-image:url(./assets/images/forest/visitor-'+id+'.webp);'+style+'"></i>'}
-const INTRO_CHECK=(size,w=3.4)=>'<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
-const introSpark=(x,y,size,color,rot=0,cls='')=>'<i'+(cls?' class="'+cls+'"':'')+' style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;background:'+color+';clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);transform:rotate('+rot+'deg)"></i>';
+const INTRO_CHECK=(size,color='#fff',w=3.4)=>'<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+// Background shapes sit behind the baked art, in stage coordinates (390x470): one burst, a few soft forms, three sparkles.
+const introSpark=(x,y,size,color,rot=0)=>'<i style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;background:'+color+';clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);transform:rotate('+rot+'deg)"></i>';
 const introBurst=(x,y,size,color,points,inner,rot=0,extra='')=>'<i style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;background:'+color+';clip-path:'+introStar(points,inner)+';transform:rotate('+rot+'deg);'+extra+'"></i>';
-const introRing=(x,y,size,color)=>'<i class="intro-ring" style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;border-color:'+color+'"></i>';
+const introDisc=(x,y,size,color)=>'<i style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+'"></i>';
+const introPill=(x,y,w,h,color,rot)=>'<i style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;border-radius:'+h/2+'px;background:'+color+';transform:rotate('+rot+'deg)"></i>';
+const introTile=(x,y,size,radius,color,rot)=>'<i style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;border-radius:'+radius+'px;background:'+color+';transform:rotate('+rot+'deg)"></i>';
+const introHalf=(x,y,w,color,rot)=>'<i style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+w/2+'px;border-radius:'+w/2+'px '+w/2+'px 0 0;background:'+color+';transform:rotate('+rot+'deg)"></i>';
+const introRing=(x,y,size)=>'<i class="intro-ring" style="left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px"></i>';
+const introDots=(x,y,alpha)=>'<i class="intro-dots-pattern" style="left:'+x+'px;top:'+y+'px;--dot:rgba(30,42,34,'+alpha+')"></i>';
 // A small, full forest for the third slide: the forest tab's ground with trees on shuffled cells.
 function introBoardHTML(){
  const ground=stickerGroundArtwork({boardW:290,boardH:121},195,178.5),cell=(u,v)=>({x:195+(u-v)*37.8,y:102.9+(u+v)*18.9});
@@ -82,19 +124,20 @@ function introBoardHTML(){
  return '<svg class="intro-board" viewBox="0 0 390 340" aria-hidden="true"><defs>'+ground.defs+'</defs>'+ground.body+'</svg>'+items.map(t=>t.html).join('');
 }
 const INTRO_SLIDES=[
- {title:'마음에 든 작품,<br>가볍게 <mark style="--tilt:-2deg">스크랩.</mark>',copy:'읽고 싶은 책, 보고 싶은 영화를 한곳에 담아요.',label:'책과 영화 카드, 씨앗, 다람쥐 스티커',
-  shapes:introBurst(130,66,290,'#F6E7A8',16,40,8)+introBurst(-50,336,170,'rgba(255,255,255,.28)',12,37,-10)+introSpark(20,64,24,'#1E2A22')+introSpark(340,86,18,'#E85A47',15)+introSpark(336,446,28,'#1E2A22',10,'intro-low')+introSpark(14,466,16,'#fff',0,'intro-low')+introRing(-20,96,88,'rgba(30,42,34,.55)')+introRing(300,366,64,'rgba(255,255,255,.9)'),
+ {eyebrow:'01 — SCRAP',title:'마음에 든 작품,<br>가볍게 <mark style="--tilt:-2deg">스크랩.</mark>',copy:'읽고 싶은 책, 보고 싶은 영화를 한곳에 담아요.',label:'책과 영화 카드, 씨앗, 다람쥐 스티커',
+  shapes:introBurst(130,66,290,'#F6E7A8',16,40,8)+introDisc(-70,330,190,'rgba(255,255,255,.32)')+introPill(286,404,140,52,'#F9D9C8',-18)+introTile(296,8,46,14,'rgba(255,255,255,.7)',16)+introRing(-20,96,88)+introDots(24,8,.28)+introSpark(22,62,24,'#1E2A22')+introSpark(340,90,18,'#E85A47',15)+introSpark(352,300,14,'#fff'),
   art:()=>'<div class="intro-card" style="left:40px;top:62px;background:#F9D9C8;transform:rotate(-10deg)"><span>BOOK</span>'+INTRO_BOOK_ART+'</div><div class="intro-card" style="left:198px;top:96px;background:#C5E8CE;transform:rotate(8deg)"><span>MOVIE</span>'+INTRO_MOVIE_ART+'</div>'+
    introVisitor('squirrel','left:6px;top:292px;width:146px;height:146px;transform:rotate(-5deg)')+introSticker('trees/seed.webp','left:152px;top:312px;width:120px;height:120px;transform:rotate(7deg)')+introSticker('forest/decor-flower-peach.webp','left:276px;top:328px;width:78px;height:78px;transform:rotate(-12deg)'),
   overlay:'<span class="intro-chip" style="left:126px;top:30px;background:#1E2A22;color:#fff;transform:rotate(-7deg)">+ 스크랩</span>'},
- {title:'하루 한 번,<br>도장 <mark class="is-ink" style="--tilt:3deg">쾅!</mark>',copy:'담아둔 작품 하나를 골라 오늘 읽었다고 찍어요.',label:'새싹, 오늘 읽었어요 도장, 이번 주 도장 스티커와 토끼',
-  shapes:introBurst(150,62,270,'rgba(255,255,255,.45)',20,43)+introBurst(-40,216,150,'#E6DDF8',10,36,12,'opacity:.45')+introSpark(344,256,26,'#1E2A22',0,'intro-low')+introSpark(16,70,18,'#1E2A22',20)+introSpark(262,466,16,'#E85A47',0,'intro-low')+introRing(310,70,64,'rgba(30,42,34,.55)')+introRing(20,446,54,'rgba(255,255,255,.9)'),
+ {eyebrow:'02 — STAMP',title:'하루 한 번,<br>도장 <mark class="is-ink" style="--tilt:3deg">쾅!</mark>',copy:'담아둔 작품 하나를 골라 오늘 읽었다고 찍어요.',label:'새싹, 오늘의 DONE 도장, 이번 주 기록과 토끼 스티커',
+  shapes:introBurst(150,62,270,'rgba(255,255,255,.5)',20,43)+introDisc(-60,200,170,'#E6DDF8')+introHalf(292,420,120,'#C5E8CE',-12)+introTile(318,10,42,14,'#F9D9C8',14)+introRing(306,250,64)+introDots(18,260,.25)+introSpark(16,10,18,'#1E2A22',20)+introSpark(348,200,22,'#1E2A22')+introSpark(150,10,14,'#E85A47'),
   art:()=>introSticker('trees/sprout.webp','left:8px;top:70px;width:196px;height:196px;transform:rotate(-6deg)')+introVisitor('rabbit','left:240px;top:354px;width:122px;height:122px;transform:rotate(7deg)')+introSticker('forest/decor-flower-lilac.webp','left:34px;top:378px;width:70px;height:70px;transform:rotate(-10deg)'),
-  overlay:'<div class="intro-stamp" style="left:192px;top:60px"><i class="stamp-ring"></i>'+INTRO_CHECK(36)+'<span>오늘<br>읽었어요</span></div>'+
+  // The same rubber stamp Today prints (stampSVG), in ink here so it stands out on the butter page.
+  overlay:()=>'<div class="intro-done-stamp" style="left:186px;top:52px">'+stampSVG({type:'book'},true)+'</div>'+
    '<span class="intro-chip" style="left:30px;top:40px;background:#fff;transform:rotate(-6deg)">하루 한 번</span>'+
-   '<div class="intro-week">'+['월','화','수','목','금','토','일'].map((d,i)=>i<2?'<span class="is-done" style="transform:rotate('+(i?6:-8)+'deg)">'+INTRO_CHECK(17)+'</span>':i===2?'<span class="is-today">'+d+'</span>':'<span>'+d+'</span>').join('')+'</div>'},
- {title:'다 읽은 작품이<br>나의 <mark style="--tilt:-3deg;background:#F6E7A8">숲</mark>이 돼요.',copy:'완료한 책과 영화가 달마다 숲에 나무로 남아요.',label:'나무와 새싹이 자라는 숲 판, 여우 스티커',
-  shapes:introBurst(40,58,310,'#F6E7A8',24,44,0,'opacity:.9')+introBurst(300,376,110,'rgba(255,255,255,.28)',10,36,18)+introSpark(14,76,22,'#1E2A22')+introSpark(350,96,18,'#fff')+introSpark(10,446,26,'#1E2A22',12,'intro-low')+introSpark(196,64,14,'#E85A47')+introRing(318,66,60,'rgba(30,42,34,.55)'),
+   '<div class="intro-week">'+['월','화','수','목','금','토','일'].map((d,i)=>i<2?'<span class="is-done">'+INTRO_CHECK(17)+'</span>':i===2?'<span class="is-today">'+d+'</span>':'<span>'+d+'</span>').join('')+'</div>'},
+ {eyebrow:'03 — FOREST',title:'다 읽은 작품이<br>나의 <mark style="--tilt:-3deg;background:#F6E7A8">숲</mark>이 돼요.',copy:'완료한 책과 영화가 달마다 숲에 나무로 남아요.',label:'나무와 새싹이 자라는 숲 판, 여우 스티커',
+  shapes:introBurst(40,58,310,'#F6E7A8',24,44,0,'opacity:.9')+introDisc(250,-40,150,'rgba(255,255,255,.35)')+introPill(-40,410,150,52,'#E6DDF8',14)+introTile(312,380,52,16,'#F9D9C8',-12)+introRing(318,66,60)+introDots(330,250,.25)+introSpark(14,76,22,'#1E2A22')+introSpark(196,30,14,'#E85A47')+introSpark(40,300,16,'#fff'),
   art:()=>'<div class="intro-board-wrap">'+introBoardHTML()+'</div>'+introVisitor('fox','left:250px;top:330px;width:124px;height:124px;transform:rotate(-6deg)')+introSticker('forest/decor-flower-peach.webp','left:14px;top:348px;width:64px;height:64px;transform:rotate(10deg)'),
   overlay:()=>'<span class="intro-chip" style="left:22px;top:44px;background:#F6E7A8;transform:rotate(-8deg);font-size:16px">+1 TREE</span><span class="intro-chip" style="left:226px;top:64px;background:#fff;transform:rotate(6deg)">'+Number(now().slice(5,7))+'월의 숲</span>'}
 ];
@@ -116,50 +159,101 @@ function fitIntroStage(){
 addEventListener('resize',()=>{if(authRoute==='intro')fitIntroStage()});
 function renderIntroduction(){
  const step=introductionStep,s=INTRO_SLIDES[step],last=step===2;
- return '<section class="sticker-intro" data-step="'+step+'"><div class="intro-shapes" aria-hidden="true">'+s.shapes+'</div>'+
- '<div class="intro-top"><span class="intro-wordmark">'+esc(APP_BRAND.en)+'</span>'+button('건너뛰기','introSkip','textbtn intro-skip')+'</div>'+
- '<div class="intro-stage" role="img" aria-label="'+esc(s.label)+'">'+introArtLayer(step)+(typeof s.overlay==='function'?s.overlay():s.overlay)+'</div>'+
- '<div class="intro-bottom"><span class="sr-only">3장 중 '+(step+1)+'번째</span><h1>'+s.title+'</h1><p>'+s.copy+'</p><div class="intro-footer"><div class="intro-dots" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i===step?'on':'')+'"></i>').join('')+'</div>'+
+ return '<section class="sticker-intro" data-step="'+step+'">'+
+ '<div class="intro-progress" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i<=step?'on':'')+'"></i>').join('')+'</div>'+
+ '<div class="intro-top"><span class="intro-wordmark">'+esc(APP_BRAND.en)+'</span>'+button('건너뛰기','introSkip','intro-skip')+'</div>'+
+ '<div class="intro-stage" role="img" aria-label="'+esc(s.label)+'"><div class="intro-bg" aria-hidden="true">'+s.shapes+'</div>'+introArtLayer(step)+(typeof s.overlay==='function'?s.overlay():s.overlay)+'</div>'+
+ '<div class="intro-bottom"><span class="intro-eyebrow" aria-hidden="true">'+s.eyebrow+'</span><span class="sr-only">3장 중 '+(step+1)+'번째</span><h1>'+s.title+'</h1><p>'+s.copy+'</p><div class="intro-actions">'+
+ (step?button('<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg>','introPrev','intro-prev','aria-label="이전"'):'')+
  button((last?'시작하기':'다음')+'<span aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>','introNext','intro-next')+'</div></div></section>';
 }
-function renderEntry(){
- if(authRoute==='welcome'&&!introSeen()){if(!introFirstRun)introductionStep=0;introFirstRun=true;authRoute='intro'}
- $('head').hidden=false;
- $('tabs').hidden=true;$('page').dataset.view=authRoute;document.body.dataset.view=authRoute;$('head').dataset.view=authRoute;$('page').classList.add('entry-page');$('page').classList.toggle('taste-page',authRoute==='taste');$('page').classList.toggle('intro-page',authRoute==='intro');
- $('head').innerHTML=!['welcome','onboard','taste','ready','intro'].includes(authRoute)?'<div class="row">'+button(icon('back'),'flowBack','iconbtn','aria-label="뒤로가기"')+'<span class="back-title">'+esc(APP_BRAND.ko)+'</span></div>':'<div class="brand">'+icon('forest')+esc(APP_BRAND.ko)+'</div>';
- let h='';
- if(authRoute==='welcome')h='<section class="sticker-welcome"><i class="sticker-block" aria-hidden="true"></i><div class="intro-shapes" aria-hidden="true"><i style="right:44px;top:470px;width:24px;height:24px;background:#1E2A22;clip-path:'+INTRO_STAR4+'"></i><i style="left:200px;top:60px;width:18px;height:18px;background:#E85A47;clip-path:'+INTRO_STAR4+'"></i><i class="intro-ring" style="right:28px;top:360px;width:72px;height:72px"></i></div>'+
- '<div class="intro-top"><span class="intro-wordmark">'+esc(APP_BRAND.en)+'</span><span class="welcome-name">'+esc(APP_BRAND.ko)+'</span></div>'+
- '<div class="welcome-stage">'+entryStickerArt()+'<span class="intro-chip" style="left:24px;top:6px;background:#fff;transform:rotate(-7deg)">책</span><span class="intro-chip" style="left:76px;top:0;background:#F4E3A0;transform:rotate(5deg)">영화</span><span class="intro-chip" style="right:18px;top:4px;background:#E85A47;color:#fff;transform:rotate(-5deg)">+1 TREE</span></div>'+
- '<div class="welcome-copy"><h1>읽고, 보고,<br><mark style="--tilt:-2deg;background:#B9E0C2">자라요.</mark></h1><p>'+esc(APP_BRAND.motto)+'</p></div>'+
- '<div class="welcome-actions">'+button('시작하기','flowSignup','primary ink-button')+button('로그인','flowEmailLogin','secondary')+button(esc(APP_BRAND.ko)+' 알아보기 <span aria-hidden="true">↗</span>','introStart','textbtn')+'</div></section>';
- if(authRoute==='intro')h=renderIntroduction();
- if(authRoute==='signupOptions')h='<div class="entry-options-page"><div class="entry-options-title"><div class="entry-options-symbol">'+icon('forest')+'</div><h1>나의 숲을<br>시작해요.</h1><p>이메일로 나만의 숲을 시작해요.</p></div><div class="signup-benefits"><p>'+icon('scrap')+'<span>책과 영화를 한곳에 모아요.</span></p><p>'+icon('forest')+'<span>경험한 작품이 나무로 자라요.</span></p></div><div class="signup-methods">'+button('이메일로 가입하기','flowEmailSignup','primary ink-button')+'</div><p class="entry-login-link">이미 함께하고 있나요? '+button('로그인','flowEmailLogin','textbtn')+'</p></div>';
- if(authRoute==='login')h='<div class="entry-hero"><span class="section-eyebrow">WELCOME BACK</span><h1>다시 만나서<br>반가워요.</h1><p>당신의 숲이 기다리고 있어요.</p></div><form id="flowLoginForm">'+loginFields()+'<div id="flowError" class="entry-error" role="alert"></div><button class="primary ink-button" type="submit">로그인</button></form>'+button('비밀번호를 잊으셨나요?','flowRecover','textbtn')+'<p class="entry-login-link">아직 계정이 없나요? '+button('회원가입','flowSignup','textbtn')+'</p>'+entryNote();
- if(authRoute==='signupSent')h='<div class="entry-hero"><span class="section-eyebrow">CHECK YOUR EMAIL</span><h1>메일을 확인하면<br>숲을 시작할 수 있어요.</h1><p>가입한 이메일로 확인 안내를 보냈어요.<br>메일의 링크를 확인한 뒤 로그인해주세요.</p></div><p class="note">메일이 보이지 않으면 스팸함도 확인해주세요. 이미 가입한 이메일이라면 로그인을 이용해주세요.</p>'+button('로그인으로 이동','flowEmailLogin','primary ink-button');
- if(authRoute==='social')h='<div class="entry-hero"><h1>함께할 준비 중이에요</h1><p>지금은 이메일로 '+esc(APP_BRAND.ko)+'를 시작할 수 있어요.</p></div>'+button('이메일로 가입하기','flowEmailSignup');
- if(authRoute==='signup')h=entrySteps(1)+'<div class="entry-hero"><h1>이메일로<br>가입하기.</h1><p>나만의 취향을 차곡차곡 쌓아보세요.</p></div><form id="flowSignupForm">'+loginFields().replace('autocomplete="current-password"','autocomplete="new-password"')+'<label for="flowPasswordConfirm">비밀번호 확인</label><input id="flowPasswordConfirm" required type="password" minlength="6" autocomplete="new-password" placeholder="비밀번호를 한 번 더 입력해주세요"><label class="checkrow"><input id="flowTerms" type="checkbox" required><span>이용약관 및 개인정보 안내에 동의합니다</span></label>'+button('이용 안내 보기','terms','terms-link')+'<div id="flowError" class="entry-error" role="alert"></div><button class="primary ink-button" type="submit">가입하기</button></form>'+entryNote();
- if(authRoute==='recover')h='<div class="entry-hero"><h1>비밀번호를<br>잊으셨나요?</h1><p>가입한 이메일로 재설정 안내를 보내드려요.</p><p class="entry-error">'+esc(passwordRecoveryError)+'</p></div><form id="flowRecoverForm"><label for="recoveryEmail">이메일</label><input id="recoveryEmail" type="email" required autocomplete="email" placeholder="you@example.com"><div id="flowError" class="entry-error" role="alert"></div><button class="primary" type="submit">재설정 안내 받기</button></form>'+entryNote();
- if(authRoute==='recoverSent')h='<div class="entry-hero"><h1>메일을<br>확인해주세요.</h1><p>메일에서 재설정 링크를 확인해주세요.</p></div>'+(location.protocol==='file:'?'<p class="creator">로컬 파일에서는 링크를 열기 전에 주소를 복사해 아래에 붙여넣어주세요.</p><form id="flowRecoveryLinkForm"><label for="recoveryLink">재설정 메일의 링크</label><input id="recoveryLink" type="password" autocomplete="off" required><div id="flowError" class="entry-error" role="alert"></div><button class="primary" type="submit">재설정 계속하기</button></form>':'')+button('새 메일 받기','flowRecover','textbtn')+button('로그인으로 돌아가기','flowEmailLogin','textbtn');
- if(authRoute==='resetPassword')h='<div class="entry-hero"><h1>새 비밀번호를<br>정해주세요.</h1><p>'+esc(passwordRecoveryEmail)+'</p></div><form id="flowResetPasswordForm"><label for="newPassword">새 비밀번호</label><input id="newPassword" type="password" required minlength="6" autocomplete="new-password"><label for="newPasswordConfirm">새 비밀번호 확인</label><input id="newPasswordConfirm" type="password" required minlength="6" autocomplete="new-password"><div id="flowError" class="entry-error" role="alert"></div><button class="primary ink-button" type="submit">비밀번호 변경</button></form>'+button('새 메일 받기','flowRecover','textbtn');
- if(authRoute==='profile')h=entrySteps(2)+'<div class="entry-hero"><h1>숲의 주인은<br>누구인가요?</h1><p>'+esc(APP_BRAND.ko)+'에서 사용할 이름을 알려주세요.</p></div><div class="profile-onboard-art">'+icon('my')+'</div><form id="flowProfileForm"><label for="flowProfileName">이름 또는 별명</label><input id="flowProfileName" maxlength="30" value="'+esc(authSession.name||(state.profile.name==='나'?'':state.profile.name))+'" placeholder="어떻게 불러드릴까요?"><p class="creator">이름은 나중에도 바꿀 수 있어요.</p><button class="primary ink-button" type="submit">다음</button></form>';
- if(authRoute==='start')h=entrySteps(3)+'<div class="entry-hero"><h1>어떤 작품부터<br>담아볼까요?</h1><p>작은 관심 하나로 시작하면 돼요.</p></div><div class="start-options">'+button(icon('plus')+'<span class="option-arrow" aria-hidden="true">↗</span><strong>직접 스크랩하기</strong><small>찾고, 공유하고, 사진으로 가져와요.</small>','flowFirstScrap','start-option')+button(icon('book')+'<span class="option-arrow" aria-hidden="true">↗</span><strong>추천으로 시작하기</strong><small>작품 5개를 살펴보며 취향을 찾아요.</small>','flowOptionalTaste','start-option')+'</div>';
- if(authRoute==='tasteType'){const adding=tasteMode==='add';h=(adding?'':entrySteps(3))+'<div class="entry-hero"><h1>지금 마음이 가는<br>분야는 뭔가요?</h1><p>선택한 분야의 작품을 보여드릴게요.</p></div><div class="taste-type-grid">'+[['book','책','새로운 페이지를 넘기는 시간'],['movie','영화','또 다른 세계를 만나는 시간']].map(([type,label,desc])=>button(icon(type)+'<span class="grow">'+label+'<small>'+desc+'</small></span><span aria-hidden="true">↗</span>','chooseTasteType','taste-type-option','data-type="'+type+'"')).join('')+'</div>';}
- if(authRoute==='onboard')h=entrySteps(3)+'<div class="entry-hero"><h1>'+esc(state.profile.name)+'님,<br>어떤 걸 좋아하세요?</h1><p>관심 있는 작품이나 이미 본 작품을 추가해보세요.</p></div>'+button('직접 고르기','flowTaste')+button('저장해 둔 스크린샷 가져오기','photoAdd','secondary')+'<div class="flow-account"><strong>지금 모인 콘텐츠 '+state.items.length+'개</strong><small>가져온 콘텐츠는 스크랩에서 이어서 볼 수 있어요.</small></div>'+button(state.items.length?'이 콘텐츠로 시작하기':'취향 선택은 나중에 할게요','flowReady','textbtn');
- if(authRoute==='taste')h=renderTastePage();
- if(authRoute==='ready')h='<div class="entry-hero center"><h1>취향이 자랄<br>준비가 됐어요.</h1><p>이제 하나씩, 나의 속도로 경험해요.</p></div>'+entryStickerArt()+'<div class="entry-bottom">'+button('나의 '+esc(APP_BRAND.ko)+' 시작하기','flowFinish','primary ink-button')+'</div>';
- $('page').innerHTML=h;
- if(['intro','welcome'].includes(authRoute)){$('head').hidden=true;$('head').innerHTML='';requestAnimationFrame(scrollPageTop)}
- if(authRoute==='intro')fitIntroStage();
- if(authRoute==='taste')$('head').innerHTML=tasteMode==='add'?'<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit'):'<div class="brand">'+esc(APP_BRAND.ko)+'</div>'+button('그냥 시작하기','flowFinish','textbtn taste-exit');
- if(authRoute==='tasteType'&&tasteMode==='add')$('head').innerHTML='<div class="back-title">취향 추가</div>'+button('닫기','tasteClose','textbtn taste-exit');
+// 01 시작: the welcome and the sign-up choice on one centred screen.
+function renderEntryStart(){
+ return '<section class="ob-screen ob-entry"><div class="ob-entry-top">'+button(esc(APP_BRAND.ko)+' 알아보기 <span aria-hidden="true">↗</span>','introStart','ob-link ob-learn')+'</div>'+
+ '<div class="ob-entry-hero"><h1><span class="ob-wordmark">'+esc(APP_BRAND.en)+'</span><span class="ob-tagline">'+esc(APP_BRAND.ko)+' · '+esc(APP_BRAND.motto)+'</span></h1>'+
+ '<div class="ob-entry-art" role="img" aria-label="책과 영화로 자라난 작은 숲"><img src="./assets/images/onboarding/welcome.webp?v=1" alt="" decoding="async"></div></div>'+
+ obFoot(OB_SOCIAL.map(([id,label,action])=>button(OB_SVG[id]+label+'로 시작하기',action,'ob-social is-'+id)).join('')+button(OB_SVG.mail+'이메일로 시작하기','flowEmailSignup','ob-social is-email')+
+  '<p class="ob-alt">이미 계정이 있나요? '+button('로그인','flowEmailLogin','ob-inline-link')+'</p>','ob-entry-actions')+'</section>';
 }
+function renderEntry(){
+ if(['welcome','signupOptions','onboard','social'].includes(authRoute))authRoute='entry';
+ if(authRoute==='entry'&&!introSeen()){if(!introFirstRun)introductionStep=0;introFirstRun=true;authRoute='intro'}
+ $('tabs').hidden=true;$('head').hidden=true;$('head').innerHTML='';
+ $('page').dataset.view=authRoute;document.body.dataset.view=authRoute;$('head').dataset.view=authRoute;$('page').classList.add('entry-page');$('page').classList.toggle('taste-page',authRoute==='taste');$('page').classList.toggle('intro-page',authRoute==='intro');$('page').classList.toggle('ob-page',authRoute!=='intro');
+ const adding=tasteMode==='add',addHead='<div class="ob-head ob-add-head"><span class="ob-add-title">취향 추가</span>'+button('닫기','tasteClose','ob-link')+'</div>';
+ let h='';
+ if(authRoute==='intro')h=renderIntroduction();
+ if(authRoute==='entry')h=renderEntryStart();
+ // 02: new social sign-ups agree to the required terms on a sheet over the start screen.
+ if(authRoute==='socialTerms')h=renderEntryStart()+'<div class="ob-dim" aria-hidden="true"></div><section class="ob-sheet" role="dialog" aria-modal="true" aria-labelledby="obSheetTitle"><i class="ob-grab" aria-hidden="true"></i><h1 id="obSheetTitle">'+esc(APP_BRAND.ko)+'를 시작하려면<br>동의가 필요해요</h1>'+obConsent()+obCta('동의하고 시작하기','flowSocialConfirm',consentDone()?'':'disabled')+'</section>';
+ if(authRoute==='signup')h='<form id="flowSignupForm" class="ob-screen" novalidate>'+obHead(1)+obTitle('ACCOUNT','이메일로<br>가입하기.')+
+  '<div class="ob-form">'+obEmail('flowEmail','')+obPassword('flowPassword','비밀번호','new-password','6자 이상')+obPassword('flowPasswordConfirm','비밀번호 확인','new-password','한 번 더 입력해주세요')+obConsent()+obError()+'</div>'+
+  obFoot(obCta('가입하기','','disabled'))+entryNote()+'</form>';
+ if(authRoute==='signupSent')h='<section class="ob-screen">'+obHead(0,true)+'<div class="ob-center">'+obSeed()+'<h1>메일을 확인하면<br>숲을 시작할 수 있어요</h1>'+(lastEmail()?'<span class="ob-chip">'+esc(lastEmail())+'</span>':'')+'<p>메일의 링크를 확인한 뒤 로그인해주세요.</p><p class="ob-fine">메일이 보이지 않으면 스팸함도 확인해주세요.<br>이미 가입한 이메일이라면 로그인을 이용해주세요.</p></div>'+obFoot(obCta('로그인으로 이동','flowEmailLogin'))+'</section>';
+ if(authRoute==='login')h='<form id="flowLoginForm" class="ob-screen" novalidate>'+obHead()+'<div class="ob-login-title">'+obTitle('WELCOME BACK','다시 만나서<br>반가워요.','당신의 숲이 기다리고 있어요.')+'<img class="ob-login-oak" src="./assets/images/trees/oak.webp" alt="" decoding="async"><i class="ob-login-rabbit" aria-hidden="true"></i></div>'+
+  '<div class="ob-form is-login">'+obEmail()+obField('flowPassword','비밀번호','type="password" required minlength="6" autocomplete="current-password" placeholder="6자 이상"'+(loginError?' aria-invalid="true"':''),obEye(),button('비밀번호 찾기','flowRecover','ob-aside-link'))+obError()+'</div>'+
+  '<div class="ob-inline-cta">'+obCta('로그인')+'</div><div class="ob-divider">간편 로그인</div><div class="ob-social-row">'+OB_SOCIAL.map(([id,label,action])=>button(OB_SVG[id],action,'ob-social-circle is-'+id,'aria-label="'+label+'로 로그인"')).join('')+'</div>'+
+  obFoot('<p class="ob-alt">아직 계정이 없나요? '+button('회원가입','flowSignup','ob-inline-link')+'</p>','is-plain')+entryNote()+'</form>';
+ if(authRoute==='recover')h='<form id="flowRecoverForm" class="ob-screen" novalidate>'+obHead()+obTitle('RESET PASSWORD','비밀번호를<br>잊으셨나요?','가입한 이메일로 재설정 안내를 보내드려요.')+
+  '<div class="ob-form">'+obField('recoveryEmail','이메일','type="email" required autocomplete="email" placeholder="you@example.com"')+'<div id="flowError" class="ob-error" role="alert">'+esc(passwordRecoveryError)+'</div></div>'+
+  obFoot(obCta('재설정 안내 받기')+button('로그인으로 돌아가기','flowEmailLogin','ob-sub'))+entryNote()+'</form>';
+ if(authRoute==='recoverSent')h='<section class="ob-screen">'+obHead(0,true)+'<div class="ob-center">'+obSeed()+'<h1>메일을 확인해주세요</h1><p>메일에서 재설정 링크를 확인해주세요.</p>'+
+  (location.protocol==='file:'?'<form id="flowRecoveryLinkForm" class="ob-form is-inline"><p class="ob-fine">로컬 파일에서는 링크를 열기 전에 주소를 복사해 아래에 붙여넣어주세요.</p>'+obField('recoveryLink','재설정 메일의 링크','type="password" autocomplete="off" required')+'<div id="flowError" class="ob-error" role="alert"></div>'+obCta('재설정 계속하기','','data-variant="soft"')+'</form>':'')+
+  '</div>'+obFoot(obCta('로그인으로 돌아가기','flowEmailLogin')+button('새 메일 받기','flowRecover','ob-sub'))+'</section>';
+ if(authRoute==='resetPassword')h='<form id="flowResetPasswordForm" class="ob-screen" novalidate>'+obHead()+obTitle('NEW PASSWORD','새 비밀번호를<br>정해주세요.',esc(passwordRecoveryEmail))+
+  '<div class="ob-form">'+obPassword('newPassword','새 비밀번호','new-password','6자 이상')+obPassword('newPasswordConfirm','새 비밀번호 확인','new-password','한 번 더 입력해주세요')+'<div id="flowError" class="ob-error" role="alert"></div></div>'+
+  obFoot(obCta('비밀번호 변경')+button('새 메일 받기','flowRecover','ob-sub'))+'</form>';
+ if(authRoute==='profile'){const name=authSession.name||(state.profile.name==='나'?'':state.profile.name);h='<form id="flowProfileForm" class="ob-screen" novalidate>'+obHead(2)+obTitle('PROFILE','숲의 주인은<br>누구인가요?',esc(APP_BRAND.ko)+'에서 사용할 이름을 알려주세요.')+
+  '<div class="ob-form is-tight">'+obField('flowProfileName','이름 또는 별명','maxlength="30" autocomplete="nickname" value="'+esc(name)+'" placeholder="어떻게 불러드릴까요?" aria-describedby="flowProfileHint"','<small class="ob-counter" aria-hidden="true">'+[...name].length+'/30</small>')+'<p class="ob-hint" id="flowProfileHint">이름은 나중에도 바꿀 수 있어요.</p></div>'+
+  obFoot(obCta('다음'))+'</form>'}
+ // 11: how to begin and which field, on one screen.
+ if(authRoute==='start')h='<section class="ob-screen">'+obHead(3)+obTitle('FIRST PICK','어떤 작품부터<br>담아볼까요?','추천을 고르거나, 이미 관심 있는 작품을 직접 담아도 돼요.')+'<div class="ob-options">'+
+  [['book','책 추천받기','인기 책 '+INITIAL_TASTE_TARGET+'권을 살펴보며 취향을 찾아요.','chooseTasteType','data-type="book"'],['movie','영화 추천받기','인기 영화 '+INITIAL_TASTE_TARGET+'편을 살펴보며 취향을 찾아요.','chooseTasteType','data-type="movie"'],['plus','직접 스크랩하기','찾고, 공유하고, 사진으로 가져와요.','flowFirstScrap','']].map(([kind,title,desc,action,attrs])=>button('<span class="ob-option-icon is-'+kind+'">'+icon(kind)+'</span><span class="ob-option-copy"><b>'+title+'</b><small>'+desc+'</small></span>'+OB_SVG.chevron,action,'ob-option',attrs)).join('')+'</div></section>';
+ // MY > 취향 추가 picks a field first; the first-run flow chooses it on the start screen.
+ if(authRoute==='tasteType')h='<section class="ob-screen">'+(adding?addHead:obHead(3))+obTitle('','지금 마음이 가는<br>분야는 뭔가요?','선택한 분야의 작품을 보여드릴게요.')+'<div class="ob-options">'+
+  [['book','책','새로운 페이지를 넘기는 시간'],['movie','영화','또 다른 세계를 만나는 시간']].map(([type,label,desc])=>button('<span class="ob-option-icon is-'+type+'">'+icon(type)+'</span><span class="ob-option-copy"><b>'+label+'</b><small>'+desc+'</small></span>'+OB_SVG.chevron,'chooseTasteType','ob-option','data-type="'+type+'"')).join('')+'</div></section>';
+ if(authRoute==='taste')h='<section class="ob-screen ob-taste">'+(adding?addHead:'<div class="ob-head ob-taste-head"><span class="ob-taste-count" aria-label="첫 추천 작품 '+Math.min(tasteReviewed+1,INITIAL_TASTE_TARGET)+'번째, 전체 '+INITIAL_TASTE_TARGET+'개"><b>'+Math.min(tasteReviewed+1,INITIAL_TASTE_TARGET)+' / '+INITIAL_TASTE_TARGET+'</b><span aria-hidden="true">'+Array.from({length:INITIAL_TASTE_TARGET},(_,i)=>'<i class="'+(i<=tasteReviewed?'on':'')+'"></i>').join('')+'</span></span>'+button('그냥 시작하기','flowFinish','ob-link')+'</div>')+renderTastePage()+'</section>';
+ $('page').innerHTML=h;
+ if(authRoute==='intro')requestAnimationFrame(scrollPageTop);
+ if(authRoute==='intro')fitIntroStage();
+ if(authRoute==='signup')syncSignupReady();
+}
+function syncSignupReady(){
+ const f=$('flowSignupForm');if(!f)return;const submit=f.querySelector('[type=submit]');if(!submit||f.getAttribute('aria-busy'))return;
+ const email=$('flowEmail'),pw=$('flowPassword').value,confirm=$('flowPasswordConfirm').value;
+ submit.disabled=!(email.value.trim()&&email.validity.valid&&pw.length>=6&&confirm.length>=6&&consentDone());
+}
+function syncConsentBoxes(){
+ document.querySelectorAll('input[data-consent]').forEach(box=>{box.checked=box.dataset.consent==='all'?consentDone():!!consent[box.dataset.consent]});
+ const go=document.querySelector('.ob-sheet .ob-cta');if(go)go.disabled=!consentDone();
+ syncSignupReady();
+}
+document.addEventListener('change',e=>{
+ const key=e.target.dataset?.consent;if(!key)return;
+ if(key==='all')CONSENT_ITEMS.forEach(([k])=>{consent[k]=e.target.checked});else if(key in consent)consent[key]=e.target.checked;
+ syncConsentBoxes();
+});
+document.addEventListener('input',e=>{
+ if(e.target.closest?.('.ob-input')&&e.target.getAttribute('aria-invalid'))e.target.removeAttribute('aria-invalid');
+ if(['flowEmail','flowPassword','flowPasswordConfirm'].includes(e.target.id))syncSignupReady();
+ if(e.target.id==='flowProfileName'){const n=e.target.closest('.ob-input')?.querySelector('.ob-counter');if(n)n.textContent=[...e.target.value].length+'/30'}
+ if(authRoute==='login'&&loginError&&['flowEmail','flowPassword'].includes(e.target.id)){loginError='';$('flowError').textContent='';$('flowPassword').removeAttribute('aria-invalid')}
+});
+// Fixed bottom actions ride above the on-screen keyboard.
+function syncKeyboardInset(){const v=window.visualViewport;if(!v)return;document.documentElement.style.setProperty('--ob-kb',Math.max(0,Math.round(innerHeight-v.height-v.offsetTop))+'px')}
+window.visualViewport?.addEventListener('resize',syncKeyboardInset);window.visualViewport?.addEventListener('scroll',syncKeyboardInset);
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-action]');if(!b||b.disabled)return;
  if(b.dataset.action==='introStart'){introductionStep=0;introFirstRun=false;flowTo('intro')}
- if(b.dataset.action==='introNext'){if(introductionStep<2){introductionStep++;flowTo('intro')}else{markIntroSeen();flowTo(introFirstRun?'welcome':'signupOptions')}}
- if(b.dataset.action==='introSkip'){markIntroSeen();flowTo(introFirstRun?'welcome':'signupOptions')}
- if(b.dataset.action==='flowEmailSignup'){flowCodeSent=false;flowTo('signup')}
+ if(b.dataset.action==='introPrev'&&introductionStep>0){introductionStep--;flowTo('intro')}
+ if(b.dataset.action==='introNext'){if(introductionStep<2){introductionStep++;flowTo('intro')}else{markIntroSeen();flowTo('entry')}}
+ if(b.dataset.action==='introSkip'){markIntroSeen();flowTo('entry')}
+ if(b.dataset.action==='flowEmailSignup'){flowCodeSent=false;consent={age14:false,terms:false,privacy:false};flowTo('signup')}
+ if(b.dataset.action==='togglePassword'){
+  const input=b.closest('.ob-input')?.querySelector('input');if(!input)return;
+  const show=input.type==='password';input.type=show?'text':'password';
+  b.innerHTML=show?OB_SVG.eyeOff:OB_SVG.eye;b.setAttribute('aria-label',show?'비밀번호 숨기기':'비밀번호 보기');b.setAttribute('aria-pressed',String(show));
+ }
 });
 
 function signedIn(method){authSession.signedIn=true;authSession.method=method;saveSession();flowTo(authSession.finished?'app':'profile')}
@@ -997,26 +1091,26 @@ function renderTastePage(){
   c=tastePool[tasteIndex];
  }
  window.tasteCandidate=c||null;
- if(tasteLoading&&!c)return '<div class="entry-hero" role="status"><h1>새로운 작품을 찾고 있어요</h1><p class="creator">다음 작품을 곧 보여드릴게요.</p></div>';
+ if(tasteLoading&&!c)return '<div class="ob-title is-taste" role="status"><h1>새로운 작품을 찾고 있어요</h1><p>다음 작품을 곧 보여드릴게요.</p></div>';
  if(!c){
   const title=tasteNotice?.includes('오류')?'작품을 불러오지 못했어요':'새로운 작품을 찾지 못했어요';
   const description=esc(tasteNotice||'이미 본 작품은 제외했어요. 다른 유형을 둘러보거나 잠시 후 다시 찾아주세요.');
-  return '<div class="entry-hero" role="status"><h1>'+title+'</h1><p class="creator">'+description+'</p></div>'+button('다시 찾아보기','flowTasteMore','secondary')+button(isAdd?'닫기':'그냥 시작하기',isAdd?'tasteClose':'flowFinish','textbtn');
+  return '<div class="ob-title is-taste" role="status"><h1>'+title+'</h1><p>'+description+'</p></div>'+obFoot(obCta('다시 찾아보기','flowTasteMore')+button(isAdd?'닫기':'그냥 시작하기',isAdd?'tasteClose':'flowFinish','ob-sub'));
  }
  window.tasteCandidate=c;
  tasteActiveCandidate=c;
  rememberTasteCandidate(c);
  tasteKeys(c).forEach(key=>tasteShownKeys.add(key));
  if(c.type==='book'&&!c.contents&&!c._introLoaded&&!c._introLoading)setTimeout(()=>ensureTasteIntro(c),0);
- const initialProgress=Math.min(tasteReviewed+1,INITIAL_TASTE_TARGET);
- const heading=isAdd
-  ?'<div class="taste-heading"><h1>관심 있는 작품을 골라주세요</h1></div>'
-  :'<div class="taste-heading"><h1>관심 있는 작품을 골라주세요</h1><p class="creator">작품 5개를 살펴보세요.</p><div class="taste-progress" aria-label="첫 추천 작품 '+initialProgress+'번째, 전체 '+INITIAL_TASTE_TARGET+'개"><span>'+initialProgress+' / '+INITIAL_TASTE_TARGET+'</span><span class="taste-dots" aria-hidden="true">'+Array.from({length:INITIAL_TASTE_TARGET},(_,i)=>'<i class="'+(i<=tasteReviewed?'on':'')+'"></i>').join('')+'</span></div></div>';
- return (tasteNotice?'<p class="note" role="status">'+esc(tasteNotice)+'</p>':'')+heading+'<div class="onboard-card"><div class="taste-cover-stage">'+cover(c)+'</div><small>'+typeName[c.type]+'</small><h2 title="'+esc(c.title)+'">'+esc(c.title)+'</h2><p class="creator" title="'+esc(c.creator)+'">'+esc(c.creator)+'</p>'+button('상세보기','tasteDetail','textbtn taste-detail-link')+'</div><div class="taste-actions">'+button(({book:'읽고 싶어요',album:'듣고 싶어요',movie:'보고 싶어요'})[c.type]||'경험하고 싶어요','flowInterested')+button('이미 경험했어요','flowExperienced','secondary')+button('넘기기','flowSkip','textbtn')+'</div>'
+ // 12: one white card per work; the count and "그냥 시작하기" live in the screen header.
+ const kind=({book:'BOOK',movie:'MOVIE',album:'ALBUM'})[c.type]||String(typeName[c.type]||'').toUpperCase();
+ return (tasteNotice?'<p class="ob-notice" role="status">'+esc(tasteNotice)+'</p>':'')+'<div class="ob-title is-taste"><h1>관심 있는 작품을<br>골라주세요</h1></div>'+
+  '<div class="ob-work" data-type="'+esc(c.type)+'"><div class="ob-work-cover">'+cover(c)+'</div><span class="ob-type">'+kind+'</span><h2 title="'+esc(c.title)+'">'+esc(c.title)+'</h2><p title="'+esc(c.creator)+'">'+esc(c.creator)+'</p>'+button('상세보기 ›','tasteDetail','ob-link ob-work-detail')+'</div>'+
+  obFoot(obCta(({book:'읽고 싶어요',album:'듣고 싶어요',movie:'보고 싶어요'})[c.type]||'경험하고 싶어요','flowInterested')+button('이미 경험했어요','flowExperienced','ob-cta is-secondary')+button('넘기기','flowSkip','ob-sub'),'is-taste');
 }
 
 function response(type){const c=window.tasteCandidate;state.profile.responses??={};state.profile.responses[c.type+':'+c.title]=type;return persist()}
-function nextTaste(){if(!tastePool[tasteIndex])return;tasteIndex++;tasteReviewed++;if(tasteMode==='initial'&&tasteReviewed>=INITIAL_TASTE_TARGET){flowTo('ready');return}flowTo('taste');if(authRoute==='taste'&&tastePool.length-tasteIndex<=8)loadTasteCandidates()}
+function nextTaste(){if(!tastePool[tasteIndex])return;tasteIndex++;tasteReviewed++;if(tasteMode==='initial'&&tasteReviewed>=INITIAL_TASTE_TARGET){finishEntry();return}flowTo('taste');if(authRoute==='taste'&&tastePool.length-tasteIndex<=8)loadTasteCandidates()}
 function finishEntry(){state.onboarded=true;if(!persist())return false;authSession.finished=true;saveSession();view='today';flowTo('app');return true}
 document.addEventListener('click',async e=>{
  const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
@@ -1029,11 +1123,9 @@ document.addEventListener('click',async e=>{
   }
   loadTasteCandidates();
  }
- if(a==='flowOptionalTaste'){tasteMode='initial';tastePreferredType='';flowTo('tasteType');}
- if(a==='chooseTasteType'){const chosen=b.dataset.type;if(['book','movie'].includes(chosen))startTaste(tasteMode==='add'?'add':'initial',chosen);}
+ if(a==='chooseTasteType'){const chosen=b.dataset.type;if(['book','movie'].includes(chosen))startTaste(authRoute!=='start'&&tasteMode==='add'?'add':'initial',chosen);}
  if(a==='flowFirstScrap'){if(finishEntry())addMenu()}
- if(a==='flowWelcome')flowTo('welcome');
- if(a==='flowBack')flowTo(authRoute==='start'?'profile':authRoute==='recover'?'login':authRoute==='signup'?'signupOptions':'welcome');
+ if(a==='flowBack')flowTo(({start:'profile',tasteType:'start',recover:'login',recoverSent:'recover',resetPassword:'login'})[authRoute]||'entry');
  if(a==='flowEmailLogin'){passwordRecoveryToken='';flowTo('login');}
  if(a==='retryCloudSync'){void cloudUpsertState();return}
  if(a==='backupUnsaved'){const snapshot=JSON.parse(JSON.stringify(unsavedState||state));snapshot._unsavedForm=[...document.querySelectorAll('#overlay input:not([type=password]):not([type=file]),#overlay textarea,#overlay select')].map(el=>({id:el.id,value:el.value,checked:el.checked}));downloadStateSnapshot(snapshot,'unsaved');return}
@@ -1057,19 +1149,18 @@ document.addEventListener('click',async e=>{
  if(a==='downloadArchive'){const key=b.dataset.key;if(!key?.startsWith(accountDataKey(dataOwner)+':archive:'))return;try{const archive=JSON.parse(localStorage.getItem(key));downloadStateSnapshot(b.dataset.side==='remote'?archive.conflict.state:archive.state,'archived')}catch{toast('보관 기록을 읽지 못했어요.')}return}
 
 
- if(a==='flowSignup'){flowCodeSent=false;flowTo('signupOptions')}
+ if(a==='flowSignup'){flowCodeSent=false;flowTo('entry')}
  if(a==='cloudSetup'){cloudSetupModal()}
  if(a==='flowRecover'){passwordRecoveryToken='';passwordRecoveryError='';flowTo('recover');}
  if(['flowKakao','flowApple','flowGoogle'].includes(a)){toast('소셜 로그인은 다음 단계에서 연결할게요. 지금은 이메일 로그인을 사용해주세요.')}
- if(a==='flowSocialConfirm')flowTo('welcome');
+ if(a==='flowSocialConfirm'&&consentDone())flowTo('start');
  if(a==='flowTaste')startTaste('initial',tastePreferredType||'book');
  if(a==='tasteClose'){closeAdditionalTaste();return}
- if(a==='flowReady')flowTo('ready');
  if(a==='flowFinish')finishEntry();
  if(a==='flowInterested'){Model.add(state,window.tasteCandidate);tasteSeen++;if(response('interested'))nextTaste()}
  if(a==='flowSkip'){if(response('skipped'))nextTaste()}
  if(a==='flowExperienced'){const c=Model.add(state,window.tasteCandidate);if(!c.completed){c.completed='unknown';c.completedAt=Date.now()}if(response('experienced'))nextTaste()}
- if(a==='flowLogout'){confirmBox('로그아웃할까요?','기록과 미전송 변경은 이 기기에 보관되며, 같은 계정으로 로그인하면 이어서 전송합니다.',async()=>{await cloudLogout();authSession={signedIn:false,finished:false};saveSession();state=Model.empty();/* Account snapshots, including pending uploads, survive logout. */authRoute='welcome';view='today';render()},'로그아웃')}
+ if(a==='flowLogout'){confirmBox('로그아웃할까요?','기록과 미전송 변경은 이 기기에 보관되며, 같은 계정으로 로그인하면 이어서 전송합니다.',async()=>{await cloudLogout();authSession={signedIn:false,finished:false};saveSession();state=Model.empty();/* Account snapshots, including pending uploads, survive logout. */authRoute='entry';view='today';render()},'로그아웃')}
  if(a==='deleteAccount'){
   if(!cloudSession?.access_token){toast('다시 로그인한 뒤 회원탈퇴를 진행해주세요.');return}
   showModal(
@@ -1109,6 +1200,11 @@ document.addEventListener('submit',async e=>{
   if(!/^sb_publishable_/i.test(key) && !/^eyJ/i.test(key)){cloudSetupModal('브라우저용 Publishable key를 확인해주세요.');return}
   saveCloudPublicKey(key);closeModal();toast('Supabase 사용자 데이터 연결을 저장했어요.');render();return;
  }
+ if(['flowLoginForm','flowSignupForm','flowRecoverForm','flowResetPasswordForm','flowRecoveryLinkForm'].includes(f.id)&&!f.checkValidity()){
+  e.preventDefault();const bad=f.querySelector('input:invalid'),err=$('flowError');
+  if(err)err.textContent=bad?.type==='email'?'이메일 주소를 확인해주세요.':bad?.minLength>0&&bad.value.length<bad.minLength?'비밀번호를 '+bad.minLength+'자 이상 입력해주세요.':bad?.validationMessage||'입력한 내용을 확인해주세요.';
+  if(bad){bad.setAttribute('aria-invalid','true');bad.focus()}return;
+ }
  if(f.id==='flowLoginForm'||f.id==='flowSignupForm'){
   e.preventDefault();
   if(!cloudPublicKey()){cloudSetupModal('로그인 전에 Supabase Publishable key를 한 번 연결해주세요.');return}
@@ -1117,7 +1213,7 @@ document.addEventListener('submit',async e=>{
   try{
    if(f.id==='flowSignupForm'){
     if($('flowPasswordConfirm').value!==password)throw Error('비밀번호가 일치하지 않아요.');
-    if(!$('flowTerms').checked)throw Error('이용 안내에 동의해주세요.');
+    if(!consentDone())throw Error('필수 항목에 모두 동의해주세요.');
     const data=await cloudSignup(email,password);
     authSession.name='';
     try{localStorage.setItem(CLOUD_LAST_EMAIL_STORAGE,email)}catch{}
@@ -1145,8 +1241,13 @@ document.addEventListener('submit',async e=>{
     saveSession();
     flowTo(authSession.finished?'app':'profile');
    }
-  }catch(err){if(f.isConnected&&$('flowError'))$('flowError').textContent=err.message||'로그인 정보를 확인해주세요.'}
-  finally{if(f.isConnected){submit.disabled=false;submit.textContent=previousLabel;f.removeAttribute('aria-busy')}}
+  }catch(err){
+   const login=f.id==='flowLoginForm',msg=String(err.message||'');
+   const text=login&&err.status===400&&/invalid/i.test(msg)?'이메일 또는 비밀번호가 맞지 않아요.':login&&/not confirmed/i.test(msg)?'메일 인증을 마친 뒤 로그인해주세요.':msg||'로그인 정보를 확인해주세요.';
+   if(login)loginError=text;
+   if(f.isConnected&&$('flowError')){$('flowError').textContent=text;if(login&&$('flowPassword'))$('flowPassword').setAttribute('aria-invalid','true')}
+  }
+  finally{if(f.isConnected){submit.disabled=false;submit.textContent=previousLabel;f.removeAttribute('aria-busy');syncSignupReady()}}
   return;
  }
  if(f.id==='flowProfileForm'){e.preventDefault();const name=$('flowProfileName').value.trim()||'나';authSession.name=name;state.profile.name=name;if(!persist())return;saveSession();flowTo('start')}
@@ -1162,6 +1263,6 @@ document.addEventListener('submit',async e=>{
 });
 document.addEventListener('input',e=>{if(e.target.id==='flowProfileName')e.target.setCustomValidity('')});
 // CLOUD_SESSION_STORAGE alone drives cross-tab account changes.
-authRoute='welcome';
+authRoute='entry';
 render();
 cloudBootstrap().then(()=>render()).catch(()=>{cloudSyncStatus='error';showStorageStatus()});
