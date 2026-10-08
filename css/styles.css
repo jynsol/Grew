@@ -4188,3 +4188,7 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 @media (max-width:359px){.forest-tools-row{gap:5px;padding:0 12px}.forest-tools-row .forest-tool svg{display:none}.forest-tools-row .forest-tool{padding:0 11px}}
 /* export: secondary action, grey like "+ 스크랩" on the other tabs */
 .forest-top .forest-share{background:var(--fill)!important;color:var(--text-1)!important;box-shadow:none!important;border:0!important}
+/* same size and line as the "+ 스크랩" button on the other tabs (36px, centred on the title) */
+.forest-top .forest-share{width:36px;height:36px;flex:none;align-self:center}
+.forest-top .forest-share svg{width:18px;height:18px}
+.forest-month .forest-top{min-height:44px;align-items:center}
