@@ -896,36 +896,64 @@ function forestOverlapEdges(points,cfg,theme){
 }
 // Drop-in ground artwork: append defs inside the parent SVG's <defs>, then
 // body before the forest's depth-sorted scene. Tree projection stays untouched.
-function meadowGroundArtwork(cfg,cx=360,cy=286,floor='meadow'){
- const lush=floor==='meadow',rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.min(43,26+rx*.048),q=.024;
- const p=(x,y,dy=0)=>(cx+x*rx).toFixed(1)+' '+(cy+y*ry+dy).toFixed(1);
- const outline=(dy=0)=>`M${p(-q,-1+q,dy)}Q${p(0,-1,dy)} ${p(q,-1+q,dy)}L${p(1-q,-q,dy)}Q${p(1,0,dy)} ${p(1-q,q,dy)}L${p(q,1-q,dy)}Q${p(0,1,dy)} ${p(-q,1-q,dy)}L${p(-1+q,q,dy)}Q${p(-1,0,dy)} ${p(-1+q,-q,dy)}Z`;
- const id='terrain-'+floor+'-'+[rx,ry,cx,cy].map(Math.round).join('-'),top=outline();
- const leftFace=`M${p(-1,0)}L${p(0,1)}L${p(0,1,depth)}L${p(-1,0,depth)}Z`,rightFace=`M${p(0,1)}L${p(1,0)}L${p(1,0,depth)}L${p(0,1,depth)}Z`;
- const greens=lush?['#EBE6BE','#D8DEA9','#BAC99A']:['#DFE7C5','#CCDAB1','#B9CBA0'];
- const defs=`<linearGradient id="${id}-top" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="${greens[0]}"/><stop offset=".6" stop-color="${greens[1]}"/><stop offset="1" stop-color="${greens[2]}"/></linearGradient><linearGradient id="${id}-soil" x1="0" y1="0" x2="1" y2=".4"><stop stop-color="${lush?'#CDC7A1':'#AB8C66'}"/><stop offset=".5" stop-color="${lush?'#B5B18C':'#967A56'}"/><stop offset="1" stop-color="${lush?'#9DA584':'#826C4E'}"/></linearGradient><clipPath id="${id}-topclip"><path d="${top}"/></clipPath><clipPath id="${id}-sideclip"><path d="${leftFace+rightFace}"/></clipPath>`;
- let edge='',stones='',grass='',tiles='',flowers='',moss='';
- for(const side of [-1,1])for(let i=0;i<18;i++){
-  const t=.022+i*.055,x=cx+side*rx*(1-t),y=cy+ry*t,w=rx*.036,h=8+(i%3)*2;
-  const ay=y+side*w*ry/rx,by=y-side*w*ry/rx;
-  const fringe=lush?`M${(x-w).toFixed(1)} ${(ay-2).toFixed(1)}L${(x+w).toFixed(1)} ${(by-2).toFixed(1)}L${(x+w).toFixed(1)} ${(by+7).toFixed(1)}C${(x+w*.5).toFixed(1)} ${(by+17).toFixed(1)} ${(x-w*.4).toFixed(1)} ${(ay+20).toFixed(1)} ${(x-w).toFixed(1)} ${(ay+8).toFixed(1)}Z`:`M${(x-w).toFixed(1)} ${(ay-2).toFixed(1)}Q${(x-w*.38).toFixed(1)} ${(y+h+2).toFixed(1)} ${x.toFixed(1)} ${(y+h).toFixed(1)}Q${(x+w*.3).toFixed(1)} ${(y+h-3).toFixed(1)} ${(x+w).toFixed(1)} ${by.toFixed(1)}L${(x+w).toFixed(1)} ${(by-10).toFixed(1)}L${(x-w).toFixed(1)} ${(ay-10).toFixed(1)}Z`;
-  edge+=`<path d="${fringe}" fill="${lush?(side===-1?'#81A980':'#749B79'):(side===-1?'#A2BA82':'#8FA870')}"/>`;
-  if(!lush&&i%3===0)stones+=`<ellipse cx="${x.toFixed(1)}" cy="${(y+depth*.67).toFixed(1)}" rx="4" ry="3" fill="#C7AA7C" opacity=".62"/>`;
-  if(lush&&i%4===1){const fy=y+7;flowers+=`<g transform="translate(${x.toFixed(1)} ${fy.toFixed(1)})"><ellipse cy="-3" rx="2.5" ry="3.5" fill="#F3EFCE"/><ellipse cx="-3" rx="3.5" ry="2.5" fill="#F9F3DE"/><ellipse cx="3" rx="3.5" ry="2.5" fill="#F9F3DE"/><ellipse cy="3" rx="2.5" ry="3.5" fill="#EDEACB"/><circle r="1.9" fill="#DCC17F"/></g>`}
- }
- const count=lush?46:28;for(let i=0;i<count;i++){
-  const a=((i*37)%101)/100*1.68-.84,b=((i*61+19)%103)/102*1.66-.83;if(Math.abs(a)+Math.abs(b)>.92)continue;
-  const x=cx+a*rx,y=cy+b*ry,s=3.3+(i%3)*.6;
-  grass+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)}q-5 -1 -6 -${s.toFixed(1)}q4 0 6 ${s.toFixed(1)}q-1 -5 2 -${(s+2).toFixed(1)}q1 4 -2 ${(s+2).toFixed(1)}q4 -4 7 -3q-1 3 -7 3Z" fill="${i%2?'#89AA6E':'#9CBA7B'}" opacity=".58"/>`;
- }
- const grid=5;for(let u=0;u<grid;u++)for(let v=0;v<grid;v++)if(!lush&&(u+v)%2===0){const xy=(a,b)=>p(a-b,a+b-1);tiles+=`<path d="M${xy(u/grid,v/grid)}L${xy((u+1)/grid,v/grid)}L${xy((u+1)/grid,(v+1)/grid)}L${xy(u/grid,(v+1)/grid)}Z" fill="#EAF0D5" opacity=".12"/>`}
- if(lush)for(let i=0;i<9;i++){const x=cx+((i*31)%83/83-.5)*rx*1.5,y=cy+((i*47)%89/89-.5)*ry*1.45;moss+=`<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${(rx*.17).toFixed(1)}" ry="${(ry*.12).toFixed(1)}" fill="${i%2?'#D9E8C6':'#A3C299'}" opacity=".25"/>`}
- const body=`<g data-forest-ground="terrain" data-floor="${floor}" pointer-events="none"><path d="${leftFace+rightFace}" fill="url(#${id}-soil)"/><path d="${rightFace}" fill="#75684A" opacity=".14"/><g clip-path="url(#${id}-sideclip)">${stones}${edge}${flowers}</g><path data-ground-surface="true" d="${top}" fill="url(#${id}-top)"/><g clip-path="url(#${id}-topclip)">${tiles}${moss}<ellipse cx="${cx-rx*.25}" cy="${cy-ry*.3}" rx="${rx*.68}" ry="${ry*.46}" fill="#E5EDD1" opacity=".15"/>${grass}</g></g>`;
- return {defs,body};
-}
 
 // Basic floor (redesign 11a): a flat sticker block — green top, soil sides, grass tufts,
 // a white cut edge and a soft shadow, matching the forest tab's design.
+// Low-poly ground shared by the month board, the year board and the share image.
+// A K×K lattice whose inner points wobble and whose edge points bump in and out, cut into
+// triangles of slightly different greens. 'meadow' (꽃이끼 정원) is the same shape in pale moss
+// with white flowers along the lip.
+const POLY_FLOORS={
+ basic:{greens:['#8CBB72','#86B26F','#92C178','#80AC69','#8AB871','#95C27B'],soil:['#A9825E','#8B6A4C'],lip:['#6F9B58','#62904F'],speck:['#8E6B4C','#73563D'],dot:'#A9D190'},
+ meadow:{greens:['#DCE3AE','#D2DCA2','#E3E7BA','#C9D69B','#D7DFA8','#E6E3B6'],soil:['#BFA27A','#A58A66'],lip:['#86AD82','#779E7A'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'}
+};
+function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
+ const pal=POLY_FLOORS[floor]||POLY_FLOORS.basic,rnd=k=>(hash(seed+'|'+k)%100000)/100000,cw=rx/K;
+ const ideal=(i,j)=>[cx+(i-j)/K*rx,cy-ry+(i+j)/K*ry];
+ const V=[];for(let j=0;j<=K;j++){V[j]=[];for(let i=0;i<=K;i++){let [x,y]=ideal(i,j);const edge=i===0||j===0||i===K||j===K,corner=(i===0||i===K)&&(j===0||j===K);
+  if(corner){x+=(rnd('cx'+i+j)-.5)*cw*.12;y+=(rnd('cy'+i+j)-.5)*cw*.08}
+  else if(edge){const b=(rnd('b'+i+'.'+j)-.35)*cw*.3,nx=(i===0?-1:i===K?1:0)-(j===0?-1:j===K?1:0),ny=(i===0||j===0?-1:1);x+=nx*b;y+=ny*b*.5}
+  else{x+=(rnd('x'+i+'.'+j)-.5)*cw*.34;y+=(rnd('y'+i+'.'+j)-.5)*cw*.2}
+  V[j][i]=[x,y]}}
+ const facets=[],pick=k=>pal.greens[Math.floor(rnd(k)*pal.greens.length)];
+ for(let j=0;j<K;j++)for(let i=0;i<K;i++){const a=V[j][i],b=V[j][i+1],c=V[j+1][i+1],d=V[j+1][i],flip=rnd('f'+i+'.'+j)>.5;
+  facets.push({pts:flip?[a,b,c]:[a,b,d],fill:pick('g1'+i+'.'+j)},{pts:flip?[a,c,d]:[b,c,d],fill:pick('g2'+i+'.'+j)})}
+ const left=V[K],right=V.map(r=>r[K]).reverse(),k=cw/34,lipH=(n,side)=>(n%2?3:5.5+rnd(side+'lp'+n)*2.5)*k*1.4;
+ const drop=(p,key)=>[p[0],p[1]+depth+(rnd('d'+key)-.5)*depth*.25];
+ const sides=[],lips=[],extras=[];
+ [[left,0,'l'],[right,1,'r']].forEach(([e,s,key])=>{for(let n=0;n<K;n++){const p1=e[n],p2=e[n+1];sides.push({pts:[p1,p2,drop(p2,key+(n+1)),drop(p1,key+n)],fill:pal.soil[s]});
+  const m=[(p1[0]+p2[0])/2,(p1[1]+p2[1])/2];lips.push({pts:[p1,m,p2,[p2[0],p2[1]+lipH(2*n+2,key)],[m[0],m[1]+lipH(2*n+1,key)],[p1[0],p1[1]+lipH(2*n,key)]],fill:pal.lip[s]})}});
+ const specks=[];for(let n=0;n<Math.round(K*4);n++){const lft=n%2===0,e=lft?left:right,t=rnd('s'+n)*K,q=Math.min(K-1,Math.floor(t)),f=t-q,p1=e[q],p2=e[q+1];
+  specks.push({x:p1[0]+(p2[0]-p1[0])*f,y:p1[1]+(p2[1]-p1[1])*f+depth*(.35+rnd('sy'+n)*.5),r:(1+rnd('sr'+n))*k*1.3,fill:pal.speck[lft?0:1]})}
+ if(floor==='meadow'){
+  // white clover-like flowers along the lip and scattered on the moss
+  const flower=(x,y,z)=>{[[0,-1],[1,0],[0,1],[-1,0]].forEach(([dx,dy])=>extras.push({x:x+dx*z*.9,y:y+dy*z*.55,rx:z*.75,ry:z*.5,fill:'#FBF7E4'}));extras.push({x,y,rx:z*.38,ry:z*.28,fill:'#F2C94C'})};
+  [left,right].forEach((e,s)=>{for(let n=0;n<=K*2;n++){if(rnd('fl'+s+n)<.35)continue;const t=n/2,q=Math.min(K-1,Math.floor(t)),f=t-q,p1=e[q],p2=e[q+1];flower(p1[0]+(p2[0]-p1[0])*f,p1[1]+(p2[1]-p1[1])*f+4*k,3.2*k)}});
+  for(let n=0;n<K*3;n++){const a=rnd('ma'+n)*1.7-.85,b=rnd('mb'+n)*1.7-.85;if(Math.abs(a)+Math.abs(b)>.8)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2;
+   if(n%3===0)extras.push({x,y,rx:cw*.55,ry:cw*.3,fill:'#B9CC93',opacity:.35});else flower(x,y,2.4*k)}
+ }
+ // silhouette for the sticker edge: back edges, then the dropped front edges
+ const backL=V.map(r=>r[0]);
+ const sil=[...V[0],...right.map((p,n)=>drop(p,'r'+n)).reverse(),...left.map((p,n)=>drop(p,'l'+n)).reverse(),...backL.slice().reverse()];
+ return {facets,sides,lips,specks,extras,silhouette:sil,dot:pal.dot,V,K};
+}
+function polyGroundSVG(g,k=1){
+ const P=pts=>pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+ return g.sides.map(f=>'<polygon points="'+P(f.pts)+'" fill="'+f.fill+'"/>').join('')+g.specks.map(d=>'<circle cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" r="'+d.r.toFixed(1)+'" fill="'+d.fill+'" opacity=".85"/>').join('')+
+  g.lips.map(f=>'<polygon points="'+P(f.pts)+'" fill="'+f.fill+'"/>').join('')+
+  g.facets.map(f=>'<polygon points="'+P(f.pts)+'" fill="'+f.fill+'" stroke="'+f.fill+'" stroke-width="'+(.7*k).toFixed(2)+'" stroke-linejoin="round"/>').join('')+
+  g.extras.map(e=>'<ellipse cx="'+e.x.toFixed(1)+'" cy="'+e.y.toFixed(1)+'" rx="'+e.rx.toFixed(1)+'" ry="'+e.ry.toFixed(1)+'" fill="'+e.fill+'"'+(e.opacity?' opacity="'+e.opacity+'"':'')+'/>').join('');
+}
+function polyGroundArtwork(cfg,cx=360,cy=286,floor='basic'){
+ const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.max(18,rx*.2),k=rx/189,K=Math.max(3,Math.min(6,cfg.cols+1));
+ const g=polyGround(cx,cy,rx,ry,depth,K,'month'+cfg.cols,floor),f=n=>n.toFixed(1),P=pts=>pts.map(p=>f(p[0])+','+f(p[1])).join(' ');
+ let tufts='';for(let n=0;n<Math.round(rx/14);n++){const a=(hash('tuft|a'+n)%1000)/500-1,b=(hash('tuft|b'+n)%1000)/500-1;if(Math.abs(a)+Math.abs(b)>.85)continue;const x=cx+(a-b)*rx/2,y=cy+(a+b)*ry/2,w=4*k;
+  tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="${floor==='meadow'?'#93AE7C':'#6E9C58'}" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
+ const id='poly-ground-'+floor+'-'+Math.round(rx);
+ const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="${f(9*k)}"/></filter>`;
+ const body=`<g data-forest-ground="terrain" data-floor="${floor}" pointer-events="none"><polygon points="${P(g.silhouette)}" transform="translate(0 ${f(12*k)})" fill="rgba(30,42,34,.24)" filter="url(#${id}-shadow)"/><polygon points="${P(g.silhouette)}" fill="#fff" stroke="#fff" stroke-width="${f(7*k)}" stroke-linejoin="round"/>${polyGroundSVG(g,k)}<polygon data-ground-surface="true" points="${P([...g.V[0],...g.V.map(r=>r[g.K]).slice(1),...g.V[g.K].slice().reverse().slice(1),...g.V.map(r=>r[0]).reverse().slice(1)])}" fill="none"/>${tufts}</g>`;
+ return {defs,body};
+}
 function stickerGroundArtwork(cfg,cx=360,cy=286){
  const rx=cfg.boardW/2+44,ry=cfg.boardH/2+34,depth=Math.max(18,rx*.2),k=rx/189,f=n=>n.toFixed(1),unit=key=>(hash('ground|'+key)%10000)/10000;
  const top=`M${f(cx)} ${f(cy-ry)}L${f(cx+rx)} ${f(cy)}L${f(cx)} ${f(cy+ry)}L${f(cx-rx)} ${f(cy)}Z`;
@@ -944,7 +972,7 @@ function stickerGroundArtwork(cfg,cx=360,cy=286){
  return {defs,body};
 }
 function forestGroundArtwork(cfg, theme, cx = 360, cy = 286, floor = 'basic') {
-  if(theme!=='snow')return floor==='meadow'?meadowGroundArtwork(cfg,cx,cy,floor):stickerGroundArtwork(cfg,cx,cy);
+  if(theme!=='snow')return polyGroundArtwork(cfg,cx,cy,floor==='meadow'?'meadow':'basic');
   const snow = theme === 'snow';
   const rx = cfg.boardW / 2 + 44;
   const ry = cfg.boardH / 2 + 34;

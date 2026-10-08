@@ -687,24 +687,9 @@ function yearForestItems(y,type){
  return items.sort((a,b)=>key(a).localeCompare(key(b)));
 }
 function yearBoardGeometry(y,items){
- const W=390,H=250,n=items.length,N=Math.max(2,Math.ceil(Math.sqrt(n))),K=Math.min(N,6);
+ const W=390,H=250,n=items.length,N=Math.max(2,Math.ceil(Math.sqrt(n)));
  const BW=Math.min(170,95+N*9),y0=46+(170-BW)/2,cx=W/2,rnd=k=>(hash(y+'|board|'+k)%100000)/100000;
- const HW=BW/K,HH=HW/2,ideal=(i,j)=>[cx+(i-j)*HW,y0+(i+j)*HH];
- // lattice with jitter: interior points wobble, edge points bump in or out
- const V=[];for(let j=0;j<=K;j++){V[j]=[];for(let i=0;i<=K;i++){let [x,yy]=ideal(i,j);const edge=i===0||j===0||i===K||j===K,corner=(i===0||i===K)&&(j===0||j===K);
-  if(corner){x+=(rnd('cx'+i+j)-.5)*4;yy+=(rnd('cy'+i+j)-.5)*3}
-  else if(edge){const b=(rnd('b'+i+'.'+j)-.35)*HW*.32,nx=(i===0?-1:i===K?1:0)-(j===0?-1:j===K?1:0),ny=(i===0||j===0?-1:1);x+=nx*b;yy+=ny*b*.5}
-  else{x+=(rnd('x'+i+'.'+j)-.5)*HW*.34;yy+=(rnd('y'+i+'.'+j)-.5)*HH*.4}
-  V[j][i]=[x,yy]}}
- const greens=['#8CBB72','#86B26F','#92C178','#80AC69','#8AB871','#95C27B'],facets=[];
- for(let j=0;j<K;j++)for(let i=0;i<K;i++){const a=V[j][i],b=V[j][i+1],c=V[j+1][i+1],d=V[j+1][i],flip=rnd('f'+i+'.'+j)>.5;
-  const t1=flip?[a,b,c]:[a,b,d],t2=flip?[a,c,d]:[b,c,d];
-  facets.push({pts:t1,fill:greens[Math.floor(rnd('g1'+i+'.'+j)*greens.length)]},{pts:t2,fill:greens[Math.floor(rnd('g2'+i+'.'+j)*greens.length)]})}
- // front sides: left (j=K, i 0..K) and right (i=K, j K..0)
- const D=16,sides=[],left=V[K],right=V.map(r=>r[K]).reverse(),drop=(p,k)=>[p[0],p[1]+D+(rnd('d'+k)-.5)*5];
- for(let k=0;k<K;k++){const p1=left[k],p2=left[k+1];sides.push({pts:[p1,p2,drop(p2,'l'+(k+1)),drop(p1,'l'+k)],fill:'#A9825E'},{pts:[p1,p2,[p2[0],p2[1]+3.5],[p1[0],p1[1]+3.5]],fill:'#6F9B58'})}
- for(let k=0;k<K;k++){const p1=right[k],p2=right[k+1];sides.push({pts:[p1,p2,drop(p2,'r'+(k+1)),drop(p1,'r'+k)],fill:'#8B6A4C'},{pts:[p1,p2,[p2[0],p2[1]+3.5],[p1[0],p1[1]+3.5]],fill:'#62904F'})}
- const specks=[];for(let k=0;k<14;k++){const lft=k%2===0,e=lft?left:right,t=rnd('s'+k)*K,q=Math.min(K-1,Math.floor(t)),f=t-q,p1=e[q],p2=e[q+1];specks.push({x:p1[0]+(p2[0]-p1[0])*f,y:p1[1]+(p2[1]-p1[1])*f+6+rnd('sy'+k)*8,r:.9+rnd('sr'+k)*.9,fill:lft?'#8E6B4C':'#73563D'})}
+ const ground=polyGround(cx,y0+BW/2,BW,BW/2,16,Math.max(3,Math.min(6,N+1)),'year'+y+N,bmFloorId()==='meadow'?'meadow':'basic');
  // cells back to front, centre-out along each diagonal
  const cellW=BW/N,cellH=cellW/2,cells=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)cells.push({r,c});
  cells.sort((p,q)=>(p.r+p.c)-(q.r+q.c)||Math.abs(p.c-p.r)-Math.abs(q.c-q.r)||p.c-q.c);
@@ -712,14 +697,12 @@ function yearBoardGeometry(y,items){
  const trees=items.map((it,k)=>{const cell=cells[k],[x,yy]=center(cell),stage=it.completed?3:Model.stage(it),base=cellW*2.25;
   return {x:x+(rnd('tx'+it.id)-.5)*cellW*.5,y:yy+(rnd('ty'+it.id)-.5)*cellH*.5,src:stickerTreeSrc(it,stage),size:+(base*(stage===3?1:stage===2?.62:.45)).toFixed(1),id:it.id}});
  const dots=cells.slice(n).filter((_,k)=>k%2===0).map(cell=>{const [x,yy]=center(cell);return {x,y:yy}});
- return {W,H,facets,sides,specks,trees:trees.sort((a,b)=>a.y-b.y),dots,cellW};
+ return {W,H,ground,trees:trees.sort((a,b)=>a.y-b.y),dots,cellW};
 }
 function forestYearIsland(y,type){
- const g=yearBoardGeometry(y,yearForestItems(y,type)),P=pts=>pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
- return '<svg class="forest-island forest-year-board" viewBox="0 0 '+g.W+' '+g.H+'" role="img" aria-label="'+y+'년의 숲, '+g.trees.length+'그루">'+
-  g.sides.map(f=>'<polygon points="'+P(f.pts)+'" fill="'+f.fill+'"/>').join('')+g.specks.map(d=>'<circle cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" r="'+d.r.toFixed(1)+'" fill="'+d.fill+'"/>').join('')+
-  g.facets.map(f=>'<polygon points="'+P(f.pts)+'" fill="'+f.fill+'" stroke="'+f.fill+'" stroke-width=".6" stroke-linejoin="round"/>').join('')+
-  g.dots.map(d=>'<ellipse cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" rx="'+(g.cellW*.16).toFixed(1)+'" ry="'+(g.cellW*.08).toFixed(1)+'" fill="#A9D190"/>').join('')+
+ const g=yearBoardGeometry(y,yearForestItems(y,type));
+ return '<svg class="forest-island forest-year-board" viewBox="0 0 '+g.W+' '+g.H+'" role="img" aria-label="'+y+'년의 숲, '+g.trees.length+'그루">'+polyGroundSVG(g.ground)+
+  g.dots.map(d=>'<ellipse cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" rx="'+(g.cellW*.16).toFixed(1)+'" ry="'+(g.cellW*.08).toFixed(1)+'" fill="'+g.ground.dot+'"/>').join('')+
   g.trees.map(t=>'<image href="'+esc(t.src)+'" x="'+(t.x-t.size/2).toFixed(1)+'" y="'+(t.y-t.size*.875).toFixed(1)+'" width="'+t.size+'" height="'+t.size+'" pointer-events="none"/>').join('')+'</svg>';
 }
 function renderForestYear(){

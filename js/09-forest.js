@@ -854,10 +854,12 @@ function shareStamp(ctx,cx,cy,r,date,rotate=10){
  ctx.restore();
 }
 async function shareIsland(ctx,y0,x0,scale,items){
- const g=yearBoardGeometry(year,items),P=(x,y)=>[x0+x*scale,y0+y*scale],poly=(pts,fill)=>{ctx.fillStyle=fill;ctx.beginPath();pts.forEach(([x,y],k)=>{const [px,py]=P(x,y);k?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.closePath();ctx.fill()};
- g.sides.forEach(f=>poly(f.pts,f.fill));g.specks.forEach(d=>{ctx.fillStyle=d.fill;ctx.beginPath();const [x,y]=P(d.x,d.y);ctx.arc(x,y,d.r*scale,0,Math.PI*2);ctx.fill()});
- g.facets.forEach(f=>{poly(f.pts,f.fill);ctx.strokeStyle=f.fill;ctx.lineWidth=.6*scale;ctx.stroke()});
- g.dots.forEach(d=>{ctx.fillStyle='#A9D190';ctx.beginPath();const [x,y]=P(d.x,d.y);ctx.ellipse(x,y,g.cellW*.16*scale,g.cellW*.08*scale,0,0,Math.PI*2);ctx.fill()});
+ const g=yearBoardGeometry(year,items),G=g.ground,P=(x,y)=>[x0+x*scale,y0+y*scale];
+ const poly=(pts,fill,stroke)=>{ctx.fillStyle=fill;ctx.beginPath();pts.forEach(([x,y],k)=>{const [px,py]=P(x,y);k?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.closePath();ctx.fill();if(stroke){ctx.strokeStyle=fill;ctx.lineWidth=.7*scale;ctx.lineJoin='round';ctx.stroke()}};
+ const oval=(x,y,rx,ry,fill,a=1)=>{ctx.globalAlpha=a;ctx.fillStyle=fill;ctx.beginPath();const [px,py]=P(x,y);ctx.ellipse(px,py,rx*scale,ry*scale,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1};
+ G.sides.forEach(f=>poly(f.pts,f.fill));G.specks.forEach(d=>oval(d.x,d.y,d.r,d.r,d.fill,.85));G.lips.forEach(f=>poly(f.pts,f.fill));
+ G.facets.forEach(f=>poly(f.pts,f.fill,true));G.extras.forEach(e=>oval(e.x,e.y,e.rx,e.ry,e.fill,e.opacity||1));
+ g.dots.forEach(d=>oval(d.x,d.y,g.cellW*.16,g.cellW*.08,G.dot));
  const imgs=await Promise.all(g.trees.map(t=>shareAsset(t.src)));
  g.trees.forEach((t,k)=>{if(imgs[k]){const z=t.size,[x,y]=P(t.x-z/2,t.y-z*.875);ctx.drawImage(imgs[k],x,y,z*scale,z*scale)}});
 }
