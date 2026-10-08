@@ -904,8 +904,8 @@ function forestOverlapEdges(points,cfg,theme){
 // triangles of slightly different greens. 'meadow' (꽃이끼 정원) is the same shape in pale moss
 // with soft moss patches and a few small flowers.
 const POLY_FLOORS={
- basic:{greens:['#B2D68F','#AED38B','#B6D993','#ABD088','#B0D58D'],soil:['#A9825E','#8B6A4C'],lip:['#88B56C','#7BA862'],speck:['#8E6B4C','#73563D'],dot:'#C6E3A6'},
- meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#BFA27A','#A58A66'],lip:['#86AD82','#779E7A'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'}
+ basic:{greens:['#B2D68F','#AED38B','#B6D993','#ABD088','#B0D58D'],soil:['#B08A63','#86663F'],lip:['#98C277','#82AD62'],speck:['#8E6B4C','#73563D'],dot:'#C6E3A6'},
+ meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#C4A67C','#9A7F5B'],lip:['#C9D394','#B1BE7C'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'}
 };
 function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
  const pal=POLY_FLOORS[floor]||POLY_FLOORS.basic,rnd=k=>(hash(seed+'|'+k)%100000)/100000,cw=rx/K;
@@ -951,7 +951,7 @@ function polyGroundArtwork(cfg,cx=360,cy=286,floor='basic'){
   tufts+=`<path d="M${f(x-w)} ${f(y)}L${f(x-w*.32)} ${f(y-5*k)}L${f(x)} ${f(y-1.5*k)}L${f(x+w*.32)} ${f(y-5.5*k)}L${f(x+w)} ${f(y)}" fill="none" stroke="${floor==='meadow'?'#93AE7C':'#86B06A'}" stroke-width="${f(1.3*k)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}
  const id='poly-ground-'+floor+'-'+Math.round(rx);
  const defs=`<filter id="${id}-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="${f(9*k)}"/></filter>`;
- const body=`<g data-forest-ground="terrain" data-floor="${floor}" pointer-events="none"><polygon points="${P(g.silhouette)}" transform="translate(0 ${f(12*k)})" fill="rgba(30,42,34,.24)" filter="url(#${id}-shadow)"/><polygon points="${P(g.silhouette)}" fill="#fff" stroke="#fff" stroke-width="${f(7*k)}" stroke-linejoin="round"/>${polyGroundSVG(g,k)}<polygon data-ground-surface="true" points="${P([...g.V[0],...g.V.map(r=>r[g.K]).slice(1),...g.V[g.K].slice().reverse().slice(1),...g.V.map(r=>r[0]).reverse().slice(1)])}" fill="none"/>${tufts}</g>`;
+ const body=`<g data-forest-ground="terrain" data-floor="${floor}" pointer-events="none"><polygon points="${P(g.silhouette)}" transform="translate(0 ${f(14*k)})" fill="rgba(30,42,34,.3)" filter="url(#${id}-shadow)"/><polygon points="${P(g.silhouette)}" fill="#fff" stroke="#fff" stroke-width="${f(7*k)}" stroke-linejoin="round"/>${polyGroundSVG(g,k)}<polygon data-ground-surface="true" points="${P([...g.V[0],...g.V.map(r=>r[g.K]).slice(1),...g.V[g.K].slice().reverse().slice(1),...g.V.map(r=>r[0]).reverse().slice(1)])}" fill="none"/>${tufts}</g>`;
  return {defs,body};
 }
 function stickerGroundArtwork(cfg,cx=360,cy=286){
