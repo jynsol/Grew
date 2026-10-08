@@ -73,7 +73,10 @@ document.addEventListener('click',async e=>{
  if(a==='forestShow'){forestShow=b.dataset.show==='calendar'?'calendar':'forest';forestEditMode=false;render();return}
  if(a==='forestType'){if(['all','book','movie'].includes(b.dataset.type))forestTypeFilter=b.dataset.type;render();return}
  if(a==='forestPrevMonth'||a==='forestNextMonth'){const [y,m]=month.split('-').map(Number),d=new Date(y,m-1+(a==='forestPrevMonth'?-1:1),1),next=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');if(next<=now().slice(0,7)){month=next;forestViewportYear=null;zoomState={scale:1,x:0,y:0};render()}return}
- if(a==='forestPrevYear'||a==='forestNextYear'){const y=Number(year)+(a==='forestPrevYear'?-1:1);if(String(y)<=now().slice(0,4)){year=String(y);month=y===Number(now().slice(0,4))?now().slice(0,7):y+'-12';render()}return}
+ if(a==='forestPrevYear'||a==='forestNextYear'){const ys=forestTreeYears(),y=a==='forestPrevYear'?ys.filter(x=>x<year).at(-1):ys.find(x=>x>year);if(y){year=y;month=forestYearMonth(y);render()}return}
+ if(a==='forestMonthPicker'){openForestMonthPicker();return}
+ if(a==='forestPickYear'){const sheet=document.querySelector('.month-pick');if(sheet)sheet.outerHTML=forestMonthPickerHTML(b.dataset.year);return}
+ if(a==='forestPickMonth'){if(/^\d{4}-\d{2}$/.test(b.dataset.month||'')&&b.dataset.month<=now().slice(0,7)){month=b.dataset.month;forestMode='month';forestViewportYear=null;zoomState={scale:1,x:0,y:0};closeModal();render();scrollPageTop()}return}
  if(a==='scrapFilters'){openScrapFilters();return}
  if(a==='scrapFilterDraftReset'){const form=$('scrapFilterForm');if(form){const status=form.querySelector('input[name="status"][value="all"]');if(status)status.checked=true;form.querySelector('input[name="sort"][value="recent"]').checked=true}return}
  if(a==='clearScrapStatus'){if(updateScrapFilters({status:'all'}))document.querySelector('[data-action="scrapFilters"]')?.focus();return}

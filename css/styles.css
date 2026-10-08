@@ -4159,3 +4159,17 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 /* hairlines as real borders: spread-shadow rings drop out on some screens (fractional pixels, scrolling layers) */
 .tv-week,.sticker-recent-card,.type-tabs,.forest-toggle,.fcal,.forest-type-filter,.settings-card,.notification-sample,.bm-wallet-pill,.bm-page-tabs,.bm-shop-card,.bm-floor-card,.scrap-filter-options,.bm-codex-hero-art,.bm-codex-art.is-soon{border:1px solid rgba(30,42,34,.1)!important;box-shadow:none!important}
 .detail-more summary{background:var(--fill)!important;box-shadow:none!important;border:0!important}
+/* month title opens the month picker */
+.forest-title-btn{display:inline-flex;align-items:center;gap:4px;min-height:0;height:auto;padding:0;margin:0;border:0;background:none;font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer}
+.forest-title-btn .month-pick-chev{color:var(--text-3);margin-top:3px}
+.forest-title-btn:active{opacity:.6}
+.month-pick-year{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px}
+.month-pick-year strong{font:700 17px/1 var(--font-family);font-variant-numeric:tabular-nums}
+.month-pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:8px}
+.month-pick-cell{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:0;height:64px;padding:12px 14px;border:0;border-radius:16px;background:var(--fill);color:var(--text-1);text-align:left;box-shadow:none}
+.month-pick-cell strong{font:700 15px/1 var(--font-family)}
+.month-pick-cell small{font:500 12px/1 var(--font-family);color:var(--text-2)}
+.month-pick-cell.is-current{background:#CBE4FF}
+.month-pick-cell.is-selected{background:var(--sb-ink);color:#fff}
+.month-pick-cell.is-selected small{color:rgba(255,255,255,.7)}
+.month-pick-cell:disabled{background:none;color:var(--text-3);opacity:1}
