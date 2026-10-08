@@ -928,8 +928,9 @@ function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
  if(floor==='meadow'){
   // soft moss patches with a few small white flowers on top
   const flower=(x,y,z,pink)=>{[[0,-1],[1,0],[0,1],[-1,0]].forEach(([dx,dy])=>extras.push({x:x+dx*z*.9,y:y+dy*z*.55,rx:z*.75,ry:z*.5,fill:pink?'#F7DCE0':'#FBF7E4'}));extras.push({x,y,rx:z*.38,ry:z*.28,fill:'#F2C94C'})};
-  for(let n=0;n<K*3;n++){const a=rnd('ma'+n)*1.7-.85,b=rnd('mb'+n)*1.7-.85;if(Math.abs(a)+Math.abs(b)>.8||n%2)continue;extras.push({x:cx+(a-b)*rx/2,y:cy+(a+b)*ry/2,rx:cw*.55,ry:cw*.3,fill:'#C3D39C',opacity:.3})}
-  for(let n=0;n<K*K*4;n++){const a=rnd('fa'+n)*2-1,b=rnd('fb'+n)*2-1,m=Math.abs(a)+Math.abs(b);if(m>.94||(m<.55&&n%3))continue;flower(cx+(a-b)*rx/2,cy+(a+b)*ry/2,(4+rnd('fz'+n)*1.6)*k,rnd('fc'+n)<.3)}
+  for(let n=0;n<K*3;n++){const a=rnd('ma'+n)*1.7-.85,b=rnd('mb'+n)*1.7-.85;if(n%2)continue;extras.push({x:cx+(a-b)*rx/2,y:cy+(a+b)*ry/2,rx:cw*.55,ry:cw*.3,fill:'#C3D39C',opacity:.3})}
+  // a,b span the whole top face (a square in board space); favour the outer ring a little
+  for(let n=0;n<K*K*4;n++){const a=rnd('fa'+n)*2-1,b=rnd('fb'+n)*2-1,m=Math.max(Math.abs(a),Math.abs(b));if(m>.9||(m<.5&&n%3))continue;flower(cx+(a-b)*rx/2,cy+(a+b)*ry/2,(4+rnd('fz'+n)*1.6)*k,rnd('fc'+n)<.3)}
  }
  // silhouette for the sticker edge: back edges, then the dropped front edges
  const backL=V.map(r=>r[0]);
