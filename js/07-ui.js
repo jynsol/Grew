@@ -818,7 +818,7 @@ function forestDecorationPosition(preferred,candidates,extent,blocked,cfg,treeBo
  if(!valid.length)for(let y=286-ry+12;y<286+ry;y+=8)for(let x=360-rx+12;x<360+rx;x+=8){const p={x,y};if(clear(p))valid.push(p)}
  return valid.sort((a,b)=>score(a)-score(b))[0]||null;
 }
-function forestDecorations(cfg,project,theme='basic',emptySlots=[],featureSlots=[],treeBoxes=[]){
+function forestDecorations(cfg,project,theme='basic',emptySlots=[],featureSlots=[],treeBoxes=[],floorId='basic'){
  const pieces=[],featureMap=new Map(featureSlots.map(s=>[s.key,s]));let illustratedFlowerIndex=0;
  const at=(key)=>{const s=featureMap.get(key);return s?project(s):null};
  // Decorations are allowed to overlap foliage. Treating the full tree crown as
@@ -857,7 +857,7 @@ const snowShrub=(x,y,s=1,shape=0)=>{const crowns=['<ellipse cx="0" cy="-26" rx="
  // Landmarks use normalized ground coordinates, not optional/occupied tiles.
  // Even a fully occupied board keeps its well and rocks. Empty forests stay empty.
  if(cfg.tier===0)return [];
- if(cfg.month)return emptySlots.map(project).map(p=>({y:p.y-40,art:'<ellipse data-empty-cell="true" pointer-events="none" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" rx="'+(cfg.boardW/cfg.cols*.09).toFixed(1)+'" ry="'+(cfg.boardH/cfg.rows*.09).toFixed(1)+'" fill="#C9E3B4" opacity=".9"/>'}));
+ if(cfg.month)return emptySlots.map(project).map(p=>({y:p.y-40,art:'<ellipse data-empty-cell="true" pointer-events="none" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" rx="'+(cfg.boardW/cfg.cols*.09).toFixed(1)+'" ry="'+(cfg.boardH/cfg.rows*.09).toFixed(1)+'" fill="'+(floorId==='basic'?'#C9E3B4':(POLY_FLOORS[floorId]||POLY_FLOORS.basic).dot)+'" opacity=".9"/>'}));
  const anchor=(u,v)=>({x:360+u*cfg.boardW,y:286+v*cfg.boardH});
  const snow=theme==='snow',large=cfg.tier>=4;
  place(snow?'frozen-well':'well',(x,y)=>(snow?frozenWell:well)(x,y,1.12),anchor(-.18,.02),[-27,-33,27,22]);
@@ -906,7 +906,7 @@ const POLY_FLOORS={
  basic:{greens:['#B2D68F','#AED38B','#B6D993','#ABD088','#B0D58D'],soil:['#B08A63','#86663F'],lip:['#98C277','#82AD62'],speck:['#8E6B4C','#73563D'],dot:'#C6E3A6'},
  meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#C4A67C','#9A7F5B'],lip:['#C9D394','#B1BE7C'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'},
  // 눈 덮인 숲: snow on top (white with faint blue facets), snow overhang on frozen earth
- snow:{greens:['#F6F9FB','#EEF4F8','#F9FBFC','#E8F0F5','#F2F7FA'],soil:['#A7927D','#7E6B59'],lip:['#FFFFFF','#E2EBF1'],speck:['#8C7865','#6D5C4C'],dot:'#DCE7EE'}
+ snow:{greens:['#F6F9FB','#EEF4F8','#F9FBFC','#E8F0F5','#F2F7FA'],soil:['#A7927D','#7E6B59'],lip:['#FFFFFF','#E2EBF1'],speck:['#8C7865','#6D5C4C'],dot:'#C9DBE7'}
 };
 function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
  const pal=POLY_FLOORS[floor]||POLY_FLOORS.basic,rnd=k=>(hash(seed+'|'+k)%100000)/100000,cw=rx/K;
@@ -1049,7 +1049,7 @@ function forestSVG(items,theme='basic',animated=true,options={}){
  const layout=forestPlacements(visibleItems,cfg);if(layout.changed&&!options.preview&&!options.transient)persist();
  const points=layout.placements.map(p=>({...project(p.slot),c:p.item,profile:p.profile,scale:p.scale})).sort((a,b)=>a.y-b.y||a.c.id.localeCompare(b.c.id));
  const floorId=options.floor||bmFloorId(),groundArtwork=forestGroundArtwork(cfg,theme,cx,cy,floorId);
- const decorations=forestDecorations(cfg,project,theme,layout.emptySlots,layout.featureSlots,forestTreeObstacles(points,cfg,theme));
+ const decorations=forestDecorations(cfg,project,theme,layout.emptySlots,layout.featureSlots,forestTreeObstacles(points,cfg,theme),floorId);
  // Raster trees already carry soft shading. Avoid per-tree blur/mask copies of large images.
  const overlap=points.every(p=>!!illustratedTreeAsset(p.c,theme))?{defs:'',edges:points.map(()=> '')}:forestOverlapEdges(points,cfg,theme);
  const trees=points.map((p,i)=>{const hiddenKind=forestGrowthKey(p.c)?null:p.c?.hiddenTree,hiddenBoost=hiddenKind?hiddenTreeScale(hiddenKind,theme):1,sc=((p.scale||cfg.treeScale)*hiddenBoost).toFixed(3),shadowRx=((p.profile?.radius||24)*.70*hiddenBoost).toFixed(1),shadowRy=(Math.max(3.6,(p.profile?.radius||24)*.13*hiddenBoost)).toFixed(1),snowBase=theme==='snow'?'<ellipse cx="0" cy="13" rx="'+Math.max(9,(p.profile?.radius||24)*.5*hiddenBoost).toFixed(1)+'" ry="4.1" fill="#F8FBFC" opacity=".92"/>':'';return '<g data-tree="'+esc(p.c.id)+'" data-growth="'+(forestGrowthKey(p.c)||'mature')+'" role="button" tabindex="0" aria-label="'+esc(p.c.title+' · '+String(p.c.genre||category(p.c).label))+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+') scale('+sc+')"><ellipse cx="4" cy="10" rx="'+shadowRx+'" ry="'+shadowRy+'" fill="#708579" opacity="'+(illustratedTreeAsset(p.c,theme)?'0':'.11')+'"/>'+snowBase+treeHitArea(p.c,theme)+overlap.edges[i]+'<g class="tree-art">'+treeArt(p.c,hiddenKind&&floorId==='snow'?'snow':theme)+'</g></g>'});
