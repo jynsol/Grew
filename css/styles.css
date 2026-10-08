@@ -4184,3 +4184,5 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .month-pop .forest-nav-btn{width:36px;height:36px}
 .month-pop .month-pick-grid{gap:6px;padding:0}
 .month-pop .month-pick-cell{height:54px;padding:10px 12px;border-radius:14px}
+/* narrow phones (≤359px): forest tools drop their icons so all four fit with side margins */
+@media (max-width:359px){.forest-tools-row{gap:5px;padding:0 12px}.forest-tools-row .forest-tool svg{display:none}.forest-tools-row .forest-tool{padding:0 11px}}
