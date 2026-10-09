@@ -4054,7 +4054,6 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .forest-edit-floor.is-locked .forest-edit-swatch{opacity:.55}
 .forest-edit-bar .forest-edit-floor .forest-edit-lock{position:absolute;right:3px;bottom:3px;width:16px;height:16px;padding:3px;border-radius:50%;background:#fff;color:var(--text-2)}
 .forest-edit-bar .forest-edit-reset{flex:none;height:44px}
-/* This week's dots: a step deeper than the hero card's pastel, ink letters */
-.today-v2 .sticker-week li.is-logged,.today-v2[data-type] .sticker-week li.is-logged{color:var(--sb-ink)}
-.today-v2[data-type="book"] .sticker-week li.is-logged{background:#EEC64A}
-.today-v2[data-type="movie"] .sticker-week li.is-logged{background:#7FCB9B}
+/* This week's dots: the original mustard / green, a little clearer */
+.today-v2[data-type="book"] .sticker-week li.is-logged{background:#A47906;color:#fff}
+.today-v2[data-type="movie"] .sticker-week li.is-logged{background:#2C8653;color:#fff}
