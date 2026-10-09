@@ -4054,7 +4054,7 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .forest-edit-floor.is-locked .forest-edit-swatch{opacity:.55}
 .forest-edit-bar .forest-edit-floor .forest-edit-lock{position:absolute;right:3px;bottom:3px;width:16px;height:16px;padding:3px;border-radius:50%;background:#fff;color:var(--text-2)}
 .forest-edit-bar .forest-edit-reset{flex:none;height:44px}
-/* This week's dots: coloured by what was recorded that day (book · film · both), a little clearer than before */
-.today-v2 .sticker-week li.is-logged.is-book,.today-v2[data-type] .sticker-week li.is-logged.is-book{background:#A47906;color:#fff}
-.today-v2 .sticker-week li.is-logged.is-movie,.today-v2[data-type] .sticker-week li.is-logged.is-movie{background:#2C8653;color:#fff}
-.today-v2 .sticker-week li.is-logged.is-both,.today-v2[data-type] .sticker-week li.is-logged.is-both{background:linear-gradient(135deg,#A47906 50%,#2C8653 50%);color:#fff}
+/* This week's dots: coloured by what was recorded that day (book · film · split for both) */
+.today-v2 .sticker-week li.is-logged.is-book,.today-v2[data-type] .sticker-week li.is-logged.is-book{background:#F2B84B;color:var(--sb-ink)}
+.today-v2 .sticker-week li.is-logged.is-movie,.today-v2[data-type] .sticker-week li.is-logged.is-movie{background:#6CC092;color:var(--sb-ink)}
+.today-v2 .sticker-week li.is-logged.is-both,.today-v2[data-type] .sticker-week li.is-logged.is-both{background:linear-gradient(135deg,#F2B84B 50%,#6CC092 50%);color:var(--sb-ink)}
