@@ -892,7 +892,7 @@ async function drawShareCard(kind,format,target){
  const isYear=kind==='year',life=isYear&&forestLifetime,items=isYear?yearForestItems(life?'all':year,'all'):forestMonthItems(month);
  const done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length,m=Number(month.slice(5));
  head(life?'MY FOREST':isYear?year+' FOREST':months[m-1]+' '+month.slice(0,4));
- const top=story?250:200;ctx.fillStyle=ink;ctx.font='700 46px '+F;ctx.fillText(name+'의 '+(life?'평생':isYear?'올해':m+'월')+' 숲',72,top);
+ const top=story?250:200;ctx.fillStyle=ink;ctx.font='700 46px '+F;ctx.fillText(name+'의 '+(life?'':isYear?'올해 ':m+'월 ')+'숲',72,top);
  const big=String(done.length);ctx.font='800 '+(story?300:250)+'px '+L;ctx.fillText(big,60,top+(story?290:240));
  ctx.font='700 56px '+F;ctx.fillText('그루를 심었어요',72,top+(story?390:330));
  sharePill(ctx,'책 ',W-72,top-30,{fill:'#F7E7A1',size:34,bold:books+'권',boldSize:48,rotate:-6,align:'right'});
@@ -913,7 +913,7 @@ function shareCropSVG(markup){
  try{const svg=host.querySelector('svg'),world=svg?.querySelector('#forest-world')||svg;const b=world.getBBox(),pad=16;if(b.width&&b.height)return markup.replace(/viewBox="[^"]*"/,'viewBox="'+[b.x-pad,b.y-pad,b.width+pad*2,b.height+pad*2].map(n=>n.toFixed(1)).join(' ')+'"')}catch{}finally{host.remove()}
  return markup;
 }
-function shareTitle(){return shareKind==='work'?'작품 공유':shareKind==='month'?Number(month.slice(5))+'월의 숲 공유':forestLifetime?'평생의 숲 공유':'올해의 숲 공유'}
+function shareTitle(){return shareKind==='work'?'작품 공유':shareKind==='month'?Number(month.slice(5))+'월의 숲 공유':forestLifetime?forestLifetimeName()+' 공유':'올해의 숲 공유'}
 async function makeShare(kind=shareKind,target=shareTarget){
  shareKind=kind==='forest'?'year':kind;shareTarget=target||'';
  const generation=++shareGeneration,current=()=>generation===shareGeneration&&modal==='share';
