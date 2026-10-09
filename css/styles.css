@@ -4165,3 +4165,9 @@ body.is-decorating .toast{bottom:calc(282px + env(safe-area-inset-bottom))!impor
 .sheet-back[data-kind="planted"] .planted-actions{padding:20px 20px 0!important;margin-top:0!important}
 .sheet-back[data-kind="planted"] .primary{height:52px!important}
 @media (prefers-reduced-motion:reduce){.sheet-back[data-kind="planted"] .sheet{animation:none}}
+/* Card popup: a smaller tree on the disc */
+.sheet-back[data-kind="planted"] .pl-stage{height:210px}
+.sheet-back[data-kind="planted"] .pl-disc{width:184px;height:184px;margin-left:-92px;top:14px}
+.sheet-back[data-kind="planted"] .pl-stage .pl-tree{width:160px;height:160px;margin-left:-80px;top:26px}
+.sheet-back[data-kind="planted"] .pl-stage .pl-stamp{width:80px;height:80px;right:6px;top:-8px}
+.sheet-back[data-kind="planted"] .pl-cover{left:14px;bottom:4px}
