@@ -890,6 +890,8 @@ async function drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,mode='life'){
   ctx.globalAlpha=1;
   const sparkle=(x,y,r,c)=>{ctx.save();ctx.translate(x,y);ctx.fillStyle=c;ctx.beginPath();for(let k=0;k<8;k++){const a=k*Math.PI/4,rr=k%2?r*.28:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath();ctx.fill();ctx.restore()};
   [[.12,.2,16],[.86,.28,20],[.2,.48,12],[.9,.52,14],[.07,.36,22],[.93,.14,12],[.5,.06,10],[.32,.12,9],[.7,.4,10]].forEach(([x,y,r],i)=>sparkle(W*x,H*y*(story?1:.95),r,i%3?(i%2?butter:white):'#F9D9C8'));
+  // one small shooting star across the sky
+  {const sx=W*.22,sy=H*(story?.095:.12),len=W*.15,ex=sx-len*.9,ey=sy-len*.4;const tr=ctx.createLinearGradient(sx,sy,ex,ey);tr.addColorStop(0,'rgba(255,255,255,.95)');tr.addColorStop(1,'rgba(255,255,255,0)');ctx.strokeStyle=tr;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();ctx.fillStyle=white;ctx.beginPath();ctx.arc(sx,sy,5,0,Math.PI*2);ctx.fill();sparkle(sx,sy,14,white)}
  }else{ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H)}
  ctx.textBaseline='alphabetic';ctx.fillStyle=fg;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillStyle=life?butter:soft;ctx.fillText(life?'SINCE '+first:year+' FOREST',W-72,96);ctx.letterSpacing='0px';
  const top=story?260:190;ctx.textAlign='center';ctx.fillStyle=fg;ctx.font='700 54px '+F;ctx.fillText(name+'의 '+(life?'':'올해 ')+'숲',W/2,top);
@@ -900,8 +902,6 @@ async function drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,mode='life'){
  if(life){glow.addColorStop(0,'rgba(247,231,161,.5)');glow.addColorStop(.5,'rgba(191,231,203,.16)');glow.addColorStop(1,'rgba(191,231,203,0)')}else{glow.addColorStop(0,'rgba(191,231,203,.28)');glow.addColorStop(1,'rgba(191,231,203,0)')}
  ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
  await shareIsland(ctx,bandTop+(bandH-250*scale)/2,(W-390*scale)/2,scale,items);
- if(life){const met=FOREST_VISITORS.filter(v=>collectionState().visitorsSeen.includes(v.id)).slice(-3),spots=[[.13,.74,-.12],[.87,.7,.14],[.62,.86,.06]];
-  for(let i=0;i<met.length;i++){const img=await shareAsset('./assets/images/forest/sticker/visitor-'+met[i].id+'.webp');if(!img)continue;const [fx,fy,rot]=spots[i],z=story?200:170;ctx.save();ctx.translate(W*fx,bandTop+bandH*fy-z*.45);ctx.rotate(rot);ctx.drawImage(img,-z/2,-z/2,z,z);ctx.restore()}}
  // bars: a year each (lifetime) or a month each (this year)
  const cur=now().slice(0,7),labels=life?years.slice(-6):Array.from({length:12},(_,i)=>String(i+1)),counts=life?labels.map(y=>yearForestItems(y,'all').length):labels.map((_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length);
  const best=life?labels.length-1:counts.indexOf(Math.max(...counts)),gap=life?24:12,max=Math.max(1,...counts),barW=Math.min(110,(W-144-(labels.length-1)*gap)/Math.max(1,labels.length)),totalW=labels.length*barW+(labels.length-1)*gap,x0=(W-totalW)/2,chartTop=bandTop+bandH+(story?50:30),chartH=story?190:96;
