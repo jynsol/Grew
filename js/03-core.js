@@ -176,7 +176,7 @@ TREE_SPECIES.push(...['zelkova','metasequoia','pine','cedar','juniper','fringe',
 // Flip to true then; while false the shop is a catalogue and nothing pretends to charge.
 const BM_STORE_OPEN=true;
 const BM_CONFIG=Object.freeze({mode:'preview',future:Object.freeze({regularTrees:26,mysteryTrees:4,totalTrees:30,paidFloorCount:2,treePriceKRW:1100,floorPriceKRW:2200,packagePriceKRW:9900,packageTreeCount:10,rewardedViewsPerDay:2,viewsPerCoupon:1,couponCostPerTree:14,collectionMysteryAt:20,cashMysteryAt:10})});
-const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'snow',name:'눈 덮인 숲',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false}];
+const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'snow',name:'겨울 숲',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false}];
 const BM_BASE_IDS=['oak','birch','fir'];
 const BM_RECORD_IDS=['zelkova','ginkgo','metasequoia','yew','cedar','evergreen','cypress'];
 const BM_EXISTING_SHOP_IDS=['cherry','maple','magnolia','crape','fringe','hackberry','willow','pine','juniper','paulownia'];
@@ -205,7 +205,7 @@ const BM_POOLS=[
 // Tree themes for the whole forest. 'mix' deals each genre's trees in turn; the others use one slot
 // per genre (0 classic, 1 special, 2 winter) and fall back to the classic tree when it isn't owned.
 // Sale themes: how special trees are grouped in the shop and codex (each is also a pack).
-const BM_SALE_THEMES=[{id:'special',name:'스페셜',pack:'first',ids:BM_EXISTING_SHOP_IDS},{id:'winter',name:'겨울',pack:'winter',ids:BM_WINTER_IDS},{id:'third',name:'새 나무',pack:'third',ids:BM_RESERVED_IDS}];
+const BM_SALE_THEMES=[{id:'special',name:'꽃이끼 정원',pack:'first',ids:BM_EXISTING_SHOP_IDS},{id:'winter',name:'겨울 숲',pack:'winter',ids:BM_WINTER_IDS},{id:'third',name:'새 나무',pack:'third',ids:BM_RESERVED_IDS}];
 // Each floor's matching tree theme: picking the floor also dresses the forest in that theme.
 const BM_FLOOR_THEME={basic:'classic',meadow:'special',snow:'winter'};
 // Forest sets: one tap dresses the forest — a floor plus its matching trees. The decorate dock leads with these.
@@ -404,7 +404,7 @@ function bmPreviewBuyFloor(id,s=state){
 // Packs: a discount on the single prices, sold only while you own none of what's inside (open one tree or the
 // floor any way and that pack is gone). The third (10 trees + a new floor) appears once its art is ready.
 const BM_PACKS=[
- {id:'first',name:'시작 숲 패키지',trees:BM_EXISTING_SHOP_IDS,floors:['meadow'],price:9900,list:13200,art:'./assets/images/shop/pack-first.webp'},
+ {id:'first',name:'꽃이끼 정원 패키지',trees:BM_EXISTING_SHOP_IDS,floors:['meadow'],price:9900,list:13200,art:'./assets/images/shop/pack-first.webp'},
  {id:'winter',name:'겨울 숲 패키지',trees:BM_WINTER_IDS,floors:['snow'],price:11000,list:13200,art:'./assets/images/shop/pack-winter.webp',tone:'sky'},
  {id:'third',name:'세 번째 숲 패키지',trees:BM_RESERVED_IDS,floors:['floor-reserved-01'],price:9900,list:13200}
 ];
@@ -523,7 +523,7 @@ const BM_FLOOR_NAMES={basic:'기본 바닥',meadow:'꽃이끼 정원'};
 const BM_KRW_FORMAT=new Intl.NumberFormat('ko-KR'),bmKRW=n=>BM_KRW_FORMAT.format(n)+'원';
 function bmTreeName(id){return id.startsWith('mystery-')?bmMysteries().find(t=>t.id===id.slice(-1))?.name||'히든 나무':TREE_SPECIES.find(t=>t.id===id)?.name||'새 나무 '+String(BM_RESERVED_IDS.indexOf(id)+1)}
 function bmPlaceholder(label='디자인 준비 중'){return '<div class="bm-placeholder" aria-label="'+esc(label)+'"><span aria-hidden="true">✧</span><small>'+esc(label)+'</small></div>'}
-// Hidden trees follow the floor: on 눈 덮인 숲 they show (and are named for) their winter look.
+// Hidden trees follow the floor: on 겨울 숲 they show (and are named for) their winter look.
 function bmHiddenSnow(){return bmFloorId()==='snow'}
 function bmTreeSVG(id,snow=false){if(!bmTreeReady(id))return bmPlaceholder();const special=id.startsWith('mystery-'),key=special?(snow?'winter':'')+(id==='mystery-A'?'shining':'moonlight'):id,b=(SONGLIM_TREE_ASSETS[key]||SONGLIM_TREE_ASSETS[key.replace('winter','')])?.bounds;if(!b)return bmPlaceholder();const w=Math.max(94,b.width+12);return '<svg viewBox="'+[-w/2,b.y-7,w,b.height+15].join(' ')+'" aria-hidden="true">'+(special?hiddenTreeArt(id.slice(-1),snow?'snow':'basic'):previewSpeciesArt(id,'basic'))+'</svg>'}
 function bmReadyTreeIds(){return [...bmOwnedTreeIds().filter(bmTreeReady),...bmMysteries().filter(t=>t.ready&&t.unlocked).map(t=>'mystery-'+t.id)]}
@@ -748,7 +748,7 @@ function bmPackSceneArt(ids,floor){const s=Model.empty(),pick=ids.filter(bmTreeR
 function bmShopHeroHTML(only){
  const packs=BM_PACKS.filter(p=>!only||p.id===only).map(p=>bmPackageInfo(state,p.id)).filter(p=>p.ready&&p.untouched&&(!BM_STORE_OPEN||p.canBuy));
  if(!packs.length)return '';
- const slide=p=>{const f=p.floorIds[0],trees=p.ids.slice(0,3);return '<article class="bm-hero'+(p.pack.tone?' is-'+p.pack.tone:'')+'">'+'<div class="bm-hero-copy"><span class="bm-hero-tag">'+'묶음 '+Math.round((1-p.pack.price/p.pack.list)*100)+'% 할인'+'</span><strong>'+esc(p.pack.name)+'</strong><small>'+(BM_SALE_THEMES.find(t=>t.pack===p.pack.id)?.name||'스페셜')+' 나무 '+p.ids.length+'종 + '+esc(BM_FLOORS.find(x=>x.id===f)?.name||'바닥')+'</small></div>'+
+ const slide=p=>{const f=p.floorIds[0],trees=p.ids.slice(0,3);return '<article class="bm-hero'+(p.pack.tone?' is-'+p.pack.tone:'')+'">'+'<div class="bm-hero-copy"><span class="bm-hero-tag">'+'묶음 '+Math.round((1-p.pack.price/p.pack.list)*100)+'% 할인'+'</span><strong>'+esc(p.pack.name)+'</strong><small>나무 '+p.ids.length+'종 + '+esc(BM_FLOORS.find(x=>x.id===f)?.name||'')+' 바닥</small></div>'+
   '<div class="bm-hero-art" aria-hidden="true">'+(p.pack.art?'<img src="'+p.pack.art+'" alt="" decoding="async">':bmPackSceneArt(p.ids,f))+'</div>'+
   '<div class="bm-hero-price"><div><strong>'+bmKRW(p.pack.price)+'</strong><del>'+bmKRW(p.pack.list)+'</del></div>'+(BM_STORE_OPEN?button('구매하기','bmPackage','bm-hero-buy','data-pack="'+p.pack.id+'"'):'<span class="bm-hero-buy is-soon">곧 열려요</span>')+'</div>'+
   '<p class="bm-hero-fine">구성 나무가 하나도 없을 때만 살 수 있어요</p>'+'</article>'};
@@ -791,7 +791,7 @@ function bmCodexTreeCard(id){
  return '<div class="bm-codex-tree'+(owned?'':' is-locked')+'">'+(bmTreeReady(id)?button(bmTreeImg(id,owned?'is-sticker':'',owned?'sticker':'thumb'),'bmPreviewTree','bm-codex-art','data-species="'+id+'" aria-label="'+esc(bmTreeName(id))+' 살펴보기"'):'<div class="bm-codex-art is-mystery"><span aria-hidden="true">?</span></div>')+(owned||!bmTreeReady(id)?'':'<span class="bm-codex-lock">'+BM_PAGE_ICONS.lock+'</span>')+'<strong>'+esc(bmTreeName(id))+'</strong><small>'+esc(note)+'</small></div>';
 }
 // Hidden trees' winter looks: open once the hidden tree is open and you have the snow floor. Never sold.
-function bmWinterLooks(){const snow=bmFloorOwned('snow');return bmMysteries().filter(t=>t.ready).map(t=>({id:'winter'+(t.id==='A'?'shining':'moonlight'),name:t.id==='A'?'반짝이는 트리':'눈꽃 달빛나무',base:t,open:t.unlocked&&snow,note:t.unlocked&&snow?'눈 덮인 숲에서':!t.unlocked?t.name+'를 열면':'눈 덮인 숲 바닥이 있으면'}))}
+function bmWinterLooks(){const snow=bmFloorOwned('snow');return bmMysteries().filter(t=>t.ready).map(t=>({id:'winter'+(t.id==='A'?'shining':'moonlight'),name:t.id==='A'?'반짝이는 트리':'눈꽃 달빛나무',base:t,open:t.unlocked&&snow,note:t.unlocked&&snow?'겨울 숲에서':!t.unlocked?t.name+'를 열면':'겨울 숲 바닥이 있으면'}))}
 function bmWinterLookCard(w){const src='./assets/images/trees/'+(w.open?'sticker':'thumb')+'/'+w.id+'.webp';return '<div class="bm-codex-tree'+(w.open?'':' is-locked')+'"><div class="bm-codex-art"><img class="bm-img'+(w.open?' is-sticker':'')+'" src="'+src+'" alt="" decoding="async" loading="lazy"></div>'+(w.open?'':'<span class="bm-codex-lock">'+BM_PAGE_ICONS.lock+'</span>')+'<strong>'+esc(w.name)+'</strong><small>'+esc(w.note)+'</small></div>'}
 function renderCodexPage(){
  bmRefresh(state);const tab=bmCodexTab==='visitors'?'visitors':'trees';
@@ -806,7 +806,7 @@ function renderCodexPage(){
  const count=g=>g.filter(id=>bmReadyTreeIds().includes(id)).length,latest=owned.at(-1)||'oak';
  const section=(title,sub,ids,mystery=false)=>'<section class="bm-codex-section"><div class="bm-shop-head"><div><h2>'+title+'</h2><p class="bm-codex-sub">'+sub+'</p></div><span>'+(mystery?bmMysteries().filter(t=>t.unlocked).length:count(ids))+' / '+ids.length+'</span></div><div class="bm-codex-grid">'+ids.map(bmCodexTreeCard).join('')+'</div></section>';
  return '<section class="bm-page">'+head+'<div class="bm-codex-hero"><div><span>모은 나무</span><strong>'+(regular+hidden)+'<small>/'+total+'종</small></strong><i class="bm-codex-bar"><b style="width:'+Math.round((regular+hidden)/total*100)+'%"></b></i><p>클래식 '+count(BM_GENRE_IDS)+' · 히든 '+hidden+BM_SALE_THEMES.map(t=>{const r=t.ids.filter(bmTreeReady);return r.length?' · '+t.name+' '+count(r):''}).join('')+'</p></div><span class="bm-codex-hero-art">'+bmTreeImg(latest)+'</span></div>'+
- section('클래식 나무','책과 영화의 장르마다 한 그루씩, 처음부터 열려 있어요.',BM_GENRE_IDS)+section('히든 나무','나무를 심을수록 하나씩 열려요. 판매하지 않아요.',mysteries,true)+(winterLooks.length?'<section class="bm-codex-section"><div class="bm-shop-head"><div><h2>히든 나무 · 겨울 모습</h2><p class="bm-codex-sub">눈 덮인 숲 바닥에서 바뀐 모습이에요.</p></div><span>'+winterLooks.filter(w=>w.open).length+' / '+winterLooks.length+'</span></div><div class="bm-codex-grid">'+winterLooks.map(bmWinterLookCard).join('')+'</div></section>':'')+BM_SALE_THEMES.map(t=>({...t,ids:t.ids.filter(bmTreeReady)})).filter(t=>t.ids.length).map(t=>section(t.name+' 나무',(t.id==='winter'?'눈 덮인 숲과 어울리는 나무예요. ':'')+(BM_STORE_OPEN?'상점에서 열 수 있어요.':'상점에서 곧 열려요.'),t.ids)).join('')+'</section>';
+ section('클래식 나무','책과 영화의 장르마다 한 그루씩, 처음부터 열려 있어요.',BM_GENRE_IDS)+section('히든 나무','나무를 심을수록 하나씩 열려요. 판매하지 않아요.',mysteries,true)+(winterLooks.length?'<section class="bm-codex-section"><div class="bm-shop-head"><div><h2>히든 나무 · 겨울 모습</h2><p class="bm-codex-sub">겨울 숲 바닥에서 바뀐 모습이에요.</p></div><span>'+winterLooks.filter(w=>w.open).length+' / '+winterLooks.length+'</span></div><div class="bm-codex-grid">'+winterLooks.map(bmWinterLookCard).join('')+'</div></section>':'')+BM_SALE_THEMES.map(t=>({...t,ids:t.ids.filter(bmTreeReady)})).filter(t=>t.ids.length).map(t=>section(t.name+' 나무',(t.id==='winter'?'겨울 숲과 어울리는 나무예요. ':'')+(BM_STORE_OPEN?'상점에서 열 수 있어요.':'상점에서 곧 열려요.'),t.ids)).join('')+'</section>';
 }
 
 // The finish date reads like the design ("10.07 오늘 ›"); the native date picker sits on top, invisible.

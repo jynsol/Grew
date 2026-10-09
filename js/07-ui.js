@@ -905,7 +905,7 @@ function forestOverlapEdges(points,cfg,theme){
 const POLY_FLOORS={
  basic:{greens:['#B2D68F','#AED38B','#B6D993','#ABD088','#B0D58D'],soil:['#B08A63','#86663F'],lip:['#98C277','#82AD62'],speck:['#8E6B4C','#73563D'],dot:'#C6E3A6'},
  meadow:{greens:['#DCE3AE','#D8E0A9','#E0E5B3','#D5DDA6','#DAE1AB'],soil:['#C4A67C','#9A7F5B'],lip:['#C9D394','#B1BE7C'],speck:['#9E8463','#8A7254'],dot:'#EEF0CF'},
- // 눈 덮인 숲: snow on top (white with faint blue facets), snow overhang on frozen earth
+ // 겨울 숲: snow on top (white with faint blue facets), snow overhang on frozen earth
  snow:{greens:['#F6F9FB','#EEF4F8','#F9FBFC','#E8F0F5','#F2F7FA'],soil:['#A7927D','#7E6B59'],lip:['#FFFFFF','#E2EBF1'],speck:['#8C7865','#6D5C4C'],dot:'#C9DBE7'}
 };
 function polyGround(cx,cy,rx,ry,depth,K,seed,floor='basic'){
