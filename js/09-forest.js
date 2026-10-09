@@ -877,9 +877,9 @@ async function drawShareCard(kind,format,target){
  const foot=()=>{ctx.fillStyle=muted;ctx.font='500 30px '+F;ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=ink;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left'};
  if(kind==='work'&&c){
   const done=c.completed&&c.completed!=='unknown'?c.completed:now();head('FINISHED · '+done.slice(5).replace('-','.'));
-  ctx.fillStyle=ink;ctx.font='700 48px '+F;ctx.fillText(name+(/[가-힣]$/.test(name)&&(name.charCodeAt(name.length-1)-0xAC00)%28?'이':'가')+' 다 '+(c.type==='movie'?'봤어요':'읽었어요'),72,story?260:230);
+  ctx.fillStyle=ink;ctx.textAlign='center';ctx.font='700 48px '+F;ctx.fillText(name+(/[가-힣]$/.test(name)&&(name.charCodeAt(name.length-1)-0xAC00)%28?'이':'가')+' 다 '+(c.type==='movie'?'봤어요':'읽었어요'),W/2,story?260:230);
   let size=story?92:78;ctx.font='800 '+size+'px '+F;const words=c.title;const lines=[];let line='';for(const ch of words){if(ctx.measureText(line+ch).width>W-180&&line){lines.push(line);line=ch}else line+=ch}lines.push(line);
-  lines.slice(0,2).forEach((l,k)=>ctx.fillText(k===1&&lines.length>2?l.slice(0,-1)+'…':l,72,(story?380:330)+k*size*1.2));
+  lines.slice(0,2).forEach((l,k)=>ctx.fillText(k===1&&lines.length>2?l.slice(0,-1)+'…':l,W/2,(story?380:330)+k*size*1.2));ctx.textAlign='left';
   const cy=story?1080:800,r=story?380:300;ctx.save();ctx.shadowColor='rgba(30,42,34,.12)';ctx.shadowBlur=30;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,cy,r,0,Math.PI*2);ctx.fill();ctx.restore();
   const tree=await shareAsset(stickerTreeSrc(c,3));if(tree){const s=r*1.6;ctx.drawImage(tree,W/2-s/2,cy-s/2-10,s,s)}
   const cover=c.cover?await loadShareCover(c.cover):null;ctx.save();ctx.translate(W/2-r*.95,cy+r*.45);ctx.rotate(-8*Math.PI/180);ctx.fillStyle='#fff';shareRounded(ctx,-6,-6,172,248,16);ctx.fill();if(cover)ctx.drawImage(cover,0,0,160,236);else{ctx.fillStyle=c.type==='movie'?'#BFE7CB':'#F7E7A1';ctx.fillRect(0,0,160,236)}ctx.restore();
@@ -889,7 +889,8 @@ async function drawShareCard(kind,format,target){
   ctx.textAlign='center';ctx.fillStyle=muted;ctx.font='600 34px '+F;ctx.fillText([days?days+'일':'',logs?'기록 '+logs+'회':'',(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요'].filter(Boolean).join(' · '),W/2,cy+r+(story?140:110));ctx.textAlign='left';
   foot();return canvas;
  }
- if(kind==='year')return drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,forestLifetime?'life':'year');
+ if(kind==='year'&&forestLifetime)return drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,'life');
+ if(kind==='year'||kind==='month')return drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind);
  const isYear=kind==='year',life=isYear&&forestLifetime,items=isYear?yearForestItems(life?'all':year,'all'):forestMonthItems(month);
  const done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length,m=Number(month.slice(5));
  head(life?'MY FOREST':isYear?year+' FOREST':months[m-1]+' '+month.slice(0,4));
@@ -945,6 +946,33 @@ async function drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,mode='life'){
  let cxs=(W-(chips.reduce((n,c)=>n+c.w,0)+(chips.length-1)*16))/2;
  chips.forEach(c=>{if(c.fill){ctx.fillStyle=c.fill;shareRounded(ctx,cxs,chipY,c.w,68,34);ctx.fill()}else{ctx.strokeStyle=life?'rgba(255,255,255,.5)':'rgba(30,42,34,.2)';ctx.lineWidth=2;shareRounded(ctx,cxs+1,chipY+1,c.w-2,66,33);ctx.stroke()}ctx.fillStyle=c.color;ctx.font='700 32px '+F;ctx.textBaseline='middle';ctx.fillText(c.label,cxs+28,chipY+36);ctx.textBaseline='alphabetic';cxs+=c.w+16});
  ctx.fillStyle=soft;ctx.font='500 30px '+F;ctx.textAlign='left';ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=fg;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left';
+ return canvas;
+}
+// Year and month cards: white page, centred title and big number, the forest in the middle and
+// stickers slapped on around it (tilted pills with a white edge), like a scrapbook page.
+async function drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind){
+ const isYear=kind==='year',items=isYear?yearForestItems(year,'all'):forestMonthItems(month),done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length,m=Number(month.slice(5));
+ const ink='#1E2A22',soft='rgba(30,42,34,.55)',months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+ ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H);
+ ctx.textBaseline='alphabetic';ctx.fillStyle=ink;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillStyle=soft;ctx.fillText(isYear?year+' FOREST':months[m-1]+' '+month.slice(0,4),W-72,96);ctx.letterSpacing='0px';
+ const top=story?280:200;ctx.textAlign='center';ctx.fillStyle=ink;ctx.font='700 54px '+F;ctx.fillText(name+'의 '+(isYear?'올해':m+'월')+' 숲',W/2,top);
+ ctx.font='800 '+(story?300:240)+'px '+L;ctx.fillText(String(done.length),W/2,top+(story?290:235));
+ ctx.fillStyle=soft;ctx.font='600 46px '+F;ctx.fillText('그루를 심었어요',W/2,top+(story?375:310));ctx.textAlign='left';
+ // forest
+ const bandTop=top+(story?460:360),bandH=story?900:620;
+ const glow=ctx.createRadialGradient(W/2,bandTop+bandH*.5,10,W/2,bandTop+bandH*.5,W*.55);glow.addColorStop(0,'rgba(191,231,203,.30)');glow.addColorStop(1,'rgba(191,231,203,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ if(isYear){const scale=Math.min((W-60)/390,bandH/250);await shareIsland(ctx,bandTop+(bandH-250*scale)/2,(W-390*scale)/2,scale,items)}
+ else{try{const board=items.map(x=>({...x,forestTile:''})),svg=await inlineSvgImages(shareCropSVG(selfContainedForestSVG(forestSVG(board,'basic',false,{preview:true,transient:true,grid:'month'})))),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=await loadImage(url),iw=img.naturalWidth||720,ih=img.naturalHeight||540,sc=Math.min((W+40)/iw,bandH/ih);ctx.drawImage(img,(W-iw*sc)/2,bandTop+(bandH-ih*sc)/2,iw*sc,ih*sc)}finally{URL.revokeObjectURL(url)}}catch{}}
+ // stickers
+ const s=story?1.1:1;
+ sharePill(ctx,'책 ',60,top+(story?70:40),{fill:'#F7E7A1',size:34*s,bold:books+'권',boldSize:48*s,rotate:-8});
+ sharePill(ctx,'영화 ',W-60,top+(story?170:140),{fill:'#BFE7CB',size:34*s,bold:films+'편',boldSize:48*s,rotate:7,align:'right'});
+ const rated=done.filter(x=>validRating(x.rating)),avg=rated.length?(rated.reduce((n,x)=>n+Number(x.rating),0)/rated.length).toFixed(1):'';
+ if(avg)sharePill(ctx,'★ '+avg+'  평균 별점',W-72,bandTop+bandH-(story?220:150),{fill:'#E85A47',color:'#fff',size:34*s,rotate:6,align:'right'});
+ if(isYear){const byMonth=Array.from({length:12},(_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length),best=byMonth.indexOf(Math.max(...byMonth));
+  if(done.length)sharePill(ctx,'제일 울창한 달 ',72,bandTop+bandH-(story?80:40),{size:30*s,bold:(best+1)+'월 · '+byMonth[best]+'그루',boldSize:40*s,rotate:-4})}
+ else{const days=new Set(state.items.flatMap(x=>x.logs.map(l=>l.date)).filter(d=>d.startsWith(month))).size;sharePill(ctx,'기록한 날 ',72,bandTop+bandH-(story?80:40),{fill:'#1E2A22',color:'#fff',size:32*s,bold:days+'일',boldSize:44*s,rotate:-5})}
+ ctx.fillStyle=soft;ctx.font='500 30px '+F;ctx.textAlign='left';ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=ink;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left';
  return canvas;
 }
 // Crop the scene to the board itself so a small month forest still fills the card.
