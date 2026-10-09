@@ -955,7 +955,7 @@ async function drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind){
  if(avg)sharePill(ctx,'★ '+avg+'  평균 별점',W-72,bandTop+bandH-(story?150:120),{fill:'#E85A47',color:'#fff',size:34,rotate:6,align:'right'});
  if(isYear){const byMonth=Array.from({length:12},(_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length),best=byMonth.indexOf(Math.max(...byMonth));
   if(done.length)sharePill(ctx,'제일 울창한 달 ',72,bandTop+bandH-(story?40:10),{size:30,bold:(best+1)+'월 · '+byMonth[best]+'그루',boldSize:40,rotate:-4})}
- else{const days=new Set(state.items.flatMap(x=>x.logs.map(l=>l.date)).filter(d=>d.startsWith(month))).size;if(!days){const nth=Math.max(1,new Set(state.items.filter(x=>x.completed&&x.completed!=='unknown').map(x=>x.completed.slice(0,7)).filter(p=>p<=month)).size);sharePill(ctx,'나의 ',72,bandTop+bandH-(story?60:30),{fill:'#CBE4FF',size:30,bold:nth+'번째 숲',boldSize:42,rotate:-5})}
+ else{const days=new Set(state.items.flatMap(x=>x.logs.map(l=>l.date)).filter(d=>d.startsWith(month))).size;if(!days){const cnt={};done.forEach(x=>{const g=cleanGenreValue(x.genre)?launchGenre(x.type,x.genre,x):'';if(g&&g!=='기타')cnt[g]=(cnt[g]||0)+1});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];if(top)sharePill(ctx,'이달의 장르 ',72,bandTop+bandH-(story?60:30),{fill:'#CBE4FF',size:30,bold:top[0],boldSize:42,rotate:-5})}
  else sharePill(ctx,'기록한 날 ',72,bandTop+bandH-(story?60:30),{fill:'#1E2A22',color:'#fff',size:32,bold:days+'일',boldSize:44,rotate:-5})}
  ctx.fillStyle=muted;ctx.font='500 30px '+F;ctx.textAlign='left';ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=ink;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left';
  return canvas;
