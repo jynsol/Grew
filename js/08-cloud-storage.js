@@ -440,12 +440,14 @@ function todayLogDates(c){
  return new Set((c.logs||[]).map(l=>l.date).filter(date=>typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&Number.isFinite(Date.parse(date+'T12:00:00Z'))&&new Date(date+'T12:00:00Z').toISOString().slice(0,10)===date));
 }
 // The streak and this week's dots are shared: any day you recorded any book or film counts.
+// Which kinds were recorded on each day: {date: Set('book','movie')}.
+function logKindsByDate(){const out={};for(const c of state.items||[]){const add=d=>{(out[d]=out[d]||new Set()).add(c.type)};todayLogDates(c).forEach(add);if(typeof c.completed==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.completed))add(c.completed)}return out}
 function allLogDates(){const out=new Set();for(const c of state.items||[]){todayLogDates(c).forEach(d=>out.add(d));if(typeof c.completed==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(c.completed))out.add(c.completed)}return out}
 function todayDateShift(date,days){const d=new Date(date+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
 // Calendar dates, not elapsed hours: this also keeps DST and year boundaries stable.
 function weekDots(c,today=now()){
- const logged=allLogDates(),weekday=new Date(today+'T12:00:00Z').getUTCDay(),monday=todayDateShift(today,-((weekday+6)%7));
- return Array.from({length:7},(_,i)=>{const date=todayDateShift(monday,i);return {date,logged:date<=today&&logged.has(date),isToday:date===today,isFuture:date>today}});
+ const kinds=logKindsByDate(),weekday=new Date(today+'T12:00:00Z').getUTCDay(),monday=todayDateShift(today,-((weekday+6)%7));
+ return Array.from({length:7},(_,i)=>{const date=todayDateShift(monday,i),k=date<=today&&kinds[date];const kind=!k?'':k.has('book')&&k.has('movie')?'both':k.has('movie')?'movie':'book';return {date,logged:!!kind,kind,isToday:date===today,isFuture:date>today}});
 }
 function streakDays(c,today=now()){
  const logged=allLogDates();let date=logged.has(today)?today:todayDateShift(today,-1),days=0;
@@ -531,7 +533,7 @@ function openReadingList(currentId){
 }
 function todayStickerWeek(c){
  const streak=streakDays(c),names=['월','화','수','목','금','토','일'];
- return '<section class="sticker-week" aria-label="이번 주 기록"><h2>이번 주'+(streak?'<span class="tv-streak">연속 '+streak+'일</span>':'')+'</h2><ol>'+weekDots(c).map((d,i)=>'<li class="'+(d.logged?'is-logged ':'')+(d.isToday?'is-today ':'')+(d.isFuture?'is-future':'')+'" aria-label="'+d.date+' '+names[i]+'요일'+(d.isToday?' · 오늘':'')+' · '+(d.logged?'기록함':d.isFuture?'예정':'기록 없음')+'"'+(d.isToday?' aria-current="date"':'')+'>'+names[i]+'</li>').join('')+'</ol></section>';
+ return '<section class="sticker-week" aria-label="이번 주 기록"><h2>이번 주'+(streak?'<span class="tv-streak">연속 '+streak+'일</span>':'')+'</h2><ol>'+weekDots(c).map((d,i)=>'<li class="'+(d.logged?'is-logged is-'+d.kind+' ':'')+(d.isToday?'is-today ':'')+(d.isFuture?'is-future':'')+'" aria-label="'+d.date+' '+names[i]+'요일'+(d.isToday?' · 오늘':'')+' · '+(d.logged?'기록함':d.isFuture?'예정':'기록 없음')+'"'+(d.isToday?' aria-current="date"':'')+'>'+names[i]+'</li>').join('')+'</ol></section>';
 }
 function todayBoard(c){
  const stage=Model.stage(c),readingItems=state.items.filter(x=>!x.completed&&x.id!==c.id&&Model.stage(x)>0),reading=readingItems.length,readingLabel=progressLabel(readingItems),others=state.items.some(x=>!x.completed&&x.id!==c.id),date=new Date(now()+'T12:00:00Z');
