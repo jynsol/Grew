@@ -1897,24 +1897,24 @@ function recordDone(c,previousStage,previousKey=growthKey(c,previousStage)){
  }
  setTimeout(()=>toast(message),grew?900:450);
 }
-// Planted (redesign 13a): the finished work's tree, its stamp and a way into this month's forest.
-// Planted moment: a soft gradient page in the work's colours with light rays, sparkles and the
-// coral DONE stamp, then the work and three big numbers (tree no. this month, record days, rating).
+// Planted moment (sticker page, like the share cards): white page, a left-aligned headline, the tree
+// as a sticker on a disc in the work's colour with the DONE stamp slammed on and the cover stuck to its
+// side, then the work and three tilted stat stickers.
 function plantedMoment(c){
  const done=c.completed&&c.completed!=='unknown'?c.completed:now(),month=Number(done.slice(5,7)),months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
  const number=Math.max(1,state.items.filter(x=>x.completed&&x.completed!=='unknown'&&x.completed.slice(0,7)===done.slice(0,7)).length);
  const logs=new Set(c.logs.map(l=>l.date)).size;
  const tree=c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무';
- const spark=(x,y,s,d)=>'<i class="planted-spark" style="left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;animation-delay:'+d+'s"></i>';
- const stat=(value,unit,label)=>'<div class="planted-stat"><b>'+value+'<small>'+unit+'</small></b><span>'+label+'</span></div>';
- showModal('큰 나무를 숲에 심었어요','<div class="planted-bg" data-type="'+c.type+'" aria-hidden="true"><i class="planted-glow"></i></div>'+
- '<p class="moment-kicker">'+months[month-1]+' FOREST · NO.'+number+'</p><h3 class="moment-title" aria-hidden="true">큰 나무를<br>숲에 심었어요.</h3>'+
- '<div class="planted-stage" data-type="'+c.type+'"><i class="planted-rays" aria-hidden="true"></i><i class="planted-sun" aria-hidden="true"></i>'+
-  spark(14,18,14,0)+spark(80,58,10,.6)+spark(22,70,9,1.1)+spark(70,12,8,1.6)+spark(88,30,12,.3)+spark(8,46,7,1.9)+
-  stickerTree(c,3,'planted-tree')+'<div class="planted-stamp-real" aria-hidden="true">'+stampSVG(c,true)+'</div>'+
-  '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async" loading="lazy">':'')+'</span></div>'+
- '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+((code=>{const fin=code>=0&&code<=11171?code%28:0;return fin&&fin!==8?'으로':'로'})(tree.charCodeAt(tree.length-1)-0xAC00))+' 자랐어요</span></div>'+
- '<div class="planted-stats">'+stat(number,'번째','이달의 나무')+stat(logs||1,'일','함께한 기록')+stat(validRating(c.rating)?'<i class="planted-star" aria-hidden="true">★</i>'+Number(c.rating).toFixed(1):'–','','별점')+'</div>'+
+ const spark=(cls,x,y,s,d)=>'<i class="pl-spark '+cls+'" style="left:'+x+'%;top:'+y+'%;width:'+s+'px;height:'+s+'px;animation-delay:'+d+'s"></i>';
+ const pill=(label,value,cls,rot)=>'<span class="pl-pill '+cls+'" style="--rot:'+rot+'deg">'+label+'<b>'+value+'</b></span>';
+ const eul=(code=>{const fin=code>=0&&code<=11171?code%28:0;return fin&&fin!==8?'으로':'로'})(tree.charCodeAt(tree.length-1)-0xAC00);
+ showModal('숲에 한 그루 더 자랐어요','<div class="pl-page" data-type="'+c.type+'">'+
+ '<p class="pl-kicker">'+months[month-1]+' FOREST · NO.'+number+'</p><h3 class="pl-title" aria-hidden="true">숲에 한 그루<br>더 자랐어요</h3>'+
+ '<div class="pl-stage"><i class="pl-disc" aria-hidden="true"></i>'+spark('is-honey',10,12,22,0)+spark('is-coral',86,74,14,.8)+spark('is-mint',6,70,12,1.4)+
+  stickerTree(c,3,'pl-tree')+'<div class="planted-stamp-real pl-stamp" aria-hidden="true">'+stampSVG(c,true)+'</div>'+
+  '<span class="pl-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'')+'</span></div>'+
+ '<div class="pl-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+eul+' 자랐어요</span></div>'+
+ '<div class="pl-pills">'+pill('이달의 나무 ',number+'번째','is-butter',-5)+pill('함께한 기록 ',(logs||1)+'일','is-mint',4)+(validRating(c.rating)?pill('★ ',Number(c.rating).toFixed(1),'is-coral',-3):'')+'</div></div>'+
  '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+'</div>','planted');
 }
 function complete(id){const c=get(id);if(!c||c.completed)return;ratingPrompt(c,true)}
