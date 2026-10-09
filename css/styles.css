@@ -4171,3 +4171,12 @@ body.is-decorating .toast{bottom:calc(282px + env(safe-area-inset-bottom))!impor
 .sheet-back[data-kind="planted"] .pl-stage .pl-tree{width:160px;height:160px;margin-left:-80px;top:26px}
 .sheet-back[data-kind="planted"] .pl-stage .pl-stamp{width:80px;height:80px;right:6px;top:-8px}
 .sheet-back[data-kind="planted"] .pl-cover{left:14px;bottom:4px}
+/* Planted card: confetti instead of sparkles */
+.pl-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:30px;z-index:0}
+.pl-confetti i{position:absolute;top:-16px;left:var(--x);width:8px;height:13px;border-radius:2px;background:var(--c);opacity:0;transform:rotate(var(--r));animation:plConfetti 2.6s cubic-bezier(.3,.6,.5,1) var(--d) both}
+.pl-confetti i:nth-child(3n){width:10px;height:10px;border-radius:50%}
+.pl-confetti i:nth-child(4n){width:6px;height:16px}
+@keyframes plConfetti{0%{opacity:0;transform:translateY(0) rotate(var(--r))}10%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translate(18px,560px) rotate(calc(var(--r) + 540deg))}}
+.sheet-back[data-kind="planted"] .pl-page{position:static}
+.sheet-back[data-kind="planted"] .pl-page>*:not(.pl-confetti){position:relative;z-index:1}
+@media (prefers-reduced-motion:reduce){.pl-confetti{display:none}}
