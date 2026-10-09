@@ -735,7 +735,7 @@ function yearBoardGeometry(y,items){
  cells.sort((p,q)=>(p.r+p.c)-(q.r+q.c)||Math.abs(p.c-p.r)-Math.abs(q.c-q.r)||p.c-q.c);
  const center=({r,c})=>[cx+(c-r)*cellW,y0+(c+r+1)*cellH];
  const trees=items.map((it,k)=>{const cell=cells[k],[x,yy]=center(cell),stage=it.completed?3:Model.stage(it),base=cellW*2.25;
-  return {x:x+(rnd('tx'+it.id)-.5)*cellW*.5,y:yy+(rnd('ty'+it.id)-.5)*cellH*.5,src:stickerTreeSrc(it,stage),size:+(base*(stage===3?1:stage===2?.62:.45)).toFixed(1),id:it.id}});
+  return {x:x+(rnd('tx'+it.id)-.5)*cellW*.5,y:yy+(rnd('ty'+it.id)-.5)*cellH*.5,src:stage===3&&it.hiddenTree&&bmFloorId()==='snow'?(SONGLIM_TREE_ASSETS['winter'+(it.hiddenTree==='A'?'shining':'moonlight')]||{}).src||stickerTreeSrc(it,stage):stickerTreeSrc(it,stage),size:+(base*(stage===3?1:stage===2?.62:.45)).toFixed(1),id:it.id}});
  const dots=cells.slice(n).filter((_,k)=>k%2===0).map(cell=>{const [x,yy]=center(cell);return {x,y:yy}});
  return {W,H,ground,trees:trees.sort((a,b)=>a.y-b.y),dots,cellW};
 }
