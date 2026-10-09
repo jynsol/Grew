@@ -4091,3 +4091,7 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .bm-decoration-name{font-size:12.5px!important;line-height:1.25!important;gap:3px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* Decorating: the forest sits above the dock instead of under it */
 #page .forest-month.is-board .forest-viewport.editing{bottom:calc(150px + env(safe-area-inset-bottom))}
+.forest-edit-bar .forest-edit-theme.is-locked{background:transparent;color:var(--text-3);gap:4px;display:inline-flex;align-items:center}
+.forest-edit-custom{flex:none;align-self:center;padding:0 6px;font:500 12px/1 var(--font-family);color:var(--text-3)}
+/* While decorating, toasts sit above the dock instead of covering it */
+body.is-decorating .toast{bottom:calc(232px + env(safe-area-inset-bottom))!important}

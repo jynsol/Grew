@@ -419,7 +419,7 @@ function render(){
  forestVisibilityObserver?.disconnect();forestVisibilityObserver=null;
  if(authRoute!=='app'){renderEntry();syncThemeColor();return}
  syncThemeColor();
- $('tabs').hidden=false;$('page').classList.remove('entry-page','taste-page','intro-page','ob-page');$('page').dataset.view=view;$('head').dataset.view=view;document.body.dataset.view=view;
+ $('tabs').hidden=false;$('page').classList.remove('entry-page','taste-page','intro-page','ob-page');$('page').dataset.view=view;document.body.classList.toggle('is-decorating',view==='forest'&&forestEditMode);$('head').dataset.view=view;document.body.dataset.view=view;
  const parentTab=view==='detail'?detailOrigin:view;
  const tab=['sound','notifications'].includes(parentTab)?'my':['calendar','shop','codex'].includes(parentTab)?'forest':parentTab;
  $('tabs').innerHTML=['today','scrap','forest','my'].map((t,i)=>'<button class="'+(tab===t?'active':'')+'" data-action="tab" data-tab="'+t+'" aria-current="'+(tab===t?'page':'false')+'">'+icon(t)+'<span class="tab-label">'+['오늘','스크랩','숲','마이'][i]+'</span></button>').join('');
