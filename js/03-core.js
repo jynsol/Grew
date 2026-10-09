@@ -559,10 +559,15 @@ function bmPreviewResetConfirm(){confirmBox('구매 되돌리기','체험으로 
 // Floor swatches scroll sideways, so more floors can be added without crowding the bar.
 const bmFloorSwatchCache={};
 function bmFloorSwatch(id){return bmFloorSwatchCache[id]||(bmFloorSwatchCache[id]=bmFloorPreviewArt(id))}
+// Decorate dock: one bar while decorating — a 나무 | 바닥 switch, 완료, and one sideways-scrolling row
+// of choices. New kinds of decoration become another switch tab, so the bar never grows taller.
+let bmEditTab='tree';
 function bmEditBarHTML(){const cur=bmFloorId(),theme=bmState().treeTheme||'mix',lock='<svg class="forest-edit-lock" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
- const themes='<div class="forest-edit-themes" role="group" aria-label="나무 테마">'+BM_TREE_THEMES.map(t=>{const ok=bmThemeAvailable(t.id),on=theme===t.id;return button(esc(t.name),'bmTreeTheme','forest-edit-theme'+(on?' active':''),'data-theme="'+t.id+'" aria-pressed="'+on+'"'+(ok?'':' disabled aria-label="'+esc(t.name)+' · 아직 없는 나무예요"'))}).join('')+'</div>';
- const floors='<div class="forest-edit-floors" role="group" aria-label="바닥">'+BM_FLOORS.filter(f=>f.ready).map(f=>{const owned=bmFloorOwned(f.id),on=cur===f.id;return button('<span class="forest-edit-swatch" aria-hidden="true">'+bmFloorSwatch(f.id)+'</span>'+(owned?'':lock),owned?'bmChooseOwnedFloor':'bmPreviewFloor','forest-edit-floor'+(on?' active':'')+(owned?'':' is-locked'),'data-floor="'+f.id+'" aria-pressed="'+on+'" aria-label="'+esc(f.name)+(owned?'':' · 미리보기')+'" title="'+esc(f.name)+'"')}).join('')+'</div>';
- return '<div class="forest-edit-bar is-stack" role="group" aria-label="꾸미기">'+themes+floors+'</div>'}
+ const tabs=[['tree','나무'],['floor','바닥']];
+ const head='<div class="forest-edit-head"><div class="forest-edit-tabs" role="tablist" aria-label="꾸미기">'+tabs.map(([id,label])=>button(label,'bmEditTab',bmEditTab===id?'active':'','role="tab" data-tab="'+id+'" aria-selected="'+(bmEditTab===id)+'"')).join('')+'</div>'+button('완료','forestEdit','forest-edit-done')+'</div>';
+ const themes='<div class="forest-edit-row forest-edit-themes" role="group" aria-label="나무 테마">'+BM_TREE_THEMES.map(t=>{const ok=bmThemeAvailable(t.id),on=theme===t.id;return button(esc(t.name),'bmTreeTheme','forest-edit-theme'+(on?' active':''),'data-theme="'+t.id+'" aria-pressed="'+on+'"'+(ok?'':' disabled aria-label="'+esc(t.name)+' · 아직 없는 나무예요"'))}).join('')+'</div>';
+ const floors='<div class="forest-edit-row forest-edit-floors" role="group" aria-label="바닥">'+BM_FLOORS.filter(f=>f.ready).map(f=>{const owned=bmFloorOwned(f.id),on=cur===f.id;return button('<span class="forest-edit-swatch" aria-hidden="true">'+bmFloorSwatch(f.id)+'</span>'+(owned?'':lock),owned?'bmChooseOwnedFloor':'bmPreviewFloor','forest-edit-floor'+(on?' active':'')+(owned?'':' is-locked'),'data-floor="'+f.id+'" aria-pressed="'+on+'" aria-label="'+esc(f.name)+(owned?'':' · 미리보기')+'" title="'+esc(f.name)+'"')}).join('')+'</div>';
+ return '<div class="forest-edit-bar is-dock">'+head+(bmEditTab==='floor'?floors:themes)+'<p class="forest-edit-tip">'+(bmEditTab==='floor'?'바닥을 고르면 바로 바뀌어요':'나무를 눌러 한 그루씩 바꿀 수도 있어요')+'</p></div>'}
 function bmOpenFloorPicker(){bmRefresh(state);const floors=BM_FLOORS.filter(f=>f.ready&&bmFloorOwned(f.id));showModal('바닥 바꾸기','<div class="bm-decoration-body"><div class="bm-decoration-floors">'+floors.map(f=>button(bmFloorPreviewArt(f.id)+'<span>'+f.name+(bmFloorId()===f.id?'<b aria-hidden="true">✓</b>':'')+'</span>','bmChooseOwnedFloor','bm-decoration-floor '+(bmFloorId()===f.id?'selected':''),'data-floor="'+f.id+'" aria-pressed="'+(bmFloorId()===f.id)+'"')).join('')+'</div><p id="formError" class="form-error" role="alert"></p></div>','collection')}
 function bmChooseOwnedFloor(id){if(!BM_FLOORS.some(f=>f.id===id&&f.ready&&bmFloorOwned(id)))return;if(bmFloorId()===id)return;if(!bmSetFloor(id)||!persist())return;closeModal();view='forest';forestEditMode=true;render()}
 
@@ -572,6 +577,7 @@ function bmAction(a,b){
  if(a==='bmDecorateFloors'){bmDecorateForest();bmOpenFloorPicker();return true}
  if(a==='bmChooseOwnedTree'){bmChooseOwnedTree(b.dataset.id,b.dataset.species);return true}
  if(a==='bmAutoOwnedTree'){bmChooseOwnedTree(b.dataset.id,'',true);return true}
+ if(a==='bmEditTab'){bmEditTab=b.dataset.tab==='floor'?'floor':'tree';render();return true}
  if(a==='bmTreeTheme'){const t=b.dataset.theme;if(!bmThemeAvailable(t)||bmState().treeTheme===t&&t!=='mix')return true;const before=Model.clone(state);bmApplyTreeTheme(state,t);if(!persist()){state=before;return true}view='forest';forestEditMode=true;render();toast(t==='mix'?'가진 나무를 섞어서 심었어요.':BM_TREE_THEMES.find(x=>x.id===t).name+' 나무로 바꿨어요.');return true}
  if(a==='bmPreviewReset'){bmPreviewResetConfirm();return true}
  if(a==='bmChooseOwnedFloor'){bmChooseOwnedFloor(b.dataset.floor);return true}
