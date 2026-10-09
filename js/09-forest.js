@@ -953,6 +953,7 @@ async function drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind){
  // decoration around the island (shareDecor): sparkles always, plus one extra touch
  const spark=(x,y,r,c)=>{ctx.save();ctx.translate(x,y);ctx.fillStyle=c;ctx.beginPath();for(let k=0;k<8;k++){const a=k*Math.PI/4,rr=k%2?r*.3:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath();ctx.fill();ctx.restore()};
  spark(W-150,bandTop-10,20,'#F2B84B');spark(W-210,bandTop+50,13,'#E85A47');
+ {ctx.save();ctx.translate(190,bandTop+(story?50:20));ctx.rotate(-.2);ctx.fillStyle='#6CC092';ctx.beginPath();for(let k=0;k<10;k++){const a=k*Math.PI/5-Math.PI/2,q=k%2?8:19;ctx.lineTo(Math.cos(a)*q,Math.sin(a)*q)}ctx.closePath();ctx.fill();ctx.restore()}
  await shareDecorate(ctx,W,tx,ty,bandTop,bandH,story);
  const rated=done.filter(x=>validRating(x.rating)),avg=rated.length?(rated.reduce((n,x)=>n+Number(x.rating),0)/rated.length).toFixed(1):'';
  if(avg)sharePill(ctx,'★ '+avg+'  평균 별점',W-72,bandTop+bandH-(story?150:120),{fill:'#E85A47',color:'#fff',size:34,rotate:6,align:'right'});
