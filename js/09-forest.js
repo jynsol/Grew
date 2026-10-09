@@ -918,6 +918,21 @@ async function drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,mode='life'){
 // Year and month cards: white page; the original header (title, big number and 그루를 심었어요 on the
 // left, 책/영화 stickers stacked on the right), then the forest with a strip of washi tape, a couple of
 // sparkles and stickers slapped on around it.
+let shareDecor='visitor';
+async function shareDecorate(ctx,W,tx,ty,bandTop,bandH,story){
+ const d=shareDecor,sticker=(img,x,y,size,rot)=>{if(!img)return;ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.drawImage(img,-size/2,-size/2,size,size);ctx.restore()};
+ if(d==='visitor'){ // a forest friend peeking from the island's corner
+  const pick=FOREST_VISITORS.filter(v=>collectionState().visitorsSeen.includes(v.id)),v=(pick.at(-1)||FOREST_VISITORS[0]).id;sticker(await shareAsset('./assets/images/forest/sticker/visitor-'+v+'.webp'),tx+10,ty-30,story?190:170,-.12)}
+ else if(d==='leaves'){ // a few falling leaves in the app's colours
+  const leaf=(x,y,r,rot,c)=>{ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(0,-r);ctx.quadraticCurveTo(r*.8,0,0,r);ctx.quadraticCurveTo(-r*.8,0,0,-r);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-r*.8);ctx.lineTo(0,r*.8);ctx.stroke();ctx.restore()};
+  [[110,bandTop+30,26,.6,'#6CC092'],[180,bandTop-30,18,-.4,'#F2B84B'],[W-120,bandTop+bandH*.45,22,.9,'#E85A47'],[W*.5+250,bandTop-40,16,-.8,'#6CC092'],[140,bandTop+bandH*.55,16,1.2,'#F2B84B']].forEach(a=>leaf(...a))}
+ else if(d==='doodle'){ // hand-drawn heart and swirl next to the forest
+  ctx.save();ctx.strokeStyle='#E85A47';ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';const hx=130,hy=bandTop+40,r=34;ctx.beginPath();ctx.moveTo(hx,hy+r*.9);ctx.bezierCurveTo(hx-r*1.6,hy-r*.2,hx-r*.6,hy-r*1.3,hx,hy-r*.4);ctx.bezierCurveTo(hx+r*.6,hy-r*1.3,hx+r*1.6,hy-r*.2,hx,hy+r*.9);ctx.stroke();
+  ctx.strokeStyle='#6CC092';ctx.beginPath();for(let a=0;a<Math.PI*3;a+=.2){const rr=6+a*7;ctx.lineTo(W-150+Math.cos(a)*rr,bandTop+bandH*.42+Math.sin(a)*rr)}ctx.stroke();ctx.restore()}
+ else if(d==='badge'){ // round "MY FOREST" sticker badge on the island corner
+  ctx.save();ctx.translate(tx+20,ty-20);ctx.rotate(-.18);ctx.shadowColor='rgba(30,42,34,.18)';ctx.shadowBlur=18;ctx.shadowOffsetY=8;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,78,0,Math.PI*2);ctx.fill();ctx.shadowColor='transparent';ctx.fillStyle='#CBE4FF';ctx.beginPath();ctx.arc(0,0,68,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#1E2A22';ctx.textAlign='center';ctx.font='800 26px Archivo,sans-serif';ctx.fillText('MY',0,-6);ctx.fillText('FOREST',0,24);ctx.textAlign='left';ctx.restore()}
+}
 async function drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind){
  const isYear=kind==='year',items=isYear?yearForestItems(year,'all'):forestMonthItems(month),done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length,m=Number(month.slice(5));
  const ink='#1E2A22',soft='rgba(30,42,34,.55)',muted='#52524F',months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -932,10 +947,10 @@ async function drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind){
  let tx=W*.2,ty=bandTop+bandH*.3;
  if(isYear){const scale=Math.min((W-80)/390,bandH/250),oy=bandTop+(bandH-250*scale)/2,ox=(W-390*scale)/2;await shareIsland(ctx,oy,ox,scale,items);const N=Math.max(2,Math.ceil(Math.sqrt(items.length))),BW=Math.min(170,95+N*9),y0=46+(170-BW)/2;tx=ox+(195-BW*.92)*scale;ty=oy+(y0+BW/2-8)*scale}
  else{try{const board=items.map(x=>({...x,forestTile:''})),svg=await inlineSvgImages(shareCropSVG(selfContainedForestSVG(forestSVG(board,'basic',false,{preview:true,transient:true,grid:'month'})))),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=await loadImage(url),iw=img.naturalWidth||720,ih=img.naturalHeight||540,sc=Math.min((W+60)/iw,bandH/ih);const ix=(W-iw*sc)/2,iy=bandTop+(bandH-ih*sc)/2;ctx.drawImage(img,ix,iy,iw*sc,ih*sc);tx=ix+iw*sc*.12;ty=iy+ih*sc*.4}finally{URL.revokeObjectURL(url)}}catch{}}
- // washi tape on the island's corner and a couple of sparkles
- ctx.save();ctx.translate(tx,ty);ctx.rotate(-.55);ctx.globalAlpha=.8;ctx.fillStyle='#F2B84B';ctx.fillRect(-80,-20,160,40);ctx.globalAlpha=.35;ctx.fillStyle='#fff';for(let i=-80;i<80;i+=16)ctx.fillRect(i,-20,7,40);ctx.restore();
+ // decoration around the island (shareDecor): sparkles always, plus one extra touch
  const spark=(x,y,r,c)=>{ctx.save();ctx.translate(x,y);ctx.fillStyle=c;ctx.beginPath();for(let k=0;k<8;k++){const a=k*Math.PI/4,rr=k%2?r*.3:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath();ctx.fill();ctx.restore()};
  spark(W-150,bandTop-10,20,'#F2B84B');spark(W-210,bandTop+50,13,'#E85A47');
+ await shareDecorate(ctx,W,tx,ty,bandTop,bandH,story);
  const rated=done.filter(x=>validRating(x.rating)),avg=rated.length?(rated.reduce((n,x)=>n+Number(x.rating),0)/rated.length).toFixed(1):'';
  if(avg)sharePill(ctx,'★ '+avg+'  평균 별점',W-72,bandTop+bandH-(story?150:120),{fill:'#E85A47',color:'#fff',size:34,rotate:6,align:'right'});
  if(isYear){const byMonth=Array.from({length:12},(_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length),best=byMonth.indexOf(Math.max(...byMonth));
