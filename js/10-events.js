@@ -68,12 +68,13 @@ document.addEventListener('click',async e=>{
  if(a==='toToday'){go('today');return}
  if(a==='toScrap'){go('scrap');return}
  if(a==='calendar'){forestMode='month';forestShow='calendar';go('forest');return}
- if(a==='forestYearView'){forestMode='year';forestEditMode=false;render();scrollPageTop();return}
- if(a==='forestMonthView'){if(/^\d{4}-\d{2}$/.test(b.dataset.month||''))month=b.dataset.month;forestMode='month';forestViewportYear=null;zoomState={scale:1,x:0,y:0};render();scrollPageTop();return}
+ if(a==='forestYearView'){forestMode='year';forestLifetime=false;forestEditMode=false;render();scrollPageTop();return}
+ if(a==='forestMonthView'){forestLifetime=false;if(/^\d{4}-\d{2}$/.test(b.dataset.month||''))month=b.dataset.month;forestMode='month';forestViewportYear=null;zoomState={scale:1,x:0,y:0};render();scrollPageTop();return}
  if(a==='forestShow'){forestShow=b.dataset.show==='calendar'?'calendar':'forest';forestEditMode=false;render();return}
  if(a==='forestType'){if(['all','book','movie'].includes(b.dataset.type))forestTypeFilter=b.dataset.type;render();return}
  if(a==='forestPrevMonth'||a==='forestNextMonth'){const [y,m]=month.split('-').map(Number),d=new Date(y,m-1+(a==='forestPrevMonth'?-1:1),1),next=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');if(next<=now().slice(0,7)){month=next;forestViewportYear=null;zoomState={scale:1,x:0,y:0};render()}return}
- if(a==='forestPrevYear'||a==='forestNextYear'){const ys=forestTreeYears(),y=a==='forestPrevYear'?ys.filter(x=>x<year).at(-1):ys.find(x=>x>year);if(y){year=y;month=forestYearMonth(y);render()}return}
+ if(a==='forestPrevYear'||a==='forestNextYear'){const ys=forestTreeYears();if(forestLifetime){if(a==='forestPrevYear'&&ys.length){forestLifetime=false;year=ys.at(-1);month=forestYearMonth(year);render()}return}const y=a==='forestPrevYear'?ys.filter(x=>x<year).at(-1):ys.find(x=>x>year);if(y){year=y;month=forestYearMonth(y);render()}else if(a==='forestNextYear'&&ys.length){forestLifetime=true;render()}return}
+ if(a==='forestPickYearCard'){forestLifetime=false;year=b.dataset.year;month=forestYearMonth(year);render();scrollPageTop();return}
  if(a==='forestMonthPicker'){forestMonthPopOpen=!forestMonthPopOpen;render();return}
  if(a==='forestMonthPickerClose'){forestMonthPopOpen=false;render();return}
  if(a==='forestPickYear'){const sheet=document.querySelector('.month-pick');if(sheet)sheet.outerHTML=forestMonthPickerHTML(b.dataset.year);return}

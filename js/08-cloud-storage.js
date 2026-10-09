@@ -719,10 +719,12 @@ function forestCalendarHTML(period){
 // spots inside the diamond, so the plot fills evenly without lining up in rows.
 // Year forest: one square, slightly bumpy low-poly board. Every tree from the year is planted in order,
 // from the back corner forward. The board is the smallest square that holds them, so it never looks empty.
+// Past the latest year, › shows 평생의 숲: every tree ever planted on one board (y==='all').
+let forestLifetime=false;
 function yearForestItems(y,type){
  const current=now().slice(0,7);
  // Only finished works count as planted trees here (and in shares); growing ones live in the month forest.
- const items=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&c.completed&&forestRecordYear(c)===y);
+ const items=state.items.filter(c=>['book','movie'].includes(c.type)&&(type==='all'||c.type===type)&&c.completed&&(y==='all'||forestRecordYear(c)===y));
  const key=c=>c.completed&&c.completed!=='unknown'?c.completed:'9999'+(c.logs.map(l=>l.date).sort().at(-1)||c.startedAt||'');
  return items.sort((a,b)=>key(a).localeCompare(key(b)));
 }
@@ -741,23 +743,34 @@ function yearBoardGeometry(y,items){
 }
 function forestYearIsland(y,type){
  const g=yearBoardGeometry(y,yearForestItems(y,type));
- return '<svg class="forest-island forest-year-board" viewBox="0 0 '+g.W+' '+g.H+'" role="img" aria-label="'+y+'년의 숲, '+g.trees.length+'그루">'+polyGroundSVG(g.ground)+
+ return '<svg class="forest-island forest-year-board" viewBox="0 0 '+g.W+' '+g.H+'" role="img" aria-label="'+(y==='all'?'평생의 숲':y+'년의 숲')+', '+g.trees.length+'그루">'+polyGroundSVG(g.ground)+
   g.dots.map(d=>'<ellipse cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" rx="'+(g.cellW*.16).toFixed(1)+'" ry="'+(g.cellW*.08).toFixed(1)+'" fill="'+g.ground.dot+'"/>').join('')+
   g.trees.map(t=>'<image href="'+esc(t.src)+'" x="'+(t.x-t.size/2).toFixed(1)+'" y="'+(t.y-t.size*.875).toFixed(1)+'" width="'+t.size+'" height="'+t.size+'" pointer-events="none"/>').join('')+'</svg>';
 }
 function renderForestYear(){
  const treeYears=forestTreeYears();
  if(!treeYears.length)return '<section class="forest-page-section forest-year"><div class="forest-top">'+button('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>'+Number(month.slice(5))+'월의 숲','forestMonthView','forest-back','data-month="'+month+'"')+'</div><div class="empty"><span class="empty-icon" aria-hidden="true">'+icon('forest')+'</span><h3>아직 심은 나무가 없어요</h3><p>작품을 다 읽거나 보면<br>올해의 숲에 나무가 생겨요.</p></div></section>';
+ if(forestLifetime)return renderForestLifetime(treeYears);
  const type=forestTypeFilter,current=now().slice(0,7),all=yearForestItems(year,type);
  const filters='<div class="forest-type-filter" role="group" aria-label="종류">'+[['all','전체'],['book','책'],['movie','영화']].map(([k,l])=>button(l,'forestType',k===type?'active':'','data-type="'+k+'" aria-pressed="'+(k===type)+'"')).join('')+'</div>';
  const head='<div class="forest-top">'+button('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>'+Number(month.slice(5))+'월의 숲','forestMonthView','forest-back','data-month="'+month+'"')+filters+'</div>'+
-  '<div class="forest-title-row"><div><span class="forest-year-label">'+esc(year)+'</span><h1 class="page-title">올해의 숲</h1>'+forestTypeChips(all,'<span class="forest-reading">'+all.length+'그루</span>',forestTypeFilter)+'</div>'+forestNav('forestPrevYear','forestNextYear','지난해','다음 해',treeYears.some(y=>y>year),treeYears.some(y=>y<year))+'</div>';
+  '<div class="forest-title-row"><div><span class="forest-year-label">'+esc(year)+'</span><h1 class="page-title">올해의 숲</h1>'+forestTypeChips(all,'<span class="forest-reading">'+all.length+'그루</span>',forestTypeFilter)+'</div>'+forestNav('forestPrevYear','forestNextYear','지난해',treeYears.some(y=>y>year)?'다음 해':'평생의 숲',true,treeYears.some(y=>y<year))+'</div>';
  const cards=Array.from({length:12},(_,i)=>{const period=year+'-'+String(i+1).padStart(2,'0'),future=period>current,items=future?[]:forestMonthItems(period,type),done=items.filter(c=>c.completed),b=done.filter(c=>c.type==='book').length,m=done.filter(c=>c.type==='movie').length;
   return future?'<div class="forest-month-card is-future"><strong>'+(i+1)+'월</strong><small>—</small></div>':button('<strong>'+(i+1)+'월<b>'+done.length+'</b></strong><small>'+(forestTypeFilter==='book'?'책 '+b+'권':forestTypeFilter==='movie'?'영화 '+m+'편':'책 '+b+' · 영화 '+m)+'</small>','forestMonthView','forest-month-card'+(period===current?' is-current':''),'data-month="'+period+'"')}).join('');
  return '<section class="forest-page-section forest-year">'+head+'<div class="forest-island-wrap">'+forestYearIsland(year,type)+'</div><div class="forest-month-grid">'+cards+'</div>'+
  (all.length?'<div class="forest-year-share">'+button('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>올해의 숲 자랑하기','shareForest','primary')+'</div>':'')+'</section>';
 }
 
+function renderForestLifetime(treeYears){
+ const type=forestTypeFilter,all=yearForestItems('all',type),first=treeYears[0],last=treeYears.at(-1);
+ const back='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>';
+ const filters='<div class="forest-type-filter" role="group" aria-label="종류">'+[['all','전체'],['book','책'],['movie','영화']].map(([k,l])=>button(l,'forestType',k===type?'active':'','data-type="'+k+'" aria-pressed="'+(k===type)+'"')).join('')+'</div>';
+ const head='<div class="forest-top">'+button(back+Number(month.slice(5))+'월의 숲','forestMonthView','forest-back','data-month="'+month+'"')+filters+'</div>'+
+  '<div class="forest-title-row"><div><span class="forest-year-label">'+esc(first===last?first:first+'–'+last)+'</span><h1 class="page-title">평생의 숲</h1>'+forestTypeChips(all,'<span class="forest-reading">'+all.length+'그루</span>',type)+'</div>'+forestNav('forestPrevYear','forestNextYear',last+'년의 숲','',false,true)+'</div>';
+ const cards=[...treeYears].reverse().map(y=>{const done=yearForestItems(y,type),b=done.filter(c=>c.type==='book').length,m=done.filter(c=>c.type==='movie').length;return button('<strong>'+y+'<b>'+done.length+'</b></strong><small>'+(type==='book'?'책 '+b+'권':type==='movie'?'영화 '+m+'편':'책 '+b+' · 영화 '+m)+'</small>','forestPickYearCard','forest-month-card'+(y===now().slice(0,4)?' is-current':''),'data-year="'+y+'"')}).join('');
+ return '<section class="forest-page-section forest-year is-lifetime">'+head+'<div class="forest-island-wrap">'+forestYearIsland('all',type)+'</div><div class="forest-month-grid">'+cards+'</div>'+
+ (all.length?'<div class="forest-year-share">'+button('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>평생의 숲 자랑하기','shareForest','primary')+'</div>':'')+'</section>';
+}
 function calendarHTML(period){
  const [y,m]=period.split('-').map(Number),start=new Date(y,m-1,1).getDay(),days=new Date(y,m,0).getDate();
  let html='<div class="cal">'+['일','월','화','수','목','금','토'].map(d=>'<div class="weekday">'+d+'</div>').join('')+'<div></div>'.repeat(start);
