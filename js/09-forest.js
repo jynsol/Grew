@@ -891,23 +891,7 @@ async function drawShareCard(kind,format,target){
  }
  if(kind==='year'&&forestLifetime)return drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,'life');
  if(kind==='year'||kind==='month')return drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind);
- const isYear=kind==='year',life=isYear&&forestLifetime,items=isYear?yearForestItems(life?'all':year,'all'):forestMonthItems(month);
- const done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length,m=Number(month.slice(5));
- head(life?'MY FOREST':isYear?year+' FOREST':months[m-1]+' '+month.slice(0,4));
- const top=story?250:200;ctx.fillStyle=ink;ctx.font='700 46px '+F;ctx.fillText(name+'의 '+(life?'':isYear?'올해 ':m+'월 ')+'숲',72,top);
- const big=String(done.length);ctx.font='800 '+(story?300:250)+'px '+L;ctx.fillText(big,60,top+(story?290:240));
- ctx.font='700 56px '+F;ctx.fillText('그루를 심었어요',72,top+(story?390:330));
- sharePill(ctx,'책 ',W-72,top-30,{fill:'#F7E7A1',size:34,bold:books+'권',boldSize:48,rotate:-6,align:'right'});
- sharePill(ctx,'영화 ',W-110,top+90,{fill:'#BFE7CB',size:34,bold:films+'편',boldSize:48,rotate:5,align:'right'});
- const bandTop=top+(story?520:400),bandH=story?820:560;
- if(isYear){const scale=Math.min((W-80)/390,bandH/250);await shareIsland(ctx,bandTop+(bandH-250*scale)/2,(W-390*scale)/2,scale,items)}
- else{try{const board=items.map(x=>({...x,forestTile:''})),svg=await inlineSvgImages(shareCropSVG(selfContainedForestSVG(forestSVG(board,'basic',false,{preview:true,transient:true,grid:'month'})))),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=await loadImage(url),iw=img.naturalWidth||720,ih=img.naturalHeight||540,s=Math.min((W+60)/iw,bandH/ih);ctx.drawImage(img,(W-iw*s)/2,bandTop+(bandH-ih*s)/2,iw*s,ih*s)}finally{URL.revokeObjectURL(url)}}catch{}}
- if(isYear){
-  const byMonth=Array.from({length:12},(_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length),best=byMonth.indexOf(Math.max(...byMonth)),rated=done.filter(x=>validRating(x.rating)),avg=rated.length?(rated.reduce((n,x)=>n+Number(x.rating),0)/rated.length).toFixed(1):'';
-  if(done.length)sharePill(ctx,'제일 울창한 달 ',72,bandTop+bandH-(story?40:10),{size:30,bold:(best+1)+'월 · '+byMonth[best]+'그루',boldSize:40,rotate:-4});
-  if(avg)sharePill(ctx,'★ '+avg+'  평균 별점',W-72,bandTop+bandH-(story?150:120),{fill:'#E85A47',color:'#fff',size:34,rotate:6,align:'right'});
- }else{const days=new Set(state.items.flatMap(x=>x.logs.map(l=>l.date)).filter(d=>d.startsWith(month))).size;sharePill(ctx,'기록한 날 ',72,bandTop+bandH-(story?60:30),{fill:'#1E2A22',color:'#fff',size:32,bold:days+'일',boldSize:44,rotate:-5})}
- foot();return canvas;
+ return canvas;
 }
 // Forest stat cards. Lifetime ("솔의 숲"): a night forest — dark sky, stars, the island lit from behind,
 // a bar per year. Year ("올해의 숲"): the same layout on white, no sky, a bar per month.
@@ -971,7 +955,7 @@ async function drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind){
  if(avg)sharePill(ctx,'★ '+avg+'  평균 별점',W-72,bandTop+bandH-(story?220:150),{fill:'#E85A47',color:'#fff',size:34*s,rotate:6,align:'right'});
  if(isYear){const byMonth=Array.from({length:12},(_,i)=>done.filter(x=>x.completed.slice(5,7)===String(i+1).padStart(2,'0')).length),best=byMonth.indexOf(Math.max(...byMonth));
   if(done.length)sharePill(ctx,'제일 울창한 달 ',72,bandTop+bandH-(story?80:40),{size:30*s,bold:(best+1)+'월 · '+byMonth[best]+'그루',boldSize:40*s,rotate:-4})}
- else{const days=new Set(state.items.flatMap(x=>x.logs.map(l=>l.date)).filter(d=>d.startsWith(month))).size;sharePill(ctx,'기록한 날 ',72,bandTop+bandH-(story?80:40),{fill:'#1E2A22',color:'#fff',size:32*s,bold:days+'일',boldSize:44*s,rotate:-5})}
+ else{const days=new Set(state.items.flatMap(x=>x.logs.map(l=>l.date)).filter(d=>d.startsWith(month))).size;if(days)sharePill(ctx,'기록한 날 ',72,bandTop+bandH-(story?80:40),{fill:'#1E2A22',color:'#fff',size:32*s,bold:days+'일',boldSize:44*s,rotate:-5})}
  ctx.fillStyle=soft;ctx.font='500 30px '+F;ctx.textAlign='left';ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=ink;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left';
  return canvas;
 }
