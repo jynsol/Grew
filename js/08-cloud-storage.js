@@ -1915,7 +1915,7 @@ function plantedMoment(c){
   '<span class="planted-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async" loading="lazy">':'')+'</span></div>'+
  '<div class="planted-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+((code=>{const fin=code>=0&&code<=11171?code%28:0;return fin&&fin!==8?'으로':'로'})(tree.charCodeAt(tree.length-1)-0xAC00))+' 자랐어요</span></div>'+
  '<div class="planted-stats">'+stat(number,'번째','이달의 나무')+stat(logs||1,'일','함께한 기록')+stat(validRating(c.rating)?'<i class="planted-star" aria-hidden="true">★</i>'+Number(c.rating).toFixed(1):'–','','별점')+'</div>'+
- '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+button(icon('share'),'shareWork','planted-share',attr(c.id)+' aria-label="'+esc(c.title)+' 공유하기"')+'</div>','planted');
+ '<div class="planted-actions">'+button(month+'월의 숲 보기','completionForest','primary',attr(c.id))+'</div>','planted');
 }
 function complete(id){const c=get(id);if(!c||c.completed)return;ratingPrompt(c,true)}
 function editLog(id,logId){

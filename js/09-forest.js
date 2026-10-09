@@ -871,24 +871,7 @@ async function drawShareCard(kind,format,target){
  if(document.fonts?.ready)await document.fonts.ready;
  const W=1080,H=format==='story'?1920:1350,story=format==='story',canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
  const F='"Pretendard Variable",Pretendard,sans-serif',L='Archivo,'+F,name=state.profile.name||'나',ink='#1E2A22',muted='#52524F',months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
- const c=kind==='work'?get(target):null;
- ctx.fillStyle=kind==='work'?(c&&c.type==='movie'?'#BFE7CB':'#F7E7A1'):'#F8F8F6';ctx.fillRect(0,0,W,H);
- const head=(right)=>{ctx.fillStyle=ink;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textBaseline='alphabetic';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillText(right,W-72,96);ctx.letterSpacing='0px';ctx.textAlign='left'};
- const foot=()=>{ctx.fillStyle=muted;ctx.font='500 30px '+F;ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=ink;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left'};
- if(kind==='work'&&c){
-  const done=c.completed&&c.completed!=='unknown'?c.completed:now();head('FINISHED · '+done.slice(5).replace('-','.'));
-  ctx.fillStyle=ink;ctx.textAlign='center';ctx.font='700 48px '+F;ctx.fillText(name+(/[가-힣]$/.test(name)&&(name.charCodeAt(name.length-1)-0xAC00)%28?'이':'가')+' 다 '+(c.type==='movie'?'봤어요':'읽었어요'),W/2,story?260:230);
-  let size=story?92:78;ctx.font='800 '+size+'px '+F;const words=c.title;const lines=[];let line='';for(const ch of words){if(ctx.measureText(line+ch).width>W-180&&line){lines.push(line);line=ch}else line+=ch}lines.push(line);
-  lines.slice(0,2).forEach((l,k)=>ctx.fillText(k===1&&lines.length>2?l.slice(0,-1)+'…':l,W/2,(story?380:330)+k*size*1.2));ctx.textAlign='left';
-  const cy=story?1080:800,r=story?380:300;ctx.save();ctx.shadowColor='rgba(30,42,34,.12)';ctx.shadowBlur=30;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,cy,r,0,Math.PI*2);ctx.fill();ctx.restore();
-  const tree=await shareAsset(stickerTreeSrc(c,3));if(tree){const s=r*1.6;ctx.drawImage(tree,W/2-s/2,cy-s/2-10,s,s)}
-  const cover=c.cover?await loadShareCover(c.cover):null;ctx.save();ctx.translate(W/2-r*.95,cy+r*.45);ctx.rotate(-8*Math.PI/180);ctx.fillStyle='#fff';shareRounded(ctx,-6,-6,172,248,16);ctx.fill();if(cover)ctx.drawImage(cover,0,0,160,236);else{ctx.fillStyle=c.type==='movie'?'#BFE7CB':'#F7E7A1';ctx.fillRect(0,0,160,236)}ctx.restore();
-  shareStamp(ctx,W/2+r*.82,cy-r*.78,story?130:110,done,12);
-  if(validRating(c.rating))sharePill(ctx,'★ '+Number(c.rating).toFixed(1),W/2+r*.35,cy+r*.55,{size:40,rotate:-6});
-  const logs=new Set(c.logs.map(l=>l.date)).size,start=Model.firstExperienceDate(c),days=start?Math.max(1,Math.round((Date.parse(done+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/864e5)+1):0;
-  ctx.textAlign='center';ctx.fillStyle=muted;ctx.font='600 34px '+F;ctx.fillText([days?days+'일':'',logs?'기록 '+logs+'회':'',(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요'].filter(Boolean).join(' · '),W/2,cy+r+(story?140:110));ctx.textAlign='left';
-  foot();return canvas;
- }
+ ctx.fillStyle='#F8F8F6';ctx.fillRect(0,0,W,H);
  if(kind==='year'&&forestLifetime)return drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,'life');
  if(kind==='year'||kind==='month')return drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind);
  return canvas;
@@ -965,7 +948,7 @@ function shareCropSVG(markup){
  try{const svg=host.querySelector('svg'),world=svg?.querySelector('#forest-world')||svg;const b=world.getBBox(),pad=16;if(b.width&&b.height)return markup.replace(/viewBox="[^"]*"/,'viewBox="'+[b.x-pad,b.y-pad,b.width+pad*2,b.height+pad*2].map(n=>n.toFixed(1)).join(' ')+'"')}catch{}finally{host.remove()}
  return markup;
 }
-function shareTitle(){return shareKind==='work'?'작품 공유':shareKind==='month'?Number(month.slice(5))+'월의 숲 공유':forestLifetime?forestLifetimeName()+' 공유':'올해의 숲 공유'}
+function shareTitle(){return shareKind==='month'?Number(month.slice(5))+'월의 숲 공유':forestLifetime?forestLifetimeName()+' 공유':'올해의 숲 공유'}
 async function makeShare(kind=shareKind,target=shareTarget){
  shareKind=kind==='forest'?'year':kind;shareTarget=target||'';
  const generation=++shareGeneration,current=()=>generation===shareGeneration&&modal==='share';
@@ -980,7 +963,7 @@ async function makeShare(kind=shareKind,target=shareTarget){
   const box=document.querySelector('.share-preview');if(box)box.innerHTML='<img src="'+shareURL+'" alt="'+esc(shareTitle())+' 이미지">';
  }catch(e){const box=document.querySelector('.share-preview');if(current()&&box)box.innerHTML='<p class="muted">이미지를 만들지 못했어요.</p>'+button('다시 시도','retryShare','textbtn')}
 }
-function shareFileName(){return 'grew-'+(shareKind==='year'?year:shareKind==='month'?month:'work')+'-'+shareFormat+'.png'}
+function shareFileName(){return 'grew-'+(shareKind==='year'?year:month)+'-'+shareFormat+'.png'}
 function shareFresh(){return shareRevision===shareSnapshot()}
 async function nativeShare(){
  if(!shareFresh()){await makeShare(shareKind);toast('최신 기록으로 이미지를 갱신했어요.');return}

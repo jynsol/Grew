@@ -139,7 +139,6 @@ document.addEventListener('click',async e=>{
  }
  if(a==='shareForest'){makeShare('year');return}
  if(a==='shareMonth'){makeShare('month');return}
- if(a==='shareWork'){makeShare('work',id);return}
  if(a==='shareFormat'){if(['story','feed'].includes(b.dataset.format)){shareFormat=b.dataset.format;makeShare(shareKind,shareTarget)}return}
  if(a==='retryShare'){makeShare(shareKind);return}
  if(a==='nativeShare'){nativeShare();return}
