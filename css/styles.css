@@ -4186,3 +4186,7 @@ body.is-decorating .toast{bottom:calc(282px + env(safe-area-inset-bottom))!impor
 .pl-confetti i{animation-duration:3.4s}
 @keyframes plConfetti{0%{opacity:0;transform:translateY(0) rotate(var(--r))}8%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(18px,720px) rotate(calc(var(--r) + 600deg))}}
 .sheet-back[data-kind="planted"] .sheet>.pl-page{position:static!important}
+/* Confetti falls behind everything on the card (tree, stamp, cover, stickers, button) */
+.sheet-back[data-kind="planted"] .pl-confetti{z-index:0!important}
+.sheet-back[data-kind="planted"] .sheet>.planted-actions,.sheet-back[data-kind="planted"] .pl-page>*:not(.pl-confetti){position:relative;z-index:1}
+.sheet-back[data-kind="planted"] .sheet>.sheet-head{z-index:3}
