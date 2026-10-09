@@ -4180,3 +4180,9 @@ body.is-decorating .toast{bottom:calc(282px + env(safe-area-inset-bottom))!impor
 .sheet-back[data-kind="planted"] .pl-page{position:static}
 .sheet-back[data-kind="planted"] .pl-page>*:not(.pl-confetti){position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.pl-confetti{display:none}}
+/* Confetti: covers the whole card and falls a little longer */
+.sheet-back[data-kind="planted"] .sheet{position:relative}
+.sheet-back[data-kind="planted"] .pl-confetti{position:absolute;inset:0;z-index:2}
+.pl-confetti i{animation-duration:3.4s}
+@keyframes plConfetti{0%{opacity:0;transform:translateY(0) rotate(var(--r))}8%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(18px,720px) rotate(calc(var(--r) + 600deg))}}
+.sheet-back[data-kind="planted"] .sheet>.pl-page{position:static!important}

@@ -1910,7 +1910,7 @@ function plantedMoment(c){
  const eul=(code=>{const fin=code>=0&&code<=11171?code%28:0;return fin&&fin!==8?'으로':'로'})(tree.charCodeAt(tree.length-1)-0xAC00);
  showModal('숲에 한 그루 더 자랐어요','<div class="pl-page" data-type="'+c.type+'">'+
  '<p class="pl-kicker">'+months[month-1]+' FOREST · NO.'+number+'</p><h3 class="pl-title" aria-hidden="true">숲에 한 그루<br>더 자랐어요</h3>'+
- '<div class="pl-confetti" aria-hidden="true">'+Array.from({length:18},(_,i)=>'<i style="--x:'+((i*37)%100)+'%;--d:'+((i*0.17)%1.4).toFixed(2)+'s;--r:'+((i*53)%360)+'deg;--c:'+['#F2B84B','#6CC092','#E85A47','#CBE4FF','#F9D9C8'][i%5]+'"></i>').join('')+'</div>'+'<div class="pl-stage"><i class="pl-disc" aria-hidden="true"></i>'+
+ '<div class="pl-confetti" aria-hidden="true">'+Array.from({length:26},(_,i)=>'<i style="--x:'+((i*37)%100)+'%;--d:'+((i*0.17)%1.4).toFixed(2)+'s;--r:'+((i*53)%360)+'deg;--c:'+['#F2B84B','#6CC092','#E85A47','#CBE4FF','#F9D9C8'][i%5]+'"></i>').join('')+'</div>'+'<div class="pl-stage"><i class="pl-disc" aria-hidden="true"></i>'+
   stickerTree(c,3,'pl-tree')+'<div class="planted-stamp-real pl-stamp" aria-hidden="true">'+stampSVG(c,true)+'</div>'+
   '<span class="pl-cover">'+(c.cover?'<img src="'+esc(c.cover)+'" alt="" decoding="async">':'')+'</span></div>'+
  '<div class="pl-copy"><strong>'+esc(c.title)+'</strong><span>'+esc(tree)+eul+' 자랐어요</span></div>'+
