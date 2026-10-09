@@ -4058,3 +4058,11 @@ body:has(#page.ob-page), .app:has(#page.ob-page) { background:var(--sb-bg); }
 .today-v2 .sticker-week li.is-logged.is-book,.today-v2[data-type] .sticker-week li.is-logged.is-book{background:#F2B84B;color:var(--sb-ink)}
 .today-v2 .sticker-week li.is-logged.is-movie,.today-v2[data-type] .sticker-week li.is-logged.is-movie{background:#6CC092;color:var(--sb-ink)}
 .today-v2 .sticker-week li.is-logged.is-both,.today-v2[data-type] .sticker-week li.is-logged.is-both{background:linear-gradient(135deg,#F2B84B 50%,#6CC092 50%);color:var(--sb-ink)}
+/* Decorate bar: tree themes on top, floor swatches below */
+.forest-edit-bar.is-stack{flex-direction:column;align-items:stretch;gap:4px;padding:6px;border-radius:22px}
+.forest-edit-themes{display:flex;gap:4px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.forest-edit-themes::-webkit-scrollbar{display:none}
+.forest-edit-bar .forest-edit-theme{flex:1 0 auto;height:34px;padding:0 12px;border-radius:17px;justify-content:center;font:600 13px/1 var(--font-family);color:var(--text-1);background:var(--fill)}
+.forest-edit-bar .forest-edit-theme.active{background:var(--sb-ink);color:#fff}
+.forest-edit-bar .forest-edit-theme:disabled{color:var(--text-3);background:transparent}
+.forest-edit-bar.is-stack .forest-edit-floors{justify-content:flex-start}

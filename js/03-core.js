@@ -202,6 +202,11 @@ const BM_POOLS=[
  {id:'movie-comedy',type:'movie',label:'로맨스·코미디',free:'fir',paid:['cherry','wintercherry','paid-reserved-09']},
  {id:'movie-other',type:'movie',label:'기타',free:'birch',paid:['crape','winterbirch','paid-reserved-10']}
 ];
+// Tree themes for the whole forest. 'mix' deals each genre's trees in turn; the others use one slot
+// per genre (0 classic, 1 special, 2 winter) and fall back to the classic tree when it isn't owned.
+const BM_TREE_THEMES=[{id:'mix',name:'섞어서'},{id:'classic',name:'클래식',slot:0},{id:'special',name:'스페셜',slot:1},{id:'winter',name:'겨울',slot:2}];
+function bmThemeSpecies(b,poolId,available){const t=BM_TREE_THEMES.find(t=>t.id===(b?.treeTheme||'mix'));if(!t||t.slot===undefined)return null;const p=BM_POOLS.find(p=>p.id===poolId);if(!p)return null;const id=t.slot===0?p.free:p.paid[t.slot-1];return available.includes(id)?id:p.free}
+function bmThemeAvailable(id){const t=BM_TREE_THEMES.find(t=>t.id===id);if(!t||!t.slot)return true;const own=new Set(bmReadyTreeIds());return BM_POOLS.some(p=>own.has(p.paid[t.slot-1]))}
 const BM_GROWTH_RULES=[
  {id:'first-record',speciesId:'zelkova',label:'첫 기록 남기기',target:1,metric:'record'},
  {id:'first-completion',speciesId:'ginkgo',label:'첫 작품 완료하기',target:1,metric:'completed'},
@@ -215,7 +220,7 @@ const BM_GROWTH_RULES=[
 // paid trees stay paid and hidden trees open by planted count.
 const BM_GENRE_IDS=BM_POOLS.map(p=>p.free);
 function bmGenreLabel(id){const p=BM_POOLS.find(p=>p.free===id||p.paid.includes(id));return p?(p.type==='book'?'책':'영화')+' · '+p.label:''}
-function bmFresh(){return {version:2,previewVersion:2,completedKeys:[],recordDays:[],hasRecorded:false,earnedTreeIds:[],legacyTreeIds:[],legacyMysteryIds:[],ownership:{},floorOwnership:{},previewOwnership:{},previewFloorOwnership:{},previewCouponViews:{},previewCouponSpent:0,nextByPool:{},floor:'basic'}}
+function bmFresh(){return {version:2,previewVersion:2,completedKeys:[],recordDays:[],hasRecorded:false,earnedTreeIds:[],legacyTreeIds:[],legacyMysteryIds:[],ownership:{},floorOwnership:{},previewOwnership:{},previewFloorOwnership:{},previewCouponViews:{},previewCouponSpent:0,nextByPool:{},floor:'basic',treeTheme:'mix'}}
 function bmNorm(v){return String(v||'').normalize('NFKC').toLowerCase().replace(/[\s\p{P}]/gu,'')}
 function bmCompletionKey(c){return [c.type,bmNorm(c.title),bmNorm(c.creator)].join('|')}
 function bmValidDate(v){if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;const d=new Date(v+'T00:00:00Z');return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===v}
@@ -285,6 +290,7 @@ function bmSanitize(raw,items=[]){
   const allowed=legacyCoupons?Math.floor(earned/12):Math.floor(earned/cost);
   let couponOwned=0;for(const id of BM_SALE_IDS)if(b.previewOwnership[id]?.includes('coupon')){if(couponOwned<allowed)couponOwned++;else{b.previewOwnership[id]=b.previewOwnership[id].filter(k=>k!=='coupon');if(!b.previewOwnership[id].length)delete b.previewOwnership[id]}}
   b.previewCouponSpent=legacyCoupons?Math.min(earned,couponOwned*cost):Math.max(couponOwned*cost,Number.isSafeInteger(raw.previewCouponSpent)&&raw.previewCouponSpent>=0?Math.min(raw.previewCouponSpent,earned):0);
+  b.treeTheme=BM_TREE_THEMES.some(t=>t.id===raw.treeTheme)?raw.treeTheme:'mix';
   for(const p of BM_POOLS){const n=raw.nextByPool?.[p.id];if(Number.isSafeInteger(n)&&n>=0)b.nextByPool[p.id]=Math.min(n,1000000)}
  }else{
   // v1 purchase demos were never money payments and cannot unlock cash rewards.
@@ -322,7 +328,7 @@ function bmRefresh(s){
   if(typeof launchGenre==='function'&&!GENRE_POOL[c.type]?.includes(c.genre)){if(!c.rawGenre)c.rawGenre=c.genre||'';c.genre=launchGenre(c.type,c.genre,c)}
   if(!c.bmAssignment&&BM_READY_IDS.includes(c.speciesId)){c.bmAssignment={version:2,mode:'legacy',pool:bmPool(c),fallback:false,sequence:0};bmAddSource(b.ownership,c.speciesId,'legacy')}
   const a=c.bmAssignment;
-  if(!a||!bmTreeReady(c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId)||(a.mode==='auto'&&(!bmCanUseFrom(b,c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId)||a.pool!==bmPool(c)||a.fallback&&bmAvailablePool(c,s).length)))bmAssignItem(s,c,true);
+  if(!a||!bmTreeReady(c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId)||(a.mode==='auto'&&(!bmCanUseFrom(b,c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId)||a.pool!==bmPool(c)||a.fallback&&bmAvailablePool(c,s).length||b.treeTheme&&b.treeTheme!=='mix'&&!c.hiddenTree&&c.speciesId!==bmThemeSpecies(b,a.pool,bmAvailablePool(c,s)))))bmAssignItem(s,c,true);
  }
  return b;
 }
@@ -337,8 +343,8 @@ function bmAssignItem(s,c,force=false){
  const b=s.collection?.bm?.version===2?s.collection.bm:bmRefresh(s);
  if(['manual','legacy'].includes(c.bmAssignment?.mode)&&bmTreeReady(c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId))return c;
  if(!force&&c.bmAssignment&&bmTreeReady(c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId))return c;
- const pool=bmPool(c),available=bmAvailablePool(c,s),sequence=b.nextByPool[pool]||0;
- c.speciesId=available.length?available[sequence%available.length]:bmFallback(c);c.hiddenTree=null;c.bmAppearance=true;
+ const pool=bmPool(c),available=bmAvailablePool(c,s),sequence=b.nextByPool[pool]||0,themed=bmThemeSpecies(b,pool,available);
+ c.speciesId=themed||(available.length?available[sequence%available.length]:bmFallback(c));c.hiddenTree=null;c.bmAppearance=true;
  c.bmAssignment={version:2,mode:'auto',pool,fallback:!available.length,sequence};
  if(pool&&available.length)b.nextByPool[pool]=sequence+1;
  return c;
@@ -540,10 +546,10 @@ document.addEventListener('change',e=>{if(e.target.id==='bmWorkSelect'&&get(e.ta
 function bmOpenShop(tab='inventory'){forestEditMode=false;bmTreeFilter='shop';bmPendingProduct=null;openCollection(tab)}
 function bmDecorateForest(){closeModal();bmPreview=null;bmCheckout=null;view='forest';forestEditMode=true;render();scrollPageTop()}
 function bmChooseOwnedTree(itemId,id,automatic=false){const c=get(itemId);if(!c||(!automatic&&!bmReadyTreeIds().includes(id)))return;const before=Model.clone(state);const ok=automatic?bmResetItemAppearance(state,c):bmAssignManual(state,c,id);if(ok===false){state=before;return}if(!persist())return;closeModal();bmPreview=null;view='forest';forestEditMode=true;render();toast(Model.stage(c)<3?(c.type==='movie'?'다 보면 ':'다 읽으면 ')+bmTreeName(c.hiddenTree?'mystery-'+c.hiddenTree:contentSpecies(c).id)+' 모습으로 자라요.':'나무 모습을 바꿨어요.')}
-// Decorate mode "처음으로": drop every manual choice and re-deal each genre's trees in planting order,
-// so a genre with its special tree open alternates genre tree / special tree (half and half).
-function bmResetToGenre(s=state){const b=bmRefresh(s);b.nextByPool={};const key=c=>(c.completed||'9999-99-99')+String(c.completedAt||c.createdAt||'').padStart(16,'0');for(const c of [...(s.items||[])].filter(bmTracked).sort((x,y)=>key(x)<key(y)?-1:1)){delete c.bmAssignment;c.hiddenTree=null;bmAssignItem(s,c,true)}return b}
-function bmResetGenreConfirm(){confirmBox('처음으로','꾸며 둔 나무를 모두 처음 모습으로 되돌릴까요? 장르마다 가진 나무가 번갈아 심어져요. 바닥은 그대로예요.',()=>{const before=Model.clone(state);bmResetToGenre(state);if(!persist()){state=before;return}closeModal();view='forest';forestEditMode=true;render();toast('처음 모습으로 되돌렸어요.')},'되돌리기')}
+// Re-deal every tree by genre in planting order (manual picks dropped). With the 'mix' theme a genre
+// alternates the trees you own; with a theme each genre takes that theme's tree.
+function bmApplyTreeTheme(s,theme){const b=bmRefresh(s);b.treeTheme=BM_TREE_THEMES.some(t=>t.id===theme)?theme:'mix';return bmResetToGenre(s,true)}
+function bmResetToGenre(s=state,keepHidden=false){const b=bmRefresh(s);b.nextByPool={};const key=c=>(c.completed||'9999-99-99')+String(c.completedAt||c.createdAt||'').padStart(16,'0');for(const c of [...(s.items||[])].filter(bmTracked).sort((x,y)=>key(x)<key(y)?-1:1)){if(keepHidden&&c.hiddenTree)continue;delete c.bmAssignment;c.hiddenTree=null;bmAssignItem(s,c,true)}return b}
 // Prototype only: undo every preview purchase, coupon and ad view, and any special tree/floor carried
 // over from older data, so the shop and packs can be tried again from scratch.
 function bmPreviewResetPurchases(s=state){const b=bmRefresh(s);b.previewOwnership={};b.previewFloorOwnership={};for(const id of BM_SHOP_IDS)delete b.ownership[id];for(const f of BM_PAID_FLOOR_IDS)delete b.floorOwnership[f];b.legacyTreeIds=b.legacyTreeIds.filter(id=>!BM_SHOP_IDS.includes(id));b.previewCouponViews={};b.previewCouponSpent=0;if(!bmFloorOwnedFrom(b,b.floor))b.floor='basic';for(const c of s.items||[]){if(!bmTracked(c))continue;const id=c.hiddenTree?'mystery-'+c.hiddenTree:c.speciesId;if(!bmCanUseFrom(b,id))bmResetItemAppearance(s,c)}bmRefresh(s);return b}
@@ -551,8 +557,10 @@ function bmPreviewResetConfirm(){confirmBox('구매 되돌리기','체험으로 
 // Floor swatches scroll sideways, so more floors can be added without crowding the bar.
 const bmFloorSwatchCache={};
 function bmFloorSwatch(id){return bmFloorSwatchCache[id]||(bmFloorSwatchCache[id]=bmFloorPreviewArt(id))}
-function bmEditBarHTML(){const cur=bmFloorId(),lock='<svg class="forest-edit-lock" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
- return '<div class="forest-edit-bar" role="group" aria-label="꾸미기"><div class="forest-edit-floors" role="group" aria-label="바닥">'+BM_FLOORS.filter(f=>f.ready).map(f=>{const owned=bmFloorOwned(f.id),on=cur===f.id;return button('<span class="forest-edit-swatch" aria-hidden="true">'+bmFloorSwatch(f.id)+'</span>'+(owned?'':lock),owned?'bmChooseOwnedFloor':'bmPreviewFloor','forest-edit-floor'+(on?' active':'')+(owned?'':' is-locked'),'data-floor="'+f.id+'" aria-pressed="'+on+'" aria-label="'+esc(f.name)+(owned?'':' · 미리보기')+'" title="'+esc(f.name)+'"')}).join('')+'</div><span class="forest-edit-sep" aria-hidden="true"></span>'+button('처음으로','bmResetGenre','forest-edit-reset')+'</div>'}
+function bmEditBarHTML(){const cur=bmFloorId(),theme=bmState().treeTheme||'mix',lock='<svg class="forest-edit-lock" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+ const themes='<div class="forest-edit-themes" role="group" aria-label="나무 테마">'+BM_TREE_THEMES.map(t=>{const ok=bmThemeAvailable(t.id),on=theme===t.id;return button(esc(t.name),'bmTreeTheme','forest-edit-theme'+(on?' active':''),'data-theme="'+t.id+'" aria-pressed="'+on+'"'+(ok?'':' disabled aria-label="'+esc(t.name)+' · 아직 없는 나무예요"'))}).join('')+'</div>';
+ const floors='<div class="forest-edit-floors" role="group" aria-label="바닥">'+BM_FLOORS.filter(f=>f.ready).map(f=>{const owned=bmFloorOwned(f.id),on=cur===f.id;return button('<span class="forest-edit-swatch" aria-hidden="true">'+bmFloorSwatch(f.id)+'</span>'+(owned?'':lock),owned?'bmChooseOwnedFloor':'bmPreviewFloor','forest-edit-floor'+(on?' active':'')+(owned?'':' is-locked'),'data-floor="'+f.id+'" aria-pressed="'+on+'" aria-label="'+esc(f.name)+(owned?'':' · 미리보기')+'" title="'+esc(f.name)+'"')}).join('')+'</div>';
+ return '<div class="forest-edit-bar is-stack" role="group" aria-label="꾸미기">'+themes+floors+'</div>'}
 function bmOpenFloorPicker(){bmRefresh(state);const floors=BM_FLOORS.filter(f=>f.ready&&bmFloorOwned(f.id));showModal('바닥 바꾸기','<div class="bm-decoration-body"><div class="bm-decoration-floors">'+floors.map(f=>button(bmFloorPreviewArt(f.id)+'<span>'+f.name+(bmFloorId()===f.id?'<b aria-hidden="true">✓</b>':'')+'</span>','bmChooseOwnedFloor','bm-decoration-floor '+(bmFloorId()===f.id?'selected':''),'data-floor="'+f.id+'" aria-pressed="'+(bmFloorId()===f.id)+'"')).join('')+'</div><p id="formError" class="form-error" role="alert"></p></div>','collection')}
 function bmChooseOwnedFloor(id){if(!BM_FLOORS.some(f=>f.id===id&&f.ready&&bmFloorOwned(id)))return;if(bmFloorId()===id)return;if(!bmSetFloor(id)||!persist())return;closeModal();view='forest';forestEditMode=true;render()}
 
@@ -562,7 +570,7 @@ function bmAction(a,b){
  if(a==='bmDecorateFloors'){bmDecorateForest();bmOpenFloorPicker();return true}
  if(a==='bmChooseOwnedTree'){bmChooseOwnedTree(b.dataset.id,b.dataset.species);return true}
  if(a==='bmAutoOwnedTree'){bmChooseOwnedTree(b.dataset.id,'',true);return true}
- if(a==='bmResetGenre'){bmResetGenreConfirm();return true}
+ if(a==='bmTreeTheme'){const t=b.dataset.theme;if(!bmThemeAvailable(t)||bmState().treeTheme===t&&t!=='mix')return true;const before=Model.clone(state);bmApplyTreeTheme(state,t);if(!persist()){state=before;return true}view='forest';forestEditMode=true;render();toast(t==='mix'?'가진 나무를 섞어서 심었어요.':BM_TREE_THEMES.find(x=>x.id===t).name+' 나무로 바꿨어요.');return true}
  if(a==='bmPreviewReset'){bmPreviewResetConfirm();return true}
  if(a==='bmChooseOwnedFloor'){bmChooseOwnedFloor(b.dataset.floor);return true}
  if(a==='bmCodex'||a==='bmCodexTab'){bmOpenCodex(b.dataset.tab);return true}
