@@ -4190,3 +4190,6 @@ body.is-decorating .toast{bottom:calc(282px + env(safe-area-inset-bottom))!impor
 .sheet-back[data-kind="planted"] .pl-confetti{z-index:0!important}
 .sheet-back[data-kind="planted"] .sheet>.planted-actions,.sheet-back[data-kind="planted"] .pl-page>*:not(.pl-confetti){position:relative;z-index:1}
 .sheet-back[data-kind="planted"] .sheet>.sheet-head{z-index:3}
+/* Confetti: each piece falls on its own (own start, speed and drift) */
+.pl-confetti i{animation-duration:var(--t,3.4s)}
+@keyframes plConfetti{0%{opacity:0;transform:translate(0,0) rotate(var(--r))}8%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(var(--s,18px),720px) rotate(calc(var(--r) + 600deg))}}
