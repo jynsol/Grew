@@ -4144,3 +4144,24 @@ body.is-decorating .toast{bottom:calc(282px + env(safe-area-inset-bottom))!impor
 .pl-page{padding:8px 22px 0;flex:1;justify-content:center}
 .pl-page .pl-kicker,.pl-page .pl-title{align-self:stretch}
 @media (min-height:800px){.pl-stage{height:330px;margin-top:22px}.pl-disc{width:280px;height:280px;margin-left:-140px;top:18px}.pl-stage .pl-tree{width:290px;height:290px;margin-left:-145px}.pl-pills{margin-top:22px}}
+/* Planted moment as a card popup over the dimmed screen (not full screen) */
+.sheet-back[data-kind="planted"]{align-items:center!important;padding:20px;background:rgba(30,42,34,.42)}
+.sheet-back[data-kind="planted"] .sheet{width:100%!important;max-width:360px!important;min-height:0!important;height:auto!important;max-height:calc(100dvh - 40px)!important;border-radius:30px!important;padding:22px 0 20px!important;overflow:visible!important;box-shadow:0 30px 60px -20px rgba(30,42,34,.5);animation:plCard .42s cubic-bezier(.2,.9,.3,1.15) both}
+@keyframes plCard{0%{transform:translateY(24px) scale(.92);opacity:0}100%{transform:none;opacity:1}}
+.sheet-back[data-kind="planted"] .sheet::before{display:none}
+.sheet-back[data-kind="planted"] .sheet>.sheet-head{top:14px!important;right:14px!important}
+.sheet-back[data-kind="planted"] .sheet-head .iconbtn{width:36px!important;height:36px!important;background:rgba(30,42,34,.06)!important}
+.sheet-back[data-kind="planted"] .pl-page{padding:4px 22px 0;flex:none}
+.sheet-back[data-kind="planted"] .pl-title{font-size:26px;margin-top:8px}
+.sheet-back[data-kind="planted"] .pl-stage{height:236px;margin-top:10px}
+.sheet-back[data-kind="planted"] .pl-disc{width:200px;height:200px;margin-left:-100px;top:16px}
+.sheet-back[data-kind="planted"] .pl-stage .pl-tree{width:214px;height:214px;margin-left:-107px;top:4px}
+.sheet-back[data-kind="planted"] .pl-stage .pl-stamp{width:88px;height:88px;right:-4px;top:-10px}
+.sheet-back[data-kind="planted"] .pl-cover{width:52px;height:76px;left:4px;bottom:6px}
+.sheet-back[data-kind="planted"] .pl-copy strong{font-size:18px}
+.sheet-back[data-kind="planted"] .pl-pills{margin-top:14px}
+.sheet-back[data-kind="planted"] .pl-pill{padding:8px 13px;font-size:12px}
+.sheet-back[data-kind="planted"] .pl-pill b{font-size:16px}
+.sheet-back[data-kind="planted"] .planted-actions{padding:20px 20px 0!important;margin-top:0!important}
+.sheet-back[data-kind="planted"] .primary{height:52px!important}
+@media (prefers-reduced-motion:reduce){.sheet-back[data-kind="planted"] .sheet{animation:none}}
