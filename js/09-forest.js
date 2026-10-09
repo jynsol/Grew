@@ -889,9 +889,9 @@ async function drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,mode='life'){
   for(let i=0;i<90;i++){const x=rnd('x'+i)*W,y=rnd('y'+i)*H*.62,r=.8+rnd('r'+i)*2.2;ctx.globalAlpha=.25+rnd('a'+i)*.6;ctx.fillStyle=i%7?white:butter;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
   ctx.globalAlpha=1;
   const sparkle=(x,y,r,c)=>{ctx.save();ctx.translate(x,y);ctx.fillStyle=c;ctx.beginPath();for(let k=0;k<8;k++){const a=k*Math.PI/4,rr=k%2?r*.28:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath();ctx.fill();ctx.restore()};
-  [[.12,.2,16],[.86,.28,20],[.2,.48,12],[.9,.52,14],[.07,.36,22],[.93,.14,12],[.5,.06,10],[.32,.12,9],[.7,.4,10]].forEach(([x,y,r],i)=>sparkle(W*x,H*y*(story?1:.95),r,i%3?(i%2?butter:white):'#F9D9C8'));
+  [[.86,.28,20],[.2,.48,12],[.9,.52,14],[.07,.36,22],[.93,.14,12],[.5,.06,10],[.32,.12,9],[.7,.4,10]].forEach(([x,y,r],i)=>sparkle(W*x,H*y*(story?1:.95),r,i%3?(i%2?butter:white):'#F9D9C8'));
   // one small shooting star across the sky
-  {const sx=W*.22,sy=H*(story?.095:.12),len=W*.15,ex=sx-len*.9,ey=sy-len*.4;const tr=ctx.createLinearGradient(sx,sy,ex,ey);tr.addColorStop(0,'rgba(255,255,255,.95)');tr.addColorStop(1,'rgba(255,255,255,0)');ctx.strokeStyle=tr;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();ctx.fillStyle=white;ctx.beginPath();ctx.arc(sx,sy,5,0,Math.PI*2);ctx.fill();sparkle(sx,sy,14,white)}
+  {const sx=W*.2,sy=H*(story?.19:.2),len=W*.14,ex=sx-len*.9,ey=sy-len*.4;const tr=ctx.createLinearGradient(sx,sy,ex,ey);tr.addColorStop(0,'rgba(255,255,255,.95)');tr.addColorStop(1,'rgba(255,255,255,0)');ctx.strokeStyle=tr;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();ctx.fillStyle=white;ctx.beginPath();ctx.arc(sx,sy,5,0,Math.PI*2);ctx.fill();sparkle(sx,sy,14,white)}
  }else{ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H)}
  ctx.textBaseline='alphabetic';ctx.fillStyle=fg;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillStyle=life?butter:soft;ctx.fillText(life?'SINCE '+first:year+' FOREST',W-72,96);ctx.letterSpacing='0px';
  const top=story?260:190;ctx.textAlign='center';ctx.fillStyle=fg;ctx.font='700 54px '+F;ctx.fillText(name+'의 '+(life?'':'올해 ')+'숲',W/2,top);
