@@ -333,16 +333,17 @@ document.addEventListener('submit',async e=>{
  if(f.id==='ratingForm'){
   const c=get(f.dataset.id);if(!c)return;
   const returnView=view,returnScroll=window.scrollY;
-  c.rating=validRating($('ratingValue').value);c.review=$('reviewMemo').value.trim();
+  c.rating=validRating($('ratingValue').value);
   const advance=f.dataset.advance==='yes';
   if(advance&&!c.completed){const picked=$('finishDate')?.value;Model.complete(state,c.id,Model.validDate(picked)&&picked<=now()?picked:now());assignAutoSpecies(c,true);pendingForestArrival=c.id}
+  const memo=($('finishMemo')?.value||'').trim();if(memo){c.notes=Array.isArray(c.notes)?c.notes:[];c.notes.push({id:'n'+Date.now().toString(36),date:Model.validDate(c.completed)?c.completed:now(),text:memo.slice(0,4000)})}
   if(advance){
    const next=latestReading(c.id)||state.items.filter(item=>!item.completed).sort((a,b)=>b.saves.length-a.saves.length||(b.saves.at(-1)?.at||0)-(a.saves.at(-1)?.at||0))[0];
    state.selected=next?.id||null;picking=false;sessionStorageSafe('candidate','0');
   }
   if(!commit(true))return;
   if(advance){plantedMoment(c);return}
-  toast(advance?(returnView==='today'&&state.selected?'나무가 심어졌어요. 다음 콘텐츠를 준비했어요.':state.selected?'나무가 심어졌어요.':'나무가 심어졌어요. 모아둔 콘텐츠를 모두 경험했어요.'):'평점과 감상을 저장했어요.');
+  toast(advance?(returnView==='today'&&state.selected?'나무가 심어졌어요. 다음 콘텐츠를 준비했어요.':state.selected?'나무가 심어졌어요.':'나무가 심어졌어요. 모아둔 콘텐츠를 모두 경험했어요.'):'별점을 저장했어요.');
  }
  
 });

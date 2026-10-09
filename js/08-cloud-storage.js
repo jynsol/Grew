@@ -634,7 +634,7 @@ function renderDetail(){
  return '<section class="detail-page" data-type="'+c.type+'"><div class="detail-panel">'+stickerCover(c,'detail-cover')+'<span class="detail-tree">'+stickerTree(c,stage)+'</span>'+'</div>'+
  '<div class="detail-head"><span class="detail-kicker"><span class="scrap-type is-'+c.type+'">'+(c.type==='movie'?'MOVIE':'BOOK')+'</span>'+(genre?esc(genre):'')+'</span><h1>'+esc(c.title)+'</h1>'+(c.originalTitle&&c.originalTitle!==c.title?'<p class="original-title">'+esc(c.originalTitle)+'</p>':'')+'<p class="detail-creator">'+esc(c.creator||'제작자 미확인')+(c.publisher?' · '+esc(c.publisher):'')+'</p></div>'+
  '<div class="detail-chips">'+chips+'</div>'+
- (c.review?'<div class="detail-section review-copy"><h2>나의 감상</h2><p>'+esc(c.review)+'</p></div>':'')+
+ 
  '<div class="detail-section detail-about">'+detailMetadata(c)+button('나무 모습 바꾸기','bmWorkTree','textbtn detail-tree-change',attr(c.id))+'</div>'+
  (introHTML?'<div class="detail-section">'+introHTML+'</div>':'')+recordsHTML+renderLinkSources(c)+actions+'</section>';
 }
