@@ -889,6 +889,7 @@ async function drawShareCard(kind,format,target){
   ctx.textAlign='center';ctx.fillStyle=muted;ctx.font='600 34px '+F;ctx.fillText([days?days+'일':'',logs?'기록 '+logs+'회':'',(c.hiddenTree?bmTreeName('mystery-'+c.hiddenTree):contentSpecies(c)?.name||'나무')+'로 심었어요'].filter(Boolean).join(' · '),W/2,cy+r+(story?140:110));ctx.textAlign='left';
   foot();return canvas;
  }
+ if(kind==='year'&&forestLifetime)return drawLifetimeCard(ctx,canvas,W,H,story,name,F,L);
  const isYear=kind==='year',life=isYear&&forestLifetime,items=isYear?yearForestItems(life?'all':year,'all'):forestMonthItems(month);
  const done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length,m=Number(month.slice(5));
  head(life?'MY FOREST':isYear?year+' FOREST':months[m-1]+' '+month.slice(0,4));
@@ -906,6 +907,43 @@ async function drawShareCard(kind,format,target){
   if(avg)sharePill(ctx,'★ '+avg+'  평균 별점',W-72,bandTop+bandH-(story?150:120),{fill:'#E85A47',color:'#fff',size:34,rotate:6,align:'right'});
  }else{const days=new Set(state.items.flatMap(x=>x.logs.map(l=>l.date)).filter(d=>d.startsWith(month))).size;sharePill(ctx,'기록한 날 ',72,bandTop+bandH-(story?60:30),{fill:'#1E2A22',color:'#fff',size:32,bold:days+'일',boldSize:44,rotate:-5})}
  foot();return canvas;
+}
+// Lifetime card ("솔의 숲"): a night forest — dark sky with stars, the island lit from behind,
+// a bar per year showing how the forest grew, and the totals as chips.
+async function drawLifetimeCard(ctx,canvas,W,H,story,name,F,L){
+ const items=yearForestItems('all','all'),done=items.filter(x=>x.completed),books=done.filter(x=>x.type==='book').length,films=done.filter(x=>x.type==='movie').length;
+ const years=forestTreeYears(),first=years[0]||now().slice(0,4),rated=done.filter(x=>validRating(x.rating)),avg=rated.length?(rated.reduce((n,x)=>n+Number(x.rating),0)/rated.length).toFixed(1):'';
+ const butter='#F7E7A1',mint='#BFE7CB',coral='#E85A47',white='#FFFFFF',soft='rgba(255,255,255,.62)';
+ // sky
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#16211A');g.addColorStop(.55,'#22382B');g.addColorStop(1,'#2E4A38');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ const rnd=k=>(hash('life|'+k)%10000)/10000;
+ for(let i=0;i<90;i++){const x=rnd('x'+i)*W,y=rnd('y'+i)*H*.62,r=.8+rnd('r'+i)*2.2;ctx.globalAlpha=.25+rnd('a'+i)*.6;ctx.fillStyle=i%7?white:butter;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+ ctx.globalAlpha=1;
+ const sparkle=(x,y,r,c)=>{ctx.save();ctx.translate(x,y);ctx.fillStyle=c;ctx.beginPath();for(let k=0;k<8;k++){const a=k*Math.PI/4,rr=k%2?r*.28:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath();ctx.fill();ctx.restore()};
+ [[.12,.2,16],[.86,.28,20],[.2,.48,12],[.9,.52,14]].forEach(([x,y,r],i)=>sparkle(W*x,H*y*(story?1:.95),r,i%2?butter:white));
+ // head
+ ctx.textBaseline='alphabetic';ctx.fillStyle=white;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillStyle=butter;ctx.fillText('SINCE '+first,W-72,96);ctx.letterSpacing='0px';
+ // title + number
+ const top=story?260:190;ctx.textAlign='center';ctx.fillStyle=white;ctx.font='700 54px '+F;ctx.fillText(name+'의 숲',W/2,top);
+ ctx.fillStyle=butter;ctx.font='800 '+(story?280:220)+'px '+L;ctx.fillText(String(done.length),W/2,top+(story?270:215));
+ ctx.fillStyle=soft;ctx.font='600 44px '+F;ctx.fillText('그루가 자랐어요',W/2,top+(story?350:285));
+ // island with a glow behind it
+ const bandTop=top+(story?420:320),bandH=story?680:430,scale=Math.min((W-60)/390,bandH/250),cx=W/2,cy=bandTop+bandH*.52;
+ const glow=ctx.createRadialGradient(cx,cy,10,cx,cy,W*.55);glow.addColorStop(0,'rgba(247,231,161,.38)');glow.addColorStop(.5,'rgba(191,231,203,.12)');glow.addColorStop(1,'rgba(191,231,203,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ await shareIsland(ctx,bandTop+(bandH-250*scale)/2,(W-390*scale)/2,scale,items);
+ // growth by year
+ const chartTop=bandTop+bandH+(story?50:30),ys=years.slice(-6),counts=ys.map(y=>yearForestItems(y,'all').length),max=Math.max(1,...counts),barW=Math.min(110,(W-144-(ys.length-1)*24)/Math.max(1,ys.length)),totalW=ys.length*barW+(ys.length-1)*24,x0=(W-totalW)/2,chartH=story?190:96;
+ ys.forEach((y,i)=>{const h=Math.max(12,counts[i]/max*chartH),x=x0+i*(barW+24),by=chartTop+chartH-h;ctx.fillStyle=i===ys.length-1?butter:mint;ctx.globalAlpha=i===ys.length-1?1:.85;shareRounded(ctx,x,by,barW,h,Math.min(18,barW/2));ctx.fill();ctx.globalAlpha=1;
+  ctx.fillStyle=white;ctx.font='800 32px '+L;ctx.fillText(String(counts[i]),x+barW/2,by-14);ctx.fillStyle=soft;ctx.font='600 26px '+L;ctx.fillText(y,x+barW/2,chartTop+chartH+38)});
+ // chips
+ ctx.textAlign='left';const chipY=chartTop+chartH+(story?90:66);
+ const chip=(label,fill,color)=>{ctx.font='700 32px '+F;return {label,fill,color,w:ctx.measureText(label).width+56}};
+ const chips=[chip('책 '+books+'권',butter,'#1E2A22'),chip('영화 '+films+'편',mint,'#1E2A22'),...(avg?[chip('★ '+avg,coral,white)]:[]),chip(years.length+'년째',null,white)];
+ let cxs=(W-(chips.reduce((n,c)=>n+c.w,0)+(chips.length-1)*16))/2;
+ chips.forEach(c=>{if(c.fill){ctx.fillStyle=c.fill;shareRounded(ctx,cxs,chipY,c.w,68,34);ctx.fill()}else{ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;shareRounded(ctx,cxs+1,chipY+1,c.w-2,66,33);ctx.stroke()}ctx.fillStyle=c.color;ctx.font='700 32px '+F;ctx.textBaseline='middle';ctx.fillText(c.label,cxs+28,chipY+36);ctx.textBaseline='alphabetic';cxs+=c.w+16});
+ // foot
+ ctx.fillStyle=soft;ctx.font='500 30px '+F;ctx.textAlign='left';ctx.fillText('읽고 본 것을 숲으로',72,H-70);ctx.textAlign='right';ctx.fillStyle=white;ctx.font='800 32px '+L;ctx.fillText(APP_BRAND.en,W-72,H-70);ctx.textAlign='left';
+ return canvas;
 }
 // Crop the scene to the board itself so a small month forest still fills the card.
 function shareCropSVG(markup){
