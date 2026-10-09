@@ -120,7 +120,7 @@ document.addEventListener('click',async e=>{
  if(a==='collection'){openCollection('inventory');return}
  if(a==='collectionTab'){openCollection(b.dataset.tab);return}
  if(a==='treeToggle'){bmOpenPreview('tree',b.dataset.species);return}
- if(a==='forestEdit'){forestEditMode=!forestEditMode;render();return}
+ if(a==='forestEdit'){forestEditMode=!forestEditMode;if(forestEditMode&&typeof bmEditTab!=='undefined')bmEditTab='sets';render();return}
  if(a==='contentTreePick'){const item=get(b.dataset.id);if(item)bmOpenPreview('tree',b.dataset.species,item.id);return}
  if(a==='contentHiddenPick'){const item=get(b.dataset.id);if(item)bmOpenPreview('tree','mystery-'+b.dataset.hidden,item.id);return}
  if(a==='contentHiddenClear'){const item=get(b.dataset.id);if(item){bmResetItemAppearance(state,item);commit(true)}return}
