@@ -777,53 +777,6 @@ async function imageData(file){
 }
 function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('이미지를 읽지 못했어요.'));img.src=src})}
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000)}
-function loadShareImage(src,timeoutMs=8000){
- return new Promise(resolve=>{
-  const img=new Image();let settled=false;
-  const finish=value=>{if(settled)return;settled=true;clearTimeout(timer);img.onload=null;img.onerror=null;if(!value)img.removeAttribute('src');resolve(value)};
-  const timer=setTimeout(()=>finish(null),timeoutMs);
-  // Only origin-clean images may be drawn onto an export canvas.
-  img.crossOrigin='anonymous';img.referrerPolicy='no-referrer';img.decoding='async';img.onload=()=>finish(img);img.onerror=()=>finish(null);img.src=src;
- });
-}
-const shareCoverCache=new Map();
-function shareCoverProxyURL(src){
- // The fallback receives only public catalog artwork, never uploaded photos,
- // arbitrary URLs, account data, or the calendar itself. Keep saved covers intact.
- try{
-  const url=new URL(src);
-  if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.port)return '';
-  const publicArtwork=u=>
-   (/^search\d?\.kakaocdn\.net$/.test(u.hostname)&&u.pathname.startsWith('/thumb/'))||
-   (/^t\d\.daumcdn\.net$/.test(u.hostname)&&/^\/lbook\/image\/\d+/.test(u.pathname))||
-   (u.hostname==='image.yes24.com'&&u.pathname.startsWith('/goods/'))||
-   (u.hostname==='image.aladin.co.kr'&&u.pathname.startsWith('/product/'))||
-   (u.hostname==='contents.kyobobook.co.kr'&&u.pathname.startsWith('/sih/'))||
-   (['books.google.com','books.google.co.kr','books.googleusercontent.com'].includes(u.hostname)&&u.pathname==='/books/content')||
-   (['shopping-phinf.pstatic.net','bookthumb-phinf.pstatic.net'].includes(u.hostname));
-  if(!publicArtwork(url)||[...url.searchParams.keys()].some(k=>/token|signature|credential|authorization|key/i.test(k)))return '';
-  if(url.searchParams.has('fname')){
-   const original=new URL(url.searchParams.get('fname'));
-   if(!['http:','https:'].includes(original.protocol)||original.username||original.password||original.port||!/^t\d\.daumcdn\.net$/.test(original.hostname)||!/^\/lbook\/image\/\d+/.test(original.pathname)||[...original.searchParams.keys()].some(k=>k!=='timestamp'))return '';
-  }
-  url.hash='';
-  return 'https://wsrv.nl/?'+new URLSearchParams({url:url.href,w:'240',h:'360',fit:'inside',output:'jpg'});
- }catch{return ''}
-}
-async function loadShareCover(src,timeoutMs=12000,isCurrent=()=>true){
- if(!src||!isCurrent())return null;
- if(shareCoverCache.has(src))return shareCoverCache.get(src);
- const started=performance.now(),proxy=shareCoverProxyURL(src);
- let img=await loadShareImage(src,proxy?Math.min(3500,timeoutMs):timeoutMs);
- if(!isCurrent())return null;
- if(!img&&proxy){
-  const remaining=timeoutMs-(performance.now()-started);
-  if(remaining>0)img=await loadShareImage(proxy,remaining);
- }
- if(!isCurrent())return null;
- if(img){shareCoverCache.set(src,img);if(shareCoverCache.size>64)shareCoverCache.delete(shareCoverCache.keys().next().value)}
- return img;
-}
 // Share (redesign 15/16): one sheet for the month forest, the year forest and a finished work,
 // with a story (9:16) or feed (4:5) image. Everything is drawn on a canvas from local assets.
 let shareKind='year',shareRevision='',shareGeneration=0,shareFormat='feed',shareTarget='';
@@ -846,19 +799,6 @@ function sharePill(ctx,text,x,y,{fill='#fff',color='#1E2A22',size=34,rotate=0,bo
  ctx.fillStyle=fill;shareRounded(ctx,-w/2,-h/2,w,h,h/2);ctx.fill();ctx.fillStyle=color;ctx.textBaseline='middle';ctx.font='600 '+size+'px '+F;ctx.fillText(text,-w/2+32,2);if(bold){ctx.font='800 '+(boldSize||size*1.25)+'px '+F;ctx.fillText(bold,-w/2+32+w1+16,2)}ctx.restore();return w;
 }
 // Same rubber stamp as stampSVG (coral rings, arc lettering, DONE), drawn on canvas.
-function shareStamp(ctx,cx,cy,r,date,rotate=10){
- const k=r/60,L='Archivo,"Pretendard Variable",sans-serif',coral='#E85A47';
- ctx.save();ctx.translate(cx,cy);ctx.rotate(rotate*Math.PI/180);ctx.globalAlpha=.92;ctx.strokeStyle=coral;ctx.fillStyle=coral;
- [[56,3.4],[51,1.1],[35,1.4]].forEach(([rr,w])=>{ctx.lineWidth=w*k;ctx.beginPath();ctx.arc(0,0,rr*k,0,Math.PI*2);ctx.stroke()});
- const arc=(text,rr,top)=>{ctx.font='600 '+(10*k)+'px '+L;const sp=1.4*k,ws=[...text].map(ch=>ctx.measureText(ch).width+sp),total=ws.reduce((x,y)=>x+y,0)-sp;
-  let pos=-total/2;ctx.textAlign='center';ctx.textBaseline='alphabetic';
-  [...text].forEach((ch,i)=>{const mid=pos+(ws[i]-sp)/2,ang=mid/(rr*k);ctx.save();if(top){ctx.rotate(ang);ctx.fillText(ch,0,-rr*k)}else{ctx.rotate(-ang);ctx.fillText(ch,0,rr*k+7*k)}ctx.restore();pos+=ws[i]})};
- arc('GREW · TODAY',39,true);arc(String(date||now()).replace(/-/g,'.'),39,false);
- ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.font='600 '+(7*k)+'px '+L;ctx.fillText('★  ★  ★',0,-13*k);
- ctx.font='700 '+(21*k)+'px '+L;ctx.letterSpacing=(.6*k)+'px';ctx.fillText('DONE',0,11*k);ctx.letterSpacing='0px';
- [-44,44].forEach(x=>{ctx.beginPath();ctx.arc(x*k,0,1.6*k,0,Math.PI*2);ctx.fill()});
- ctx.restore();
-}
 async function shareIsland(ctx,y0,x0,scale,items){
  const g=yearBoardGeometry(forestLifetime&&shareKind==='year'?'all':year,items),G=g.ground,P=(x,y)=>[x0+x*scale,y0+y*scale];
  const poly=(pts,fill,stroke)=>{ctx.fillStyle=fill;ctx.beginPath();pts.forEach(([x,y],k)=>{const [px,py]=P(x,y);k?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.closePath();ctx.fill();if(stroke){ctx.strokeStyle=fill;ctx.lineWidth=.7*scale;ctx.lineJoin='round';ctx.stroke()}};

@@ -243,7 +243,6 @@ function bmRealSources(b,id,floor=false){const kinds=(floor?b.floorOwnership:b.o
 function bmPreviewSources(b,id,floor=false){if(BM_CONFIG.mode!=='preview')return [];const kinds=(floor?b.previewFloorOwnership:b.previewOwnership)?.[id];return Array.isArray(kinds)?kinds.filter(k=>k==='cash'||!floor&&k==='coupon'):[]}
 function bmOwnedFrom(b){return [...new Set([...BM_GENRE_IDS,...Object.keys(b.ownership||{}).filter(id=>bmKnownRegular(id)&&bmRealSources(b,id).length),...Object.keys(b.previewOwnership||{}).filter(id=>bmTreeReady(id)&&BM_SHOP_IDS.includes(id)&&bmPreviewSources(b,id).length)])]}
 function bmCashOwnedFrom(b,id){return bmRealSources(b,id).includes('cash')||bmPreviewSources(b,id).includes('cash')}
-function bmCashCountFrom(b){return BM_SHOP_IDS.filter(id=>bmCashOwnedFrom(b,id)).length}
 // Hidden trees are never sold: each one opens when you have planted enough trees (finished works).
 const BM_MYSTERY_AT={A:30,B:50,C:75,D:100};
 function bmMysteryAvailableFrom(b,kind){if(!['A','B','C','D'].includes(kind))return false;if(b.legacyMysteryIds?.includes(kind))return true;return bmProgressFrom(b).completed>=BM_MYSTERY_AT[kind]}
@@ -344,7 +343,6 @@ function bmRefresh(s){
 }
 function bmState(){const b=state.collection?.bm;return b?.version===2&&b.previewVersion===2&&b.ownership?.oak?b:bmRefresh(state)}
 function bmOwnedTreeIds(){return bmOwnedFrom(bmState())}
-function bmCashTreeCount(){return bmCashCountFrom(bmState())}
 function bmGrowthMilestones(s=state){return bmGrowthFrom(bmRefresh(s))}
 function bmMysteries(){const b=bmState(),planted=bmProgressFrom(b).completed;return [{id:'A',name:'반짝이는 나무',ready:true},{id:'B',name:'달빛나무',ready:true},{id:'C',name:'미스터리 나무',ready:false},{id:'D',name:'미스터리 나무',ready:false}].map(t=>({...t,at:BM_MYSTERY_AT[t.id],metric:'trees',progress:planted,unlocked:bmMysteryAvailableFrom(b,t.id)}))}
 function bmAutoSpecies(c,s=state){const pool=bmAvailablePool(c,s),b=s.collection?.bm,sequence=c.bmAssignment?.sequence??b?.nextByPool?.[bmPool(c)]??0;return pool.length?pool[sequence%pool.length]:bmFallback(c)}
@@ -524,7 +522,6 @@ function previewSpeciesArt(speciesId,theme='basic'){
 }
 let collectionTab='inventory';
 let bmCollectionTab='inventory',bmPreview=null,bmCodexTab='trees',bmSelectedWork='',bmTreeFilter='shop',bmCheckout=null,bmPendingProduct=null;
-const BM_NAMES={base:'기본 나무',record:'성장 나무',shop:'스페셜 나무',mystery:'히든 나무'};
 const BM_FLOOR_NAMES={basic:'기본 바닥',meadow:'꽃이끼 정원'};
 const BM_KRW_FORMAT=new Intl.NumberFormat('ko-KR'),bmKRW=n=>BM_KRW_FORMAT.format(n)+'원';
 function bmTreeName(id){return id.startsWith('mystery-')?bmMysteries().find(t=>t.id===id.slice(-1))?.name||'히든 나무':TREE_SPECIES.find(t=>t.id===id)?.name||'새 나무 '+String(BM_RESERVED_IDS.indexOf(id)+1)}

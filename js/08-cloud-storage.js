@@ -475,7 +475,6 @@ function renderTodayBase(){
  return todayBoard(c);
 }
 // Sticker board (redesign 5a): the tree sticker leads, the stamp records, the week stays small.
-const STICKER_TREE_KEYS={0:'seed',1:'sprout',2:'young'};
 function stickerTreeSrc(c,stage=Model.stage(c)){
  const key=stage<3?growthKey(c,stage):c.hiddenTree?(c.hiddenTree==='A'?'shining':'moonlight'):contentSpecies(c)?.id;
  return (SONGLIM_TREE_ASSETS[key]||SONGLIM_TREE_ASSETS.oak).src;
