@@ -6540,7 +6540,7 @@ body.is-decorating .toast {
   font-weight: 600;
 }
 .bm-page-note {
-  margin: 16px 4px 0;
+  margin: 16px 0 0;
   font: 500 12px/1.5 var(--font-family);
   color: var(--sb-muted);
 }
@@ -10340,7 +10340,7 @@ body[data-view="intro"] .app {
 }
 .today-v2 .tv-count {
   position: absolute;
-  left: 20px;
+  left: 24px;
   bottom: 20px;
   height: auto;
   padding: 0;
@@ -13398,4 +13398,12 @@ button.primary,
     opacity: 0;
     transform: translate(var(--s, 18px), 720px) rotate(calc(var(--r) + 600deg));
   }
+}
+
+/* Alignment pass: footer button centred with its count; consent rows share one text column */
+.scrap-session-footer .primary {
+  margin: 0;
+}
+#page.ob-page .ob-check.is-all {
+  gap: 6px;
 }
