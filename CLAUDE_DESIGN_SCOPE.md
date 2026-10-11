@@ -7,15 +7,11 @@ When redesigning the app UI, preserve application behavior and data structures. 
 The forest visualization (tree art, visitors, decorations, placement logic, zoom behavior) is a separate visual system. Do not redesign or remove it unless explicitly requested.
 
 Useful files for UI work:
-- `index.html`
-- `css/styles.css`
-- `js/03-core.js`
-- `js/08-cloud-storage.js` (contains much of the current screen-rendering code despite the filename)
-- `js/11-onboarding.js`
-- `js/01-app-brand.js`
+- `index.html`, `css/styles.css`
+- `js/16-app-shell.js`, `js/17-today.js`, `js/18-scrap.js`, `js/20-record.js`, `js/24-my.js`, `js/10-shop.js`
+- `js/26-onboarding.js`, `js/01-brand.js`
 
 Forest-specific files:
-- `js/02-forest-art.js`
-- `js/09-forest.js`
+- `js/02-tree-art-assets.js`, `js/08-tree-art.js`, `js/09-forest-layout.js`, `js/21-forest.js`
 - `assets/images/trees/`
 - `assets/images/forest/`
