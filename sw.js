@@ -1,7 +1,7 @@
 // Offline shell for 그루. Pages: network first, cached copy when offline. Scripts, styles, images, sounds
 // and web fonts: cached copy right away, refreshed in the background. Login, sync and search APIs never
 // touch the cache.
-const CACHE='grew-v1';
+const CACHE='grew-v2';
 const SHELL=['./','./index.html','./manifest.webmanifest','./assets/images/icon-192.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
