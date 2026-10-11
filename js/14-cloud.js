@@ -318,7 +318,7 @@ async function cloudLogout() {
 async function deleteSongrimAccount() {
   const deletingOwner = dataOwner,
     deletingGeneration = dataGeneration;
-  if (!cloudSession?.access_token) throw Error("다시 로그인한 뒤 회원탈퇴를 진행해주세요.");
+  if (!cloudSession?.access_token) throw Error("다시 로그인한 뒤 회원 탈퇴를 진행해주세요.");
   const key = cloudPublicKey();
   if (!key) throw Error("Supabase 연결 설정이 필요해요.");
 

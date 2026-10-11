@@ -319,7 +319,11 @@ async function drawLifetimeCard(ctx, canvas, W, H, story, name, F, L, mode = "li
   ctx.textAlign = "center";
   ctx.fillStyle = fg;
   ctx.font = "700 54px " + F;
-  ctx.fillText(shareFitTitle(ctx, name, "의 " + (life ? "" : "올해 ") + "숲", W - 144), W / 2, top);
+  ctx.fillText(
+    shareFitTitle(ctx, name, "의 " + (life ? "" : yearWord(year) + " ") + "숲", W - 144),
+    W / 2,
+    top,
+  );
   ctx.fillStyle = accent;
   ctx.font = "800 " + (story ? 280 : 220) + "px " + L;
   ctx.fillText(String(done.length), W / 2, top + (story ? 270 : 215));
@@ -568,7 +572,7 @@ async function drawStickerCard(ctx, canvas, W, H, story, name, F, L, kind) {
   ctx.fillStyle = ink;
   ctx.font = "700 46px " + F;
   ctx.fillText(
-    shareFitTitle(ctx, name, "의 " + (isYear ? "올해" : m + "월") + " 숲", W - 144 - 340),
+    shareFitTitle(ctx, name, "의 " + (isYear ? yearWord(year) : m + "월") + " 숲", W - 144 - 340),
     72,
     top,
   );
@@ -759,7 +763,7 @@ function shareTitle() {
     ? Number(month.slice(5)) + "월의 숲 공유"
     : forestLifetime
       ? forestLifetimeName() + " 공유"
-      : "올해의 숲 공유";
+      : yearWord(year) + "의 숲 공유";
 }
 
 async function makeShare(kind = shareKind, target = shareTarget) {
@@ -851,7 +855,7 @@ async function nativeShare() {
   const file = new File([shareBlob], shareFileName(), { type: "image/png" });
   if (navigator.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: "나의 " + APP_BRAND.ko });
+      await navigator.share({ files: [file], title: "나의 숲" });
     } catch (e) {
       if (e.name !== "AbortError") toast("공유하지 못했어요. 이미지 저장을 이용해주세요.");
     }

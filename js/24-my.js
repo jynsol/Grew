@@ -283,7 +283,7 @@ function openLicenses() {
       item("TMDB", "영화 정보와 포스터", "themoviedb.org", "https://www.themoviedb.org/") +
       item("Google Books", "책 정보와 표지", "books.google.com", "https://books.google.com/") +
       item("알라딘", "책 정보", "aladin.co.kr", "https://www.aladin.co.kr/") +
-      '</ul><p class="license-note">This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>',
+      '</ul><p class="license-note">이 앱은 TMDB API를 사용하지만 TMDB의 보증이나 인증을 받지 않았어요.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>',
     "licenses",
   );
 }
@@ -363,7 +363,7 @@ function renderMy() {
     row("이용약관", "terms") +
     row("개인정보처리방침", "privacy") +
     row("로그아웃", "flowLogout") +
-    button("<span>회원탈퇴</span>", "deleteAccount", "menu-row danger") +
+    button("<span>회원 탈퇴</span>", "deleteAccount", "menu-row danger") +
     "</div></div></section>"
   );
 }
@@ -373,7 +373,7 @@ function exportBackup() {
     new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }),
     "grew-backup-" + now() + ".json",
   );
-  toast("백업 파일을 다운로드했어요.");
+  toast("백업 파일을 저장했어요.");
 }
 
 function replaceData(s) {

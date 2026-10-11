@@ -87,7 +87,7 @@ function bmBadge(group) {
     '<span class="bm-badge ' +
     (group === "shop" ? "paid" : group === "mystery" ? "hidden" : "free") +
     '">' +
-    (group === "shop" ? "스페셜" : group === "mystery" ? "조건 해금" : "무료") +
+    (group === "shop" ? "스페셜" : group === "mystery" ? "조건 달성" : "무료") +
     "</span>"
   );
 }
@@ -166,7 +166,7 @@ function bmWorkSelect() {
           )
           .join("") +
         "</select></div>"
-    : '<p class="bm-subtitle">작품을 담으면 해금한 나무로 꾸밀 수 있어요.</p>';
+    : '<p class="bm-subtitle">작품을 담으면 열린 나무로 꾸밀 수 있어요.</p>';
 }
 
 // Preview = the real month board (same ground art as the forest tab), empty, 3×3.
@@ -285,7 +285,7 @@ function bmPreviewHTML() {
       (isTree
         ? button(
             q.balance >= q.cost
-              ? "쿠폰 " + q.cost + "장으로 해금하기"
+              ? "쿠폰 " + q.cost + "장으로 열기"
               : "쿠폰 모으기 · " + q.balance + "/" + q.cost,
             q.balance >= q.cost ? "bmRedeemStart" : "bmCoupons",
             "secondary",
@@ -431,7 +431,7 @@ function bmOpenCheckout(kind) {
     const coupon = kind === "coupon",
       floor = kind === "floor",
       q = bmCouponStatus();
-    title = "해금하기";
+    title = "열기";
     body =
       '<div class="bm-checkout-product">' +
       (floor ? bmFloorPreviewArt(p.id) : bmTreeSVG(p.id)) +
@@ -440,7 +440,7 @@ function bmOpenCheckout(kind) {
       "</h3><small>한 번 열면 계속 사용할 수 있어요</small></div></div>" +
       bmPackWarning(p.id) +
       (!floor
-        ? '<div class="bm-payment-methods" role="group" aria-label="해금 방법">' +
+        ? '<div class="bm-payment-methods" role="group" aria-label="여는 방법">' +
           button(
             "단품 구매<strong>1,100원</strong>",
             "bmPayCash",
@@ -506,7 +506,7 @@ function bmConfirmAcquire() {
     state = before;
     const error = $("formError");
     if (error)
-      error.textContent = "이미 해금했거나 지금 진행할 수 없어요. 보유 상태와 오늘의 횟수를 확인해 주세요.";
+      error.textContent = "이미 열었거나 지금 진행할 수 없어요. 보유 상태와 오늘의 횟수를 확인해주세요.";
     return;
   }
   if (!persist()) return;
@@ -521,7 +521,7 @@ function bmConfirmAcquire() {
   } else {
     const p = request.preview;
     bmOpenPreview(p.kind, p.id, p.itemId);
-    toast("나무와 바닥은 한 번 해금하면 계속 사용할 수 있어요.");
+    toast("나무와 바닥은 한 번 열면 계속 쓸 수 있어요.");
   }
 }
 
@@ -1226,7 +1226,7 @@ function bmShopTreesHTML() {
         ? ""
         : '<div class="bm-store-note"><div><strong>스페셜 나무는 곧 살 수 있어요</strong><p>결제를 준비하고 있어요. 아직 없는 나무 ' +
           missing +
-          "종을 미리 구경해 보세요.</p></div></div>";
+          "종을 미리 구경해보세요.</p></div></div>";
   const section = (t) => {
     const owned = t.ids.filter((id) => bmReadyTreeIds().includes(id)).length;
     return (
@@ -1251,8 +1251,8 @@ function bmPackWarning(id) {
   );
   return pk
     ? '<p class="bm-money-note">이 ' +
-        (pk.floorIds.includes(id) ? "바닥" : "나무") +
-        "를 열면 " +
+        (pk.floorIds.includes(id) ? "바닥을" : "나무를") +
+        " 열면 " +
         esc(pk.pack.name) +
         "는 사라져요.</p>"
     : "";
@@ -1440,7 +1440,7 @@ function bmCouponBoardHTML() {
     ) +
     "</div>" +
     (bmPendingProduct
-      ? button(bmTreeName(bmPendingProduct.id) + "로 돌아가기", "bmReturnProduct", "bm-coupon-return")
+      ? button(withRo(bmTreeName(bmPendingProduct.id)) + " 돌아가기", "bmReturnProduct", "bm-coupon-return")
       : "") +
     '<ul class="bm-coupon-notes"><li>광고 1회에 쿠폰 1장, 하루 최대 2장이에요.</li><li>쿠폰 14장으로 스페셜 나무 1종을 영구로 열어요.</li><li>매일 모으면 7일에 한 그루씩 열 수 있어요.</li></ul>'
   );
@@ -1601,7 +1601,7 @@ function renderCodexPage() {
           : done >= v.need
             ? "곧 찾아와요"
             : near
-              ? "완료 " + (v.need - done) + "개 더"
+              ? "작품 " + (v.need - done) + "개 더 완료하면"
               : "완료 " + v.need + "개") +
         "</small></div>"
       );

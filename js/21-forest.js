@@ -232,10 +232,12 @@ function renderForestMonth() {
     "</div>";
   // The year island sits with the other forest tools instead of above the title.
   const yearTool = button(
-    '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>올해의 숲',
+    '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>' +
+      yearWord(year) +
+      "의 숲",
     "forestYearView",
     "forest-tool",
-    'aria-label="' + esc(year) + ' 올해의 숲 보기"',
+    'aria-label="' + esc(yearWord(year)) + '의 숲 보기"',
   );
   if (forestShow === "calendar")
     return (
@@ -290,7 +292,7 @@ function renderForestMonth() {
           : '<p class="forest-empty">' +
             (month === now().slice(0, 7)
               ? "이번 달 첫 기록을 남기면 새싹이 자라요"
-              : "이 달에는 심은 나무가 없어요") +
+              : "이달에는 심은 나무가 없어요") +
             "</p>") + tools) +
     "</div></div></section>"
   );
@@ -356,16 +358,16 @@ function forestCalendarHTML(period) {
       (dt.getUTCMonth() + 1) +
       "월 " +
       dt.getUTCDate() +
-      "일 " +
+      "일 (" +
       FOREST_MONTH_NAMES[dt.getUTCDay()] +
-      " · " +
+      ") · " +
       "완료" +
       "</small><strong>" +
       esc(c.title) +
       "</strong><span>" +
       (validRating(c.rating) ? "<b>★</b> " + c.rating + " · " : "") +
-      esc(c.hiddenTree ? bmTreeName("mystery-" + c.hiddenTree) : contentSpecies(c)?.name || "나무") +
-      "로 심었어요</span></span>" +
+      esc(withRo(c.hiddenTree ? bmTreeName("mystery-" + c.hiddenTree) : contentSpecies(c)?.name || "나무")) +
+      " 심었어요</span></span>" +
       stickerTree(c, 3, "is-cut-sm") +
       "</button>"
     );
@@ -528,7 +530,9 @@ function renderForestYear() {
       ) +
       '</div><div class="empty"><span class="empty-icon" aria-hidden="true">' +
       icon("forest") +
-      "</span><h3>아직 심은 나무가 없어요</h3><p>작품을 다 읽거나 보면<br>올해의 숲에 나무가 생겨요.</p></div></section>"
+      "</span><h3>아직 심은 나무가 없어요</h3><p>작품을 다 읽거나 보면<br>" +
+      yearWord(year) +
+      "의 숲에 나무가 생겨요.</p></div></section>"
     );
   if (forestLifetime) return renderForestLifetime(treeYears);
   const type = forestTypeFilter,
@@ -565,7 +569,9 @@ function renderForestYear() {
     "</div>" +
     '<div class="forest-title-row"><div><span class="forest-year-label">' +
     esc(year) +
-    '</span><h1 class="page-title">올해의 숲</h1>' +
+    '</span><h1 class="page-title">' +
+    yearWord(year) +
+    "의 숲</h1>" +
     forestTypeChips(all, '<span class="forest-reading">' + all.length + "그루</span>", forestTypeFilter) +
     "</div>" +
     forestNav(
@@ -596,7 +602,7 @@ function renderForestYear() {
               ? "책 " + b + "권"
               : forestTypeFilter === "movie"
                 ? "영화 " + m + "편"
-                : "책 " + b + " · 영화 " + m) +
+                : b + "권 · " + m + "편") +
             "</small>",
           "forestMonthView",
           "forest-month-card" + (period === current ? " is-current" : ""),
@@ -614,7 +620,9 @@ function renderForestYear() {
     (all.length
       ? '<div class="forest-year-share">' +
         button(
-          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>올해의 숲 자랑하기',
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-5 5 5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>' +
+            yearWord(year) +
+            "의 숲 자랑하기",
           "shareForest",
           "primary",
         ) +
@@ -669,7 +677,7 @@ function renderForestLifetime(treeYears) {
     "</h1>" +
     forestTypeChips(all, '<span class="forest-reading">' + all.length + "그루</span>", type) +
     "</div>" +
-    forestNav("forestPrevYear", "forestNextYear", last + "년의 숲", "", false, true) +
+    forestNav("forestPrevYear", "forestNextYear", last + "년의 숲", "다음 숲 없음", false, true) +
     "</div>";
   const cards = [...treeYears]
     .reverse()
@@ -687,7 +695,7 @@ function renderForestLifetime(treeYears) {
             ? "책 " + b + "권"
             : type === "movie"
               ? "영화 " + m + "편"
-              : "책 " + b + " · 영화 " + m) +
+              : b + "권 · " + m + "편") +
           "</small>",
         "forestPickYearCard",
         "forest-month-card" + (y === now().slice(0, 4) ? " is-current" : ""),
@@ -776,9 +784,9 @@ function renderCalendar() {
       .filter((d) => d.startsWith(month)),
   ).size;
   return (
-    '<section><div class="page-heading"><h1 class="page-title">월간 기록</h1></div><p class="page-caption">한 달의 경험을 모아 살펴보세요.</p><div class="month-head">' +
+    '<section><div class="page-heading"><h1 class="page-title">월간 기록</h1></div><p class="page-caption">한 달의 기록을 모아 살펴보세요.</p><div class="month-head">' +
     button("‹", "prevMonth", "iconbtn", 'aria-label="이전 달"') +
-    button(month.replace("-", "년 ") + "월 ▾", "months", "textbtn") +
+    button(month.slice(0, 4) + "년 " + Number(month.slice(5)) + "월 ▾", "months", "textbtn") +
     button(
       "›",
       "nextMonth",
@@ -793,9 +801,9 @@ function renderCalendar() {
     stats.n +
     '개</strong></p><p class="summary">책 ' +
     stats.book +
-    " · 영화 " +
+    "권 · 영화 " +
     stats.movie +
-    "</p>" +
+    "편</p>" +
     button("기록 공유하기", "shareMonth", "primary", recordedDays ? "" : "disabled") +
     (!recordedDays ? '<p class="creator center">이달의 기록을 남기면 이미지로 공유할 수 있어요.</p>' : "") +
     "</section>"
@@ -1011,7 +1019,7 @@ function setupForest() {
       '</strong><small><i class="ftt-type" data-type="' +
       esc(c.type) +
       '">' +
-      (TYPE_LABEL[c.type] || "콘텐츠") +
+      (TYPE_LABEL[c.type] || "작품") +
       "</i><span>" +
       esc(genre) +
       "</span></small></span>" +

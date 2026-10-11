@@ -1365,7 +1365,7 @@ function forestSVG(items, theme = "basic", animated = true, options = {}) {
     ' role="group" aria-label="' +
     n +
     "그루의 " +
-    { basic: "기본", snow: "설산" }[theme] +
+    { basic: "기본", snow: "겨울" }[theme] +
     ' 숲"><defs>' +
     overlap.defs +
     '<filter id="forestTreeEdge" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1.5" result="spread"/><feGaussianBlur in="spread" stdDeviation=".85" result="edge"/><feFlood flood-color="' +

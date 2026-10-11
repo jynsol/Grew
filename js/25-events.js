@@ -424,7 +424,7 @@ document.addEventListener("click", async (e) => {
   if (a === "undoComplete") {
     Model.undoComplete(state, id);
     if (!commit(true)) return;
-    toast("완료를 취소했어요. 이전 경험 기록은 남아 있어요.");
+    toast("완료를 취소했어요. 이전 기록은 남아 있어요.");
     return;
   }
   if (a === "undoLog") {
@@ -494,7 +494,7 @@ document.addEventListener("click", async (e) => {
     const logId = b.dataset.log;
     confirmBox(
       "이 기록을 삭제할까요?",
-      "선택한 날의 경험 기록만 삭제해요.",
+      "선택한 날의 기록만 삭제해요.",
       () => {
         c.logs = c.logs.filter((l) => l.id !== logId);
         if (!commit()) return;
@@ -518,7 +518,7 @@ document.addEventListener("click", async (e) => {
   if (a === "delete") {
     confirmBox(
       "스크랩을 삭제할까요?",
-      "이 콘텐츠의 스크랩·경험 기록·완료·숲의 나무가 함께 삭제돼요.",
+      "이 작품의 스크랩·기록·완료·숲의 나무가 함께 삭제돼요.",
       () => {
         Model.remove(state, id);
         if (!persist()) return;
@@ -671,7 +671,7 @@ document.addEventListener("click", async (e) => {
     if (list.length === 1) openDetail(list[0].id, "calendar");
     else
       showModal(
-        b.dataset.date + "의 경험",
+        Number(b.dataset.date.slice(5, 7)) + "월 " + Number(b.dataset.date.slice(8)) + "일의 기록",
         '<div class="content-list">' + list.map((c) => row(c)).join("") + "</div>",
         "day",
       );
@@ -708,7 +708,7 @@ document.addEventListener("click", async (e) => {
     }
     if (shareBlob) {
       download(shareBlob, shareFileName());
-      toast("이미지를 다운로드했어요.");
+      toast("이미지를 저장했어요.");
     }
     return;
   }
@@ -800,7 +800,7 @@ document.addEventListener("click", async (e) => {
   if (a === "clear") {
     confirmBox(
       "모든 데이터를 삭제할까요?",
-      "이 브라우저의 " + APP_BRAND.ko + " 스크랩·경험·완료·테마·프로필이 모두 초기화돼요.",
+      "이 브라우저의 " + APP_BRAND.ko + " 스크랩·기록·완료·테마·프로필이 모두 초기화돼요.",
       resetAll,
       "전체 삭제",
     );
@@ -980,7 +980,9 @@ document.addEventListener("change", async (e) => {
       .map((f) => '<span class="muted">' + esc(f.name) + "</span>")
       .join("");
     $("ocrButton").disabled = !photoFiles.length;
-    $("ocrProgress").textContent = photoFiles.length + "장 선택";
+    $("ocrProgress").textContent = "";
+    if ($("photoPickName"))
+      $("photoPickName").textContent = photoFiles.length ? photoFiles.length + "장 골랐어요" : "사진 고르기";
   }
   if (el.id === "restoreFile") {
     const file = el.files[0];
@@ -991,7 +993,7 @@ document.addEventListener("change", async (e) => {
       const s = Array.isArray(parsed.contents) ? migrateLegacy(parsed) : Model.validate(parsed);
       confirmBox(
         "백업을 복원할까요?",
-        "현재 기록을 백업의 " + s.items.length + "개 콘텐츠로 대체해요.",
+        "현재 기록을 백업의 " + s.items.length + "개 작품으로 바꿔요.",
         () => replaceData(s),
         "복원",
       );
@@ -1071,7 +1073,7 @@ document.addEventListener("submit", async (e) => {
       }
     } catch (err) {
       if ($("formError"))
-        $("formError").textContent = userMessage(err, "저장하지 못했어요. 다시 시도해 주세요.");
+        $("formError").textContent = userMessage(err, "저장하지 못했어요. 다시 시도해주세요.");
       submit.disabled = false;
     }
   }
@@ -1220,10 +1222,10 @@ document.addEventListener("submit", async (e) => {
     toast(
       advance
         ? returnView === "today" && state.selected
-          ? "나무가 심어졌어요. 다음 콘텐츠를 준비했어요."
+          ? "나무가 심어졌어요. 다음 작품을 준비했어요."
           : state.selected
             ? "나무가 심어졌어요."
-            : "나무가 심어졌어요. 모아둔 콘텐츠를 모두 경험했어요."
+            : "나무가 심어졌어요. 담아둔 작품을 모두 완료했어요."
         : "별점을 저장했어요.",
     );
   }

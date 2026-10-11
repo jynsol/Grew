@@ -67,7 +67,7 @@ function ratingPrompt(c, advance = false) {
         ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2-6 8h3l-5 7h6v5h4v-5h6l-5-7h3z"/></svg>숲에 심기'
         : "별점 저장") +
       "</button>" +
-      (c.rating ? button("평점만 지우기", "clearRating", "textbtn", attr(c.id)) : "") +
+      (c.rating ? button("별점 지우기", "clearRating", "textbtn", attr(c.id)) : "") +
       "</div></form>",
     "finish",
   );
@@ -85,7 +85,7 @@ function startExperience(id) {
     pendingForestArrival = c.id;
     document.querySelector(".growth")?.classList.add("is-growing");
   }
-  toast(previousStage === 0 ? "숲에 새싹이 자라기 시작했어요." : "이어가던 경험으로 이동했어요.");
+  toast(previousStage === 0 ? "숲에 새싹이 자라기 시작했어요." : "감상 중인 작품으로 이동했어요.");
 }
 
 function record(id) {
@@ -246,7 +246,7 @@ function editLog(id, logId) {
     l = c?.logs.find((l) => l.id === logId);
   if (!l) return;
   showModal(
-    "경험 기록 수정",
+    "기록 수정",
     '<form id="logForm" data-id="' +
       id +
       '" data-log="' +
@@ -295,7 +295,8 @@ function editNote(id, noteId = "") {
 }
 
 function editMemo(id, logId) {
-  const l = get(id)?.logs.find((l) => l.id === logId);
+  const c = get(id),
+    l = c?.logs.find((l) => l.id === logId);
   if (!l) return;
   showModal(
     l.memo ? "메모 수정" : "메모 남기기",
@@ -303,7 +304,9 @@ function editMemo(id, logId) {
       esc(id) +
       '" data-log="' +
       esc(logId) +
-      '"><label for="todayMemo">오늘 읽으며 남기고 싶은 생각</label><textarea id="todayMemo" maxlength="4000" placeholder="짧은 생각이나 기억하고 싶은 문장">' +
+      '"><label for="todayMemo">오늘 ' +
+      (c.type === "movie" ? "보며" : "읽으며") +
+      ' 남기고 싶은 생각</label><textarea id="todayMemo" maxlength="4000" placeholder="짧은 생각이나 기억하고 싶은 문장">' +
       esc(l.memo) +
       '</textarea><button type="submit" class="primary">저장</button></form>',
     "memo",

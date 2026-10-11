@@ -1481,7 +1481,7 @@ async function runLinkImport() {
   try {
     url = normalizeImportURL(s.url);
   } catch (e) {
-    renderLinkImportInput(userMessage(e, "링크를 불러오지 못했어요. 다시 시도해 주세요."));
+    renderLinkImportInput(userMessage(e, "링크를 불러오지 못했어요. 다시 시도해주세요."));
     return;
   }
   if (!url && !s.text.trim()) {
@@ -1638,7 +1638,7 @@ function linkImportRowHTML(row, index) {
     '<div><div class="link-import-result-title">' +
     esc(c.title) +
     '</div><div class="link-import-result-meta">' +
-    esc(c.creator || "제작자 미확인") +
+    esc(c.creator || (c.type === "movie" ? "감독 미확인" : "저자 미확인")) +
     (c.releaseDate ? " · " + esc(c.releaseDate.slice(0, 4)) : "") +
     '</div><span class="link-import-status ' +
     (row.needsReview ? "check" : "") +
@@ -1664,7 +1664,7 @@ function linkImportRowHTML(row, index) {
                   " · " +
                   v.title +
                   " · " +
-                  (v.creator || v.releaseDate?.slice(0, 4) || "제작자 미확인"),
+                  (v.creator || v.releaseDate?.slice(0, 4) || "저자·감독 미확인"),
               ) +
               "</option>",
           )
@@ -1863,10 +1863,13 @@ function saveLinkImport() {
   closeModal();
   render();
   toast(
-    added +
-      "개 스크랩했어요." +
-      (updated ? " 기존 " + updated + "개에 출처를 추가했어요." : "") +
-      (skipped ? " 중복 " + skipped + "개는 건너뛰었어요." : ""),
+    [
+      added ? added + "개 스크랩했어요." : "",
+      updated ? "기존 " + updated + "개에 출처를 추가했어요." : "",
+      skipped ? "중복 " + skipped + "개는 건너뛰었어요." : "",
+    ]
+      .filter(Boolean)
+      .join(" ") || "새로 담을 작품이 없어요.",
   );
 }
 

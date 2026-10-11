@@ -215,14 +215,14 @@ const Model = (() => {
           !Array.isArray(c.logs) ||
           !Array.isArray(c.saves)
         )
-          throw Error("콘텐츠 형식이 올바르지 않아요.");
+          throw Error("백업 파일의 작품 정보가 올바르지 않아요.");
         if (c.completed && c.completed !== "unknown" && !validDate(c.completed))
           throw Error("완료 날짜가 올바르지 않아요.");
         if (
           c.logs.some((l) => !validDate(l.date) || typeof l.id !== "string") ||
           new Set(c.logs.map((l) => l.date)).size !== c.logs.length
         )
-          throw Error("경험 기록 날짜를 확인해주세요.");
+          throw Error("기록 날짜를 확인해주세요.");
         return {
           ...c,
           ...contentMetadata(c),
@@ -266,7 +266,8 @@ const Model = (() => {
           hiddenTree: ["A", "B"].includes(c.hiddenTree) ? c.hiddenTree : null,
         };
       });
-    if (new Set(s.items.map((c) => c.id)).size !== s.items.length) throw Error("중복된 콘텐츠 ID가 있어요.");
+    if (new Set(s.items.map((c) => c.id)).size !== s.items.length)
+      throw Error("백업 파일이 손상됐어요. 다른 백업 파일로 다시 시도해주세요.");
     s.selected = s.items.some((c) => c.id === raw.selected) ? raw.selected : null;
     s.themes = Object.fromEntries(
       Object.entries(raw.themes || {})

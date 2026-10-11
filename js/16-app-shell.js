@@ -6,7 +6,8 @@ function toast(message, undo) {
   $("toast").classList.remove("planted");
   clearTimeout(toastTimer);
   undoAction = undo || null;
-  $("toast").innerHTML = "<span>" + esc(message) + "</span>" + (undo ? button("취소", "toastUndo", "") : "");
+  $("toast").innerHTML =
+    "<span>" + esc(message) + "</span>" + (undo ? button("되돌리기", "toastUndo", "") : "");
   toastTimer = setTimeout(
     () => {
       $("toast").innerHTML = "";
@@ -152,7 +153,7 @@ function row(c, choose = false) {
     '</span><div class="title">' +
     esc(c.title) +
     '</div><div class="creator">' +
-    esc(c.creator || "제작자 미확인") +
+    esc(c.creator || (c.type === "movie" ? "감독 미확인" : "저자 미확인")) +
     '</div><div class="content-row-meta"><span class="record-status ' +
     Model.status(c) +
     '">' +
@@ -186,9 +187,9 @@ document.addEventListener("error", handleCoverError, true);
 
 function menu(c) {
   return (
-    '<details class="more"><summary aria-label="콘텐츠 메뉴">⋯</summary><div class="more-menu">' +
+    '<details class="more"><summary aria-label="작품 메뉴">⋯</summary><div class="more-menu">' +
     button("다른 스크랩으로 바꾸기", "pick", "") +
-    button("콘텐츠 상세 보기", "detail", "", attr(c.id)) +
+    button("작품 상세 보기", "detail", "", attr(c.id)) +
     "</div></details>"
   );
 }
@@ -250,7 +251,7 @@ function render() {
   $("head").hidden = !["detail", "calendar", "sound", "notifications", "shop", "codex"].includes(view);
   $("head").innerHTML = !$("head").hidden
     ? '<div class="row">' +
-      button(icon("back"), "back", "iconbtn", 'aria-label="뒤로가기"') +
+      button(icon("back"), "back", "iconbtn", 'aria-label="뒤로 가기"') +
       '<span class="back-title">' +
       (["shop", "codex"].includes(view)
         ? "나의 숲"

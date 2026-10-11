@@ -11,7 +11,7 @@ const APP_BRAND = Object.freeze({
   contact: "",
 });
 
-document.title = APP_BRAND.ko + " — " + APP_BRAND.motto;
+document.title = APP_BRAND.ko + " · " + APP_BRAND.motto;
 
 window.initRatingPicker = function () {
   const wrap = document.querySelector("[data-rating-picker]");

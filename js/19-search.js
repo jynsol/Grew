@@ -1043,8 +1043,7 @@ async function musicSearchResults(q) {
     }
     if (!res.ok) {
       const detail = payload?.error || payload?.message || "HTTP " + res.status;
-      if (res.status === 401)
-        throw Error("검색 서버에서 인증 오류가 발생했어요. Edge Function의 Verify JWT 설정을 확인해주세요.");
+      if (res.status === 401) throw Error("검색 서버에 연결하지 못했어요. 잠시 뒤 다시 시도해주세요.");
       throw Error(detail);
     }
     if (seq !== musicSearchSeq || !$("musicCatalogResults")) return;
@@ -1264,8 +1263,7 @@ async function fetchMovieSearchPayload(query) {
   }
   if (!res.ok) {
     const detail = payload?.error || payload?.message || "HTTP " + res.status;
-    if (res.status === 401)
-      throw Error("검색 서버에서 인증 오류가 발생했어요. Edge Function의 Verify JWT 설정을 확인해주세요.");
+    if (res.status === 401) throw Error("검색 서버에 연결하지 못했어요. 잠시 뒤 다시 시도해주세요.");
     throw Error(detail);
   }
   return payload;

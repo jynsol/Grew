@@ -93,10 +93,10 @@ function renderDiscovery() {
     "<section>" +
     todayHeading() +
     '<div class="space"></div><p class="creator">' +
-    (completed.length ? "모아둔 콘텐츠를 모두 경험했어요" : "첫 관심을 모아보세요") +
+    (completed.length ? "담아둔 작품을 모두 완료했어요" : "첫 작품을 담아보세요") +
     '</p><h2 class="section-title">다음에는 무엇이 궁금하세요?</h2><p class="creator">' +
     (refs.length
-      ? "지난 경험과 비슷한 유형·장르의 작품을 골라봤어요."
+      ? "지난 기록과 비슷한 유형·장르의 작품을 골라봤어요."
       : "책과 영화 중 관심 있는 것을 골라보세요.") +
     '</p><div class="chips">' +
     [
@@ -126,7 +126,12 @@ function renderDiscovery() {
           '</h3><p class="creator">' +
           esc(c.creator) +
           '</p></div></div><div class="space"></div>' +
-          button("보고 싶어요", "discoverySave", "secondary", 'data-index="' + i + '"') +
+          button(
+            c.type === "book" ? "읽고 싶어요" : "보고 싶어요",
+            "discoverySave",
+            "secondary",
+            'data-index="' + i + '"',
+          ) +
           "</div>",
       )
       .join("") +
@@ -261,7 +266,7 @@ const OB_SOCIAL = [
 function obHead(step = 0, plain = false) {
   return (
     '<div class="ob-head">' +
-    button(OB_SVG.back, "flowBack", "ob-back" + (plain ? " is-plain" : ""), 'aria-label="뒤로가기"') +
+    button(OB_SVG.back, "flowBack", "ob-back" + (plain ? " is-plain" : ""), 'aria-label="뒤로 가기"') +
     (step ? '<span class="ob-count" aria-label="3단계 중 ' + step + '단계">' + step + " / 3</span>" : "") +
     "</div>" +
     (step
@@ -2436,14 +2441,18 @@ function renderTastePage() {
     '">' +
     esc(c.creator) +
     "</p>" +
-    button("상세보기 ›", "tasteDetail", "ob-link ob-work-detail") +
+    button("상세 보기 ›", "tasteDetail", "ob-link ob-work-detail") +
     "</div>" +
     obFoot(
       obCta(
         { book: "읽고 싶어요", album: "듣고 싶어요", movie: "보고 싶어요" }[c.type] || "경험하고 싶어요",
         "flowInterested",
       ) +
-        button("이미 경험했어요", "flowExperienced", "ob-cta is-secondary") +
+        button(
+          c.type === "book" ? "이미 읽었어요" : "이미 봤어요",
+          "flowExperienced",
+          "ob-cta is-secondary",
+        ) +
         button("넘기기", "flowSkip", "ob-sub"),
       "is-taste",
     )
@@ -2575,7 +2584,7 @@ document.addEventListener("click", async (e) => {
           state.items.length +
           "개 · 이전 " +
           previous.items.length +
-          "개</p><p>이전 기록은 자동으로 업로드하지 않았어요. 내 기록인지 확인한 뒤 복원할 수 있어요. 현재 기록도 먼저 보관합니다.</p>" +
+          "개</p><p>이전 기록은 자동으로 업로드하지 않았어요. 내 기록인지 확인한 뒤 복원할 수 있어요. 현재 기록도 먼저 보관해요.</p>" +
           button("이전 기록 내려받기", "legacyBackup", "secondary") +
           button("이전 기록으로 복원", "restoreLegacy", "secondary") +
           button("현재 기록으로 계속", "keepCurrentLegacy", "primary"),
@@ -2722,7 +2731,7 @@ document.addEventListener("click", async (e) => {
   if (a === "flowLogout") {
     confirmBox(
       "로그아웃할까요?",
-      "기록과 미전송 변경은 이 기기에 보관되며, 같은 계정으로 로그인하면 이어서 전송합니다.",
+      "기록과 미전송 변경은 이 기기에 보관되며, 같은 계정으로 로그인하면 이어서 보내요.",
       async () => {
         await cloudLogout();
         authSession = { signedIn: false, finished: false };
@@ -2737,15 +2746,15 @@ document.addEventListener("click", async (e) => {
   }
   if (a === "deleteAccount") {
     if (!cloudSession?.access_token) {
-      toast("다시 로그인한 뒤 회원탈퇴를 진행해주세요.");
+      toast("다시 로그인한 뒤 회원 탈퇴를 진행해주세요.");
       return;
     }
     showModal(
-      "회원탈퇴",
+      "회원 탈퇴",
       "<p><strong>" +
         esc(APP_BRAND.ko) +
         " 계정과 저장한 기록을 모두 삭제할까요?</strong></p>" +
-        '<p class="muted">스크랩, 경험 기록, 완료 기록, 별점과 클라우드 사용자 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</p>' +
+        '<p class="muted">스크랩, 기록, 완료 기록, 별점과 클라우드 사용자 데이터가 삭제돼요. 되돌릴 수 없어요.</p>' +
         '<label for="deleteAccountConfirm">확인을 위해 <strong>탈퇴</strong>를 입력해주세요.</label>' +
         '<input id="deleteAccountConfirm" autocomplete="off" placeholder="탈퇴">' +
         '<div id="deleteAccountError" class="entry-error" role="alert"></div>' +
@@ -2768,9 +2777,9 @@ document.addEventListener("click", async (e) => {
       await deleteSongrimAccount();
       closeModal();
       render();
-      toast("회원탈퇴가 완료됐어요.");
+      toast("회원 탈퇴가 완료됐어요.");
     } catch (ex) {
-      if (err) err.textContent = ex.message || "회원탈퇴를 완료하지 못했어요.";
+      if (err) err.textContent = userMessage(ex, "회원 탈퇴를 완료하지 못했어요.");
       if (btn) btn.disabled = false;
     }
   }
@@ -2877,7 +2886,12 @@ document.addEventListener("submit", async (e) => {
           ? "이메일 또는 비밀번호가 맞지 않아요."
           : login && /not confirmed/i.test(msg)
             ? "메일 인증을 마친 뒤 로그인해주세요."
-            : userMessage(err, "로그인 정보를 확인해주세요.");
+            : !login && /already registered|already exists/i.test(msg)
+              ? "이미 가입한 이메일이에요. 로그인해주세요."
+              : userMessage(
+                  err,
+                  login ? "로그인 정보를 확인해주세요." : "가입하지 못했어요. 입력한 정보를 확인해주세요.",
+                );
       if (login) loginError = text;
       if (f.isConnected && $("flowError")) {
         $("flowError").textContent = text;
@@ -2934,7 +2948,7 @@ document.addEventListener("submit", async (e) => {
         $("flowError").textContent =
           err.status === 401 || err.status === 403
             ? "재설정 링크가 만료됐어요. 새 메일을 받아주세요."
-            : userMessage(err, "비밀번호를 바꾸지 못했어요. 다시 시도해 주세요.");
+            : userMessage(err, "비밀번호를 바꾸지 못했어요. 다시 시도해주세요.");
     } finally {
       if (f.isConnected) submit.disabled = false;
     }

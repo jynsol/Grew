@@ -45,7 +45,7 @@ function scrapCard(c, choose = false) {
     '<span class="scrap-row-body"><strong>' +
     esc(c.title) +
     "</strong><small>" +
-    esc(c.creator || "제작자 미확인") +
+    esc(c.creator || (c.type === "movie" ? "감독 미확인" : "저자 미확인")) +
     '</small><span class="scrap-row-marks"><span class="scrap-type is-' +
     c.type +
     '">' +
@@ -107,7 +107,7 @@ function openScrapFilters() {
     "</span></label>";
   const status = picking
     ? ""
-    : '<fieldset class="scrap-filter-group is-chips"><legend>경험 상태</legend><div class="scrap-filter-options">' +
+    : '<fieldset class="scrap-filter-group is-chips"><legend>감상 상태</legend><div class="scrap-filter-options">' +
       ["all", "saved", "active", "done"]
         .map((value) => option("status", value, statusName[value], f.status === value))
         .join("") +
@@ -152,7 +152,7 @@ function renderScrap() {
           : (b.saves.at(-1)?.at || 0) - (a.saves.at(-1)?.at || 0),
   );
   const typeTabs =
-    '<div class="type-tabs" role="group" aria-label="콘텐츠 유형">' +
+    '<div class="type-tabs" role="group" aria-label="작품 유형">' +
     ["all", "book", "movie"]
       .map((t) =>
         button(
@@ -171,7 +171,7 @@ function renderScrap() {
         esc(statusName[f.status]) + " " + icon("close"),
         "clearScrapStatus",
         "scrap-applied-filter",
-        'aria-label="경험 상태 필터 해제"',
+        'aria-label="' + esc(statusName[f.status]) + ' 필터 해제"',
       ),
     );
   if (f.sort !== "recent")
@@ -207,7 +207,7 @@ function renderScrap() {
   return (
     '<section class="scrap-page"><div class="page-heading"><h1 class="page-title">' +
     (picking
-      ? "오늘 경험할 작품"
+      ? "오늘 기록할 작품"
       : '나의 스크랩<span class="scrap-heading-count">' + state.items.length + "</span>") +
     "</h1>" +
     (picking ? button("취소", "cancelPick", "textbtn") : scrapAddButton()) +
@@ -216,7 +216,7 @@ function renderScrap() {
     filterButton +
     '</div><div class="scrap-fixed-search">' +
     icon("search") +
-    '<input id="search" type="search" placeholder="제목·제작자 검색" aria-label="스크랩 검색" value="' +
+    '<input id="search" type="search" placeholder="제목·저자·감독 검색" aria-label="스크랩 검색" value="' +
     esc(f.q) +
     '"></div>' +
     count +
@@ -227,13 +227,13 @@ function renderScrap() {
       : state.items.length
         ? '<div class="empty"><span class="empty-icon" aria-hidden="true">' +
           icon("search") +
-          "</span><h3>일치하는 작품이 없어요</h3><p>다른 제목이나 제작자로 검색하거나<br>선택한 필터를 초기화해보세요.</p>" +
+          "</span><h3>일치하는 작품이 없어요</h3><p>다른 제목이나 저자·감독으로 검색하거나<br>선택한 필터를 초기화해보세요.</p>" +
           button("검색·필터 초기화", "resetFilters", "secondary") +
           "</div>"
         : '<div class="empty"><span class="empty-icon" aria-hidden="true">' +
           icon("scrap") +
           "</span><h3>첫 작품을 담아보세요</h3><p>읽고 싶은 책과<br>보고 싶은 영화를 모아보세요.</p>" +
-          button("작품 추가하기", "add", "primary") +
+          button("스크랩 추가하기", "add", "primary") +
           "</div>") +
     '</div><div class="list-footer"></div></section>'
   );
@@ -249,7 +249,7 @@ function contentIntroText(c) {
 
 function detailMenu(c) {
   return (
-    '<details class="more detail-more"><summary aria-label="콘텐츠 관리">⋯</summary><div class="more-menu">' +
+    '<details class="more detail-more"><summary aria-label="작품 관리">⋯</summary><div class="more-menu">' +
     button("기본 정보 수정", "editInfo", "", attr(c.id)) +
     (c.completed
       ? button("완료 취소", "undoComplete", "", attr(c.id))
@@ -264,7 +264,7 @@ function detailMenu(c) {
 function renderDetail() {
   const c = candidatePreview || get(detailId);
   if (!c)
-    return '<div class="empty">이 콘텐츠가 없어요.' + button("스크랩으로", "toScrap", "textbtn") + "</div>";
+    return '<div class="empty">이 작품이 없어요.' + button("스크랩으로", "toScrap", "textbtn") + "</div>";
   if (
     c.type === "book" &&
     !detailIntroAttempts.has(detailIntroKey(c)) &&
@@ -284,7 +284,7 @@ function renderDetail() {
         ? '<p class="original-title">' + esc(c.originalTitle) + "</p>"
         : "") +
       '</div></div><p class="creator">' +
-      esc(c.creator || "제작자 미확인") +
+      esc(c.creator || (c.type === "movie" ? "감독 미확인" : "저자 미확인")) +
       " · " +
       typeName[c.type] +
       ' · 추천 후보 · 아직 스크랩 전</p><div class="row">' +
@@ -302,7 +302,7 @@ function renderDetail() {
   const genre = cleanGenreValue(c.genre) ? launchGenre(c.type, c.genre, c) : "";
   const chips = c.completed
     ? '<span class="detail-chip is-ink"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF6A55" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>완료 · ' +
-      (c.completed === "unknown" ? "날짜 미상" : esc(c.completed.slice(5).replace("-", "."))) +
+      (c.completed === "unknown" ? "완료일 미상" : esc(c.completed.slice(5).replace("-", "."))) +
       "</span>" +
       '<button type="button" class="detail-chip detail-chip-rating" data-action="rating" ' +
       attr(c.id) +
@@ -425,7 +425,7 @@ function renderDetail() {
       ? '<p class="original-title">' + esc(c.originalTitle) + "</p>"
       : "") +
     '<p class="detail-creator">' +
-    esc(c.creator || "제작자 미확인") +
+    esc(c.creator || (c.type === "movie" ? "감독 미확인" : "저자 미확인")) +
     (c.publisher ? " · " + esc(c.publisher) : "") +
     "</p></div>" +
     '<div class="detail-chips">' +
@@ -558,7 +558,7 @@ function infoForm(c = null, source = "") {
   const editable = !c || (!c.providerId && !c.isbn);
   const locked = c && !editable ? ' disabled aria-disabled="true"' : "";
   showModal(
-    c ? "나의 분류 수정" : "직접 입력",
+    c ? "기본 정보 수정" : "직접 입력",
     '<form id="infoForm" data-edit="' +
       esc(c?.id || "") +
       '"><span class="info-label" id="contentTypeLabel">유형</span><input type="hidden" id="contentType" value="' +
@@ -584,7 +584,7 @@ function infoForm(c = null, source = "") {
       esc(d.title) +
       '"' +
       (c && !editable ? " readonly" : "") +
-      '><label for="contentCreator">제작자 · 모르면 비워두세요</label><input id="contentCreator" maxlength="100" value="' +
+      '><label for="contentCreator">저자·감독 · 모르면 비워두세요</label><input id="contentCreator" maxlength="100" value="' +
       esc(d.creator) +
       '"' +
       (c && !editable ? " readonly" : "") +
@@ -596,7 +596,7 @@ function infoForm(c = null, source = "") {
       '<label for="contentSource">출처·메모 · 선택</label><input id="contentSource" maxlength="500" value="' +
       esc(d.source || "") +
       '"><span class="info-label">표지 사진 · 선택</span><input id="contentCover" class="info-file" type="file" accept="image/*"><label for="contentCover" class="info-cover"><span class="info-cover-thumb" id="contentCoverThumb" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg></span><span class="info-cover-text"><strong id="contentCoverName">사진 고르기</strong><small>스크랩과 달력에만 보여요</small></span></label><div id="formError" class="form-error" role="alert"></div><button class="primary" type="submit">' +
-      (c ? "나의 분류 저장" : "스크랩") +
+      (c ? "저장" : "스크랩") +
       "</button></form>",
     "info",
   );
@@ -662,7 +662,8 @@ function updateRemoteScrapButton(index, fromAction, toAction, text) {
     if (toAction.startsWith("removeRemote")) {
       buttonEl.className = "remote-added";
       buttonEl.innerHTML = REMOTE_ADDED_HTML;
-      buttonEl.setAttribute("aria-label", text);
+      const title = (buttonEl.getAttribute("aria-label") || "").replace(/\s*스크랩.*$/, "");
+      buttonEl.setAttribute("aria-label", (title ? title + " " : "") + text);
     } else buttonEl.textContent = text;
   }
 }

@@ -21,7 +21,7 @@ function photoAdd(source = null) {
         esc(photoImportSource.title || new URL(photoImportSource.url).hostname) +
         " ↗</a></p>"
       : "") +
-      '<p class="muted">스크린샷·표지·목록 사진을 선택하세요. 여러 영역을 반복 인식해 제목과 제작자를 묶고, 가장 가능성 높은 콘텐츠를 찾아드려요.</p><label for="photoFiles">사진 선택 · 최대 10장</label><input id="photoFiles" type="file" accept="image/*" multiple><div id="photoThumbs" class="thumbs"></div><div id="ocrProgress" class="summary"></div>' +
+      '<p class="muted">표지나 책장, 목록 스크린샷에서 작품 제목을 찾아드려요.</p><input id="photoFiles" class="file-hidden" type="file" accept="image/*" multiple><label for="photoFiles" class="file-pick"><span class="file-pick-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg></span><span class="file-pick-text"><strong id="photoPickName">사진 고르기</strong><small>최대 10장</small></span></label><div id="photoThumbs" class="thumbs"></div><div id="ocrProgress" class="summary"></div>' +
       button("사진 분석하기", "runOCR", "primary", 'id="ocrButton" disabled') +
       button("직접 입력하기", "manual", "textbtn"),
     "photo",
@@ -225,7 +225,7 @@ async function ocrSearchAll(query) {
   ];
   const settled = await Promise.allSettled(configs.map((c) => ocrFetch(c[0], query, c[1], c[2])));
   const failed = settled.filter((r) => r.status === "rejected");
-  if (failed.length === settled.length) throw Error("콘텐츠 검색 서버에 연결하지 못했어요.");
+  if (failed.length === settled.length) throw Error("작품 검색 서버에 연결하지 못했어요.");
   const results = settled.flatMap((r) =>
     r.status === "fulfilled" ? r.value.map((c, rank) => ({ ...c, ocrSearchRank: rank })) : [],
   );
@@ -617,7 +617,7 @@ function ocrEvaluateHypothesis(c, q, rank, preferredType = "") {
     spatial,
     relevance,
     score,
-    label: high ? "일치 높음" : "확인 필요",
+    label: high ? "일치도 높음" : "확인 필요",
     level: high ? "high" : "medium",
     selected: high,
   };
@@ -791,7 +791,7 @@ async function requestServerOCRMultiPassUncached(file, progress, onPartial) {
       const passId = "p" + i,
         started = performance.now();
       try {
-        if (enc.bytes > 850000) throw Error("이미지 영역이 OCR 전송 한도를 초과했어요.");
+        if (enc.bytes > 850000) throw Error("사진이 너무 커요. 더 작은 사진으로 다시 시도해주세요.");
         const payload = await ocrPostImage(enc.data);
         const output = {
           text: payload.text || "",
@@ -1107,7 +1107,7 @@ async function runOCR() {
   ocrBusy = true;
   const ticket = ++ocrGeneration;
   $("ocrButton").disabled = true;
-  $("ocrProgress").textContent = "사진을 OCR 서버로 보내고 있어요…";
+  $("ocrProgress").textContent = "사진을 읽고 있어요…";
   let results = [];
   const searchSession = ocrCreateSearchSession(ocrSearchAll, () => ticket === ocrGeneration);
   try {
@@ -1133,11 +1133,11 @@ async function runOCR() {
       throw Error(
         "음반은 현재 지원하지 않아요. 책이나 영화라면 제목이 잘 보이는 사진을 가져오거나 직접 입력해주세요.",
       );
-    $("ocrProgress").textContent = "가까운 제목과 제작자를 묶고 있어요…";
+    $("ocrProgress").textContent = "제목과 저자·감독을 찾고 있어요…";
     const structured = ocrSpatialQueries(results, text);
     if (!structured.length)
       throw Error("검색할 만한 제목을 읽지 못했어요. 더 선명한 사진으로 다시 시도해주세요.");
-    $("ocrProgress").textContent = "제목과 제작자를 묶어 콘텐츠를 찾고 있어요…";
+    $("ocrProgress").textContent = "사진 속 작품을 찾고 있어요…";
 
     const queries = structured;
     searchStarted = performance.now();
@@ -1147,7 +1147,7 @@ async function runOCR() {
       (q) => searchSession.lookup(q),
       (q, i, total) => {
         if (ticket !== ocrGeneration) throw Error("인식이 취소되었어요.");
-        $("ocrProgress").textContent = "콘텐츠 검색 중 · " + (i + 1) + "/" + total + " · " + q.title;
+        $("ocrProgress").textContent = "작품 찾는 중 · " + (i + 1) + "/" + total + " · " + q.title;
       },
       preferredType,
     );
@@ -1184,7 +1184,7 @@ async function runOCR() {
         (failures || searchFailures
           ? '<div class="ocr-review-note">일부 인식·검색 요청이 실패했어요. 결과에 누락이 있을 수 있으니 다시 시도해주세요.</div>'
           : "") +
-        '<div class="ocr-review-note">제목과 제작자를 확인하고, 저장할 작품을 골라주세요.</div><div id="candidateRows"></div><details class="collapse"><summary>인식한 제목·제작자 보기</summary><p class="muted">' +
+        '<div class="ocr-review-note">제목과 저자·감독을 확인하고, 저장할 작품을 골라주세요.</div><div id="candidateRows"></div><details class="collapse"><summary>인식한 제목·제작자 보기</summary><p class="muted">' +
         esc(used.join(" · ")) +
         '</p></details><details class="collapse"><summary>사진에서 읽은 글자 보기</summary><p style="white-space:pre-wrap;overflow-wrap:anywhere">' +
         esc(text || "글자를 찾지 못했어요.") +
@@ -1231,7 +1231,7 @@ function renderCandidates() {
             '"><div class="ocr-match-title">' +
             esc(c.title) +
             '</div><div class="ocr-match-meta">' +
-            esc(c.creator || "제작자 미확인") +
+            esc(c.creator || (c.type === "movie" ? "감독 미확인" : "저자 미확인")) +
             " · " +
             typeName[c.type] +
             '</div><div class="ocr-confidence ' +
@@ -1242,6 +1242,6 @@ function renderCandidates() {
         )
         .join("") +
       "</div>"
-    : '<p class="note">확실하게 매칭된 콘텐츠를 찾지 못했어요. 인식한 글자를 확인해 직접 추가하거나 다른 사진으로 다시 시도해주세요.</p>';
+    : '<p class="note">확실하게 맞는 작품을 찾지 못했어요. 인식한 글자를 확인해 직접 추가하거나 다른 사진으로 다시 시도해주세요.</p>';
   if ($("saveCandidates")) $("saveCandidates").disabled = !candidates.some((c) => c.selected);
 }

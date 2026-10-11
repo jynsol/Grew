@@ -241,7 +241,7 @@ function showNotification(item) {
   }
   const visitor = FOREST_VISITORS.find((v) => v.id === item.id),
     isVisitor = item.type === "visitor";
-  const title = isVisitor ? (visitor?.name || "새 친구") + "의 첫 방문이에요" : "오늘의 경험을 남겨볼까요?";
+  const title = isVisitor ? (visitor?.name || "새 친구") + "의 첫 방문이에요" : "오늘의 기록을 남겨볼까요?";
   const body = isVisitor
     ? item.preview
       ? "새 친구를 만나면 이렇게 알려드려요."
@@ -314,7 +314,7 @@ function renderNotificationSettings() {
         esc(APP_BRAND.ko) +
         " · " +
         esc(notificationPrefs.time) +
-        " · 미리보기</small><strong>오늘 기록이 아직 없어요. 한 쪽만 읽어도 나무가 자라요.</strong></span>",
+        " · 미리보기</small><strong>오늘 기록이 아직 없어요. 한 쪽, 한 장면만 기록해도 나무가 자라요.</strong></span>",
       "notificationPreview",
       "notification-sample",
       'data-kind="daily" aria-label="기록 알림 미리보기"',
