@@ -1,5 +1,6 @@
 /* original script block 1 */
-const APP_BRAND=Object.freeze({ko:'그루',en:'grew',motto:'내 취향대로 자라는 숲'});
+// contact: the inbox for 문의·피드백 (MY) — also written into legal/terms.html and legal/privacy.html.
+const APP_BRAND=Object.freeze({ko:'그루',en:'grew',motto:'내 취향대로 자라는 숲',version:'1.0.0',contact:''});
 document.title=APP_BRAND.ko+' — '+APP_BRAND.motto;
 
 /* original script block 2 */

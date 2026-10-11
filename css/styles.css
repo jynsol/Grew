@@ -4201,3 +4201,35 @@ button.primary,.ob-cta,.bm-ad-button{font-size:16px!important}
 .profile-photo-status{font-size:13px!important}
 form label{font-size:13px}
 #page.ob-page .ob-check.is-all b{font-size:15px}
+/* Manual entry: type as pill tabs, cover as a picker card (native file input hidden) */
+#infoForm .info-label{display:block;margin:16px 0 8px;font-size:13px;font-weight:600;color:var(--text-1)}
+#infoForm .info-type{display:flex;gap:8px}
+#infoForm .info-type .type-tab{flex:1;min-height:48px;font-size:15px}
+#infoForm .info-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#infoForm .info-cover{display:flex;align-items:center;gap:16px;margin:0;padding:8px;border-radius:16px;background:var(--soft);cursor:pointer;font-weight:400}
+#infoForm .info-file:focus-visible+.info-cover{outline:2px solid var(--ink);outline-offset:2px}
+#infoForm .info-cover-thumb{flex:none;display:grid;place-items:center;width:56px;height:56px;border-radius:12px;background:#fff;color:var(--text-2);overflow:hidden}
+#infoForm .info-cover-thumb img{width:100%;height:100%;object-fit:cover}
+#infoForm .info-cover-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+#infoForm .info-cover-text strong{font-size:15px;font-weight:600;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#infoForm .info-cover-text small{font-size:12px;color:var(--text-2)}
+/* Bigger tap area (≥44px) for small text buttons and pill tabs — the look stays, only the hit box grows */
+:is(.textbtn,.type-tab,.composer-type-tab,.detail-memo-add,.ob-aside-link,.notification-preview,.forest-title-btn,.forest-sound-credits a){position:relative}
+:is(.textbtn,.detail-memo-add,.ob-aside-link,.notification-preview,.forest-title-btn,.forest-sound-credits a)::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:44px;transform:translateY(-50%)}
+:is(.type-tab,.composer-type-tab)::after{content:""!important;display:block!important;position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%);background:none!important;border:0!important}
+/* Readable greys: secondary text ≥4.5:1, faint text ≥3:1 on the app background */
+:root{--text-2:rgba(30,42,34,.68);--text-3:rgba(30,42,34,.54)}
+/* MY · 도움 */
+.menu-row.is-static{cursor:default}
+.license-list h3{margin:24px 0 8px;font-size:13px;font-weight:600;color:var(--text-2)}
+.license-list h3:first-child{margin-top:8px}
+.license-list ul{margin:0;padding:0;list-style:none;border-radius:16px;background:var(--soft)}
+.license-list li{display:flex;flex-direction:column;gap:4px;padding:16px;border-top:1px solid rgba(30,42,34,.06)}
+.license-list li:first-child{border-top:0}
+.license-list strong{font-size:15px;font-weight:600;color:var(--text-1)}
+.license-list span{font-size:13px;color:var(--text-2)}
+.license-list a{font-size:12px;color:var(--text-2);text-decoration:underline;text-underline-offset:2px}
+.license-note{margin:16px 0 8px;font-size:12px;line-height:1.5;color:var(--text-2)}
+#infoForm .info-type .type-tab{background:#fff;box-shadow:0 0 0 1px rgba(30,42,34,.08)}
+#infoForm .info-type .type-tab.active{background:var(--ink);color:#fff;box-shadow:none}
+#infoForm .info-type .type-tab::before{display:none!important}

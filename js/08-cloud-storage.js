@@ -893,6 +893,18 @@ function saveProfile(form){
  closeModal();render();toast('프로필을 저장했어요.');
 }
 
+// Third-party notices: fonts (SIL OFL 1.1), forest sounds (Pixabay), work data (TMDB, Google Books, 알라딘).
+function openLicenses(){
+ const item=(name,by,lic,url)=>'<li><strong>'+esc(name)+'</strong><span>'+esc(by)+'</span><a href="'+url+'" target="_blank" rel="noopener">'+esc(lic)+'</a></li>';
+ showModal('오픈소스 라이선스','<div class="license-list"><h3>글꼴</h3><ul>'+item('Pretendard','Kil Hyung-jin','SIL Open Font License 1.1','https://github.com/orioncactus/pretendard/blob/main/LICENSE')+item('Archivo','Omnibus-Type','SIL Open Font License 1.1','https://fonts.google.com/specimen/Archivo/license')+item('Bricolage Grotesque','Mathieu Triay','SIL Open Font License 1.1','https://fonts.google.com/specimen/Bricolage+Grotesque/license')+'</ul>'+
+  '<h3>숲의 소리</h3><ul>'+item('Forest ambience','AudioPapkin (Paweł Spychała)','Pixabay Content License','https://pixabay.com/service/license-summary/')+item('Evening Sound Effect in Village','Subhasis Mandal','Pixabay Content License','https://pixabay.com/service/license-summary/')+'</ul>'+
+  '<h3>작품 정보</h3><ul>'+item('TMDB','영화 정보와 포스터','themoviedb.org','https://www.themoviedb.org/')+item('Google Books','책 정보와 표지','books.google.com','https://books.google.com/')+item('알라딘','책 정보','aladin.co.kr','https://www.aladin.co.kr/')+'</ul><p class="license-note">This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>','licenses');
+}
+function contactSupport(){
+ if(!APP_BRAND.contact){toast('문의 창구를 준비하고 있어요.');return}
+ const body='\n\n\n---\n'+APP_BRAND.ko+' '+APP_BRAND.version+' · '+navigator.userAgent;
+ location.href='mailto:'+APP_BRAND.contact+'?subject='+encodeURIComponent('['+APP_BRAND.ko+'] 문의·피드백')+'&body='+encodeURIComponent(body);
+}
 function renderMy(){
  const stats=Model.stats(state.items.filter(c=>c.completed)),row=(label,action,value='›',cls='')=>button('<span>'+label+'</span><span class="menu-row-value">'+value+'</span>',action,'menu-row '+cls);
  return '<section class="my-page"><div class="page-heading"><h1 class="page-title">마이</h1></div>'+
@@ -901,6 +913,7 @@ function renderMy(){
  '<div class="settings-group"><h2>나의 설정</h2><div class="settings-card">'+row('취향 관리','tastes')+button('<span>숲의 소리</span><span class="menu-row-value forest-sound-menu-value"><span id="forestSoundSummary">'+(forestSoundPrefs.enabled?forestSoundCurrent().name:'꺼짐')+'</span> ›</span>','forestSoundSettings','menu-row')+row('알림','notifications')+'</div></div>'+
  '<div class="settings-group"><div class="settings-group-head"><h2>기록 관리</h2><p id="cloudSaveStatus" class="save-status" role="status" aria-live="polite">'+cloudSaveStatusLabel()+'</p></div><div class="settings-card">'+row('데이터 백업','backup','↓')+row('백업 복원','restore','↑')+'</div><input id="restoreFile" aria-label="백업 파일 선택" class="offscreen" type="file" accept="application/json,.json"></div>'+
  (BM_CONFIG.mode==='preview'?'<div class="settings-group"><h2>프로토타입</h2><div class="settings-card">'+row('구매 되돌리기','bmPreviewReset','↺')+'</div></div>':'')+
+ '<div class="settings-group"><h2>도움</h2><div class="settings-card">'+row('문의·피드백 보내기','contact')+row('오픈소스 라이선스','licenses')+'<div class="menu-row is-static"><span>앱 버전</span><span class="menu-row-value">'+APP_BRAND.version+'</span></div></div></div>'+
  '<div class="settings-group"><h2>서비스</h2><div class="settings-card">'+row('이용약관','terms')+row('개인정보처리방침','privacy')+row('로그아웃','flowLogout')+button('<span>회원탈퇴</span>','deleteAccount','menu-row danger')+'</div></div></section>';
 }
 let modalReturnFocus=null,modalFocusTimer=null;
@@ -1791,7 +1804,7 @@ function infoForm(c=null,source=''){
  const d=c||{type:defaultType,title:$('catalogSearch')?.value||$('musicCatalogSearch')?.value||$('movieCatalogSearch')?.value||'',creator:'',source};
  const editable=!c||!c.providerId&&!c.isbn;
  const locked=c&&!editable?' disabled aria-disabled="true"':'';
- showModal(c?'나의 분류 수정':'직접 입력','<form id="infoForm" data-edit="'+esc(c?.id||'')+'"><label for="contentType">유형</label><select id="contentType"'+locked+'>'+Object.entries(typeName).map(([k,v])=>'<option value="'+k+'" '+(d.type===k?'selected':'')+'>'+v+'</option>').join('')+'</select><label for="contentTitle">제목</label><input id="contentTitle" required maxlength="200" value="'+esc(d.title)+'"'+(c&&!editable?' readonly':'')+'><label for="contentCreator">제작자 · 모르면 비워두세요</label><input id="contentCreator" maxlength="100" value="'+esc(d.creator)+'"'+(c&&!editable?' readonly':'')+'>'+(c&&!editable?'<p class="muted tiny">검색에서 가져온 원본 정보예요. 장르와 나의 기록을 수정할 수 있어요.</p>':'')+metadataFields(d)+'<label for="contentScrapCount">스크랩 횟수</label><input id="contentScrapCount" type="number" min="0" step="1" value="'+(d.saves?.length||0)+'"><label for="contentSource">출처·메모 · 선택</label><input id="contentSource" maxlength="500" value="'+esc(d.source||'')+'"><label for="contentCover">표지 사진 · 선택</label><input id="contentCover" type="file" accept="image/*"><p class="muted tiny">표지는 스크랩과 달력에만 사용해요.</p><div id="formError" class="form-error" role="alert"></div><button class="primary" type="submit">'+(c?'나의 분류 저장':'스크랩')+'</button></form>','info');
+ showModal(c?'나의 분류 수정':'직접 입력','<form id="infoForm" data-edit="'+esc(c?.id||'')+'"><span class="info-label" id="contentTypeLabel">유형</span><input type="hidden" id="contentType" value="'+esc(d.type)+'"><div class="info-type" role="radiogroup" aria-labelledby="contentTypeLabel">'+Object.entries(typeName).map(([k,v])=>'<button type="button" class="type-tab'+(d.type===k?' active':'')+'" role="radio" aria-checked="'+(d.type===k)+'" data-info-type="'+k+'"'+locked+'>'+v+'</button>').join('')+'</div><label for="contentTitle">제목</label><input id="contentTitle" required maxlength="200" value="'+esc(d.title)+'"'+(c&&!editable?' readonly':'')+'><label for="contentCreator">제작자 · 모르면 비워두세요</label><input id="contentCreator" maxlength="100" value="'+esc(d.creator)+'"'+(c&&!editable?' readonly':'')+'>'+(c&&!editable?'<p class="muted tiny">검색에서 가져온 원본 정보예요. 장르와 나의 기록을 수정할 수 있어요.</p>':'')+metadataFields(d)+'<label for="contentSource">출처·메모 · 선택</label><input id="contentSource" maxlength="500" value="'+esc(d.source||'')+'"><span class="info-label">표지 사진 · 선택</span><input id="contentCover" class="info-file" type="file" accept="image/*"><label for="contentCover" class="info-cover"><span class="info-cover-thumb" id="contentCoverThumb" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg></span><span class="info-cover-text"><strong id="contentCoverName">사진 고르기</strong><small>스크랩과 달력에만 보여요</small></span></label><div id="formError" class="form-error" role="alert"></div><button class="primary" type="submit">'+(c?'나의 분류 저장':'스크랩')+'</button></form>','info');
 }
 function findSavedWork(candidate){
  const keys=new Set(tasteKeys(candidate));

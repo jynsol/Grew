@@ -1,0 +1,18 @@
+{
+  "name": "그루 · 내 취향대로 자라는 숲",
+  "short_name": "그루",
+  "description": "읽은 책과 본 영화가 하루하루 나무로 자라요.",
+  "lang": "ko",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F8F6",
+  "theme_color": "#F8F8F6",
+  "icons": [
+    {"src": "assets/images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "assets/images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "assets/images/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any"}
+  ]
+}

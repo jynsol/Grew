@@ -174,8 +174,12 @@ TREE_SPECIES.push(...['zelkova','metasequoia','pine','cedar','juniper','fringe',
 // Production entitlements must be issued and verified by a server before release.
 // Paid trees, floors, the pack and ad coupons stay closed until real payments and ads are connected.
 // Flip to true then; while false the shop is a catalogue and nothing pretends to charge.
-const BM_STORE_OPEN=true;
-const BM_CONFIG=Object.freeze({mode:'preview',future:Object.freeze({regularTrees:26,mysteryTrees:4,totalTrees:30,paidFloorCount:2,treePriceKRW:1100,floorPriceKRW:2200,packagePriceKRW:9900,packageTreeCount:10,rewardedViewsPerDay:2,viewsPerCoupon:1,couponCostPerTree:14,collectionMysteryAt:20,cashMysteryAt:10})});
+// Paid store and rewarded ads aren't wired to real payments yet. In the release build the store shows
+// "곧 열려요"; the free trial (체험 구매, 광고 쿠폰, 구매 되돌리기) only runs with ?preview=1 in the address,
+// which sticks on this device until ?preview=0.
+const BM_PREVIEW=(()=>{try{const q=new URLSearchParams(location.search).get('preview');if(q==='1')localStorage.setItem('grew.preview','1');if(q==='0')localStorage.removeItem('grew.preview');return localStorage.getItem('grew.preview')==='1'}catch{return false}})();
+const BM_STORE_OPEN=BM_PREVIEW;
+const BM_CONFIG=Object.freeze({mode:BM_PREVIEW?'preview':'off',future:Object.freeze({regularTrees:26,mysteryTrees:4,totalTrees:30,paidFloorCount:2,treePriceKRW:1100,floorPriceKRW:2200,packagePriceKRW:9900,packageTreeCount:10,rewardedViewsPerDay:2,viewsPerCoupon:1,couponCostPerTree:14,collectionMysteryAt:20,cashMysteryAt:10})});
 const BM_FLOORS=[{id:'basic',name:'기본 바닥',ready:true,free:true},{id:'meadow',name:'꽃이끼 정원',ready:true,free:false},{id:'snow',name:'겨울 숲',ready:true,free:false},{id:'floor-reserved-01',name:'새 바닥',ready:false,free:false}];
 const BM_BASE_IDS=['oak','birch','fir'];
 const BM_RECORD_IDS=['zelkova','ginkgo','metasequoia','yew','cedar','evergreen','cypress'];
@@ -484,6 +488,8 @@ const GENRE_POOL=Object.fromEntries(Object.entries(LAUNCH_GENRES).map(([type,gro
 function genreCandidates(c){return (GENRE_POOL[c.type]||[]).map(label=>[label,''])}
 function genreOptions(c){const selected=launchGenre(c.type,c.genre,c);return genreCandidates(c).map(([label])=>'<option value="'+esc(label)+'" '+(label===selected?'selected':'')+'>'+esc(label)+'</option>').join('')}
 function metadataFields(c){return '<label for="contentGenre">장르</label><select id="contentGenre">'+genreOptions(c)+'</select><span id="genreTreePreview" hidden></span><p class="muted tiny">직접 고른 장르는 자동으로 바뀌지 않아요.</p>'}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-info-type]');if(!b||b.disabled)return;const input=$('contentType');if(!input||input.value===b.dataset.infoType)return;input.value=b.dataset.infoType;b.parentElement.querySelectorAll('[data-info-type]').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-checked',String(on))});input.dispatchEvent(new Event('change',{bubbles:true}))});
+document.addEventListener('change',e=>{if(e.target.id!=='contentCover')return;const file=e.target.files[0],name=$('contentCoverName'),thumb=$('contentCoverThumb');if(!name||!thumb)return;name.textContent=file?file.name:'사진 고르기';if(file){const url=URL.createObjectURL(file);thumb.innerHTML='<img src="'+url+'" alt="">';thumb.querySelector('img').onload=()=>URL.revokeObjectURL(url)}});
 document.addEventListener('change',e=>{if(e.target.id==='contentType'){$('contentGenre').innerHTML=genreOptions({type:e.target.value,genre:''});const isBook=e.target.value==='book';}if(['contentType','contentGenre'].includes(e.target.id))$('genreTreePreview').textContent='나무 · '+mappedForestCategoryLabel($('contentType').value,$('contentGenre').value)+' 계열'});
 // Work info as one quiet line (date · length); the values speak for themselves, no labels.
 function detailMetadata(c){

@@ -154,6 +154,8 @@ document.addEventListener('click',async e=>{
  // Terms and privacy are real pages under ./legal; the app opens them in a new tab.
  if(a==='linkIdentity'){cloudLinkIdentity(b.dataset.provider);return}
  if(a==='unlinkIdentity'){const id=b.dataset.id,pv=b.dataset.provider;confirmBox(OAUTH_NAMES[pv]+' 연결 해제',OAUTH_NAMES[pv]+'(으)로는 더 이상 로그인할 수 없어요. 해제할까요?',()=>cloudUnlinkIdentity(id,pv),'해제',true);return}
+ if(a==='contact'){contactSupport();return}
+ if(a==='licenses'){openLicenses();return}
  if(a==='terms'){window.open('./legal/terms.html','_blank','noopener');return}
  if(a==='privacy'){window.open('./legal/privacy.html','_blank','noopener');return}
  if(a==='backup'){exportBackup();return}
@@ -367,3 +369,27 @@ window.addEventListener('beforeunload',e=>{if(unsavedState){e.preventDefault();e
 window.addEventListener('error',e=>{console.error('[Songrim runtime]',e.error||e.message);});
 load();
 window.Songrim={get state(){return state},get view(){return view},Model,go,render,replaceData,complete,record,makeShare};
+// Phone back (Android back button, iOS swipe-back): while there is something to step back from — an open
+// sheet, decorate mode, a screen with a back arrow, a tab other than 오늘 — one extra history entry
+// sits on top. Going back pops it and the app takes its own step back instead of leaving the page.
+const backNav={guard:false,ignore:0,timer:0};
+function backTarget(){
+ const vis=el=>el&&el.getClientRects().length>0;
+ const sheetClose=document.querySelector('#overlay .sheet-head [data-action=close]');if(vis(sheetClose))return ()=>sheetClose.click();
+ if(document.querySelector('#overlay .sheet'))return ()=>closeModal();
+ if(typeof forestEditMode!=='undefined'&&forestEditMode){const b=document.querySelector('[data-action=forestEdit]');if(vis(b))return ()=>b.click()}
+ const back=[...document.querySelectorAll('#head [data-action=back],#page [data-action=back],#page .ob-back')].find(vis);if(back)return ()=>back.click();
+ if(authRoute==='app'&&view!=='today')return ()=>{go('today');scrollPageTop?.()};
+ return null;
+}
+function syncBackGuard(){
+ const need=!!backTarget();
+ if(need&&!backNav.guard){history.pushState({grewGuard:1},'');backNav.guard=true}
+ else if(!need&&backNav.guard&&history.state?.grewGuard){backNav.guard=false;backNav.ignore++;history.back()}
+}
+window.addEventListener('popstate',()=>{
+ if(backNav.ignore){backNav.ignore--;return}
+ backNav.guard=false;const step=backTarget();if(step)step();queueBackSync();
+});
+function queueBackSync(){clearTimeout(backNav.timer);backNav.timer=setTimeout(syncBackGuard,60)}
+new MutationObserver(queueBackSync).observe(document.body,{childList:true,subtree:true});

@@ -837,6 +837,8 @@ async function inlineSvgImages(markup){
 }
 function shareSnapshot(){return JSON.stringify({items:state.items,collection:state.collection,floor:bmFloorId(),year,month,kind:shareKind,target:shareTarget,format:shareFormat,name:state.profile.name})}
 function shareRounded(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+// "(이름)의 … 숲" with the name shortened (…) so the title fits maxW at the current font.
+function shareFitTitle(ctx,name,suffix,maxW){if(ctx.measureText(name+suffix).width<=maxW)return name+suffix;let n=[...name];while(n.length>1&&ctx.measureText(n.join('')+'…'+suffix).width>maxW)n.pop();return n.join('')+'…'+suffix}
 function sharePill(ctx,text,x,y,{fill='#fff',color='#1E2A22',size=34,rotate=0,bold='',boldSize=0,align='left'}={}){
  const F='"Pretendard Variable",Pretendard,sans-serif';ctx.save();ctx.font='600 '+size+'px '+F;const w1=ctx.measureText(text).width;ctx.font='800 '+(boldSize||size*1.25)+'px '+F;const w2=bold?ctx.measureText(bold).width+16:0;
  const w=w1+w2+64,h=(boldSize||size*1.25)+48,ox=align==='right'?x-w:x;ctx.translate(ox+w/2,y+h/2);ctx.rotate(rotate*Math.PI/180);
@@ -894,7 +896,7 @@ async function drawLifetimeCard(ctx,canvas,W,H,story,name,F,L,mode='life'){
   {const sx=W*.2,sy=H*(story?.19:.2),len=W*.14,ex=sx-len*.9,ey=sy-len*.4;const tr=ctx.createLinearGradient(sx,sy,ex,ey);tr.addColorStop(0,'rgba(255,255,255,.95)');tr.addColorStop(1,'rgba(255,255,255,0)');const dx=ex-sx,dy=ey-sy,dl=Math.hypot(dx,dy),nx=-dy/dl,ny=dx/dl,hw=5;ctx.fillStyle=tr;ctx.beginPath();ctx.moveTo(sx+nx*hw,sy+ny*hw);ctx.lineTo(ex,ey);ctx.lineTo(sx-nx*hw,sy-ny*hw);ctx.closePath();ctx.fill();const hg=ctx.createRadialGradient(sx,sy,0,sx,sy,22);hg.addColorStop(0,'rgba(255,255,255,1)');hg.addColorStop(.25,'rgba(255,250,225,.9)');hg.addColorStop(1,'rgba(247,231,161,0)');ctx.fillStyle=hg;ctx.beginPath();ctx.arc(sx,sy,22,0,Math.PI*2);ctx.fill()}
  }else{ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H)}
  ctx.textBaseline='alphabetic';ctx.fillStyle=fg;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillStyle=life?butter:soft;ctx.fillText(life?'SINCE '+first:year+' FOREST',W-72,96);ctx.letterSpacing='0px';
- const top=story?264:192;ctx.textAlign='center';ctx.fillStyle=fg;ctx.font='700 54px '+F;ctx.fillText(name+'의 '+(life?'':'올해 ')+'숲',W/2,top);
+ const top=story?264:192;ctx.textAlign='center';ctx.fillStyle=fg;ctx.font='700 54px '+F;ctx.fillText(shareFitTitle(ctx,name,'의 '+(life?'':'올해 ')+'숲',W-144),W/2,top);
  ctx.fillStyle=accent;ctx.font='800 '+(story?280:220)+'px '+L;ctx.fillText(String(done.length),W/2,top+(story?270:215));
  ctx.fillStyle=soft;ctx.font='600 44px '+F;ctx.fillText(life?'그루가 자랐어요':'그루를 심었어요',W/2,top+(story?350:285));
  const bandTop=top+(story?400:300),bandH=story?700:480,scale=Math.min((W-20)/390,bandH/250),cx=W/2,cy=bandTop+bandH*.52;
@@ -941,7 +943,7 @@ async function drawStickerCard(ctx,canvas,W,H,story,name,F,L,kind){
  const ink='#1E2A22',soft='rgba(30,42,34,.55)',muted='#52524F',months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
  ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H);
  ctx.textBaseline='alphabetic';ctx.fillStyle=ink;ctx.font='700 30px '+L;ctx.letterSpacing='4px';ctx.textAlign='left';ctx.fillText('GREW',72,96);ctx.textAlign='right';ctx.fillText(isYear?year+' FOREST':months[m-1]+' '+month.slice(0,4),W-72,96);ctx.letterSpacing='0px';ctx.textAlign='left';
- const top=story?248:200;ctx.fillStyle=ink;ctx.font='700 46px '+F;ctx.fillText(name+'의 '+(isYear?'올해':m+'월')+' 숲',72,top);
+ const top=story?248:200;ctx.fillStyle=ink;ctx.font='700 46px '+F;ctx.fillText(shareFitTitle(ctx,name,'의 '+(isYear?'올해':m+'월')+' 숲',W-144-340),72,top);
  ctx.font='800 '+(story?300:250)+'px '+L;ctx.fillText(String(done.length),60,top+(story?290:240));
  ctx.font='700 56px '+F;ctx.fillText('그루를 심었어요',72,top+(story?390:330));
  sharePill(ctx,'책 ',W-72,top-30,{fill:'#F7E7A1',size:34,bold:books+'권',boldSize:48,rotate:-6,align:'right'});
