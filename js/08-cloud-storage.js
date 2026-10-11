@@ -1413,7 +1413,7 @@ function renderRemoteBooks(results,message=''){
  ).join('');
 
  const tail=bookSearchHasMore
-  ?'<div id="bookSearchSentinel" style="padding:18px 0 30px;text-align:center"><p class="creator">'+(bookSearchLoadingMore?'더 불러오는 중…':'아래로 내리면 더 불러와요')+'</p></div>'
+  ?'<div id="bookSearchSentinel" style="padding:16px 0 32px;text-align:center"><p class="creator">'+(bookSearchLoadingMore?'더 불러오는 중…':'아래로 내리면 더 불러와요')+'</p></div>'
   :'<div style="height:18px"></div>';
 
  el.innerHTML='<div class="content-list">'+rows+'</div>'+tail;
