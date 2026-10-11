@@ -1481,7 +1481,7 @@ async function runLinkImport() {
   try {
     url = normalizeImportURL(s.url);
   } catch (e) {
-    renderLinkImportInput(e.message);
+    renderLinkImportInput(userMessage(e, "링크를 불러오지 못했어요. 다시 시도해 주세요."));
     return;
   }
   if (!url && !s.text.trim()) {
@@ -1607,7 +1607,7 @@ async function runLinkImport() {
           ? video
             ? "영상을 분석하는 데 시간이 오래 걸려요. 잠시 뒤 다시 시도하거나 설명·자막을 붙여넣어주세요."
             : "페이지를 읽는 데 시간이 걸리고 있어요. 다시 시도하거나 추천 내용을 붙여넣어주세요."
-          : e.message || "내용을 불러오지 못했어요. 본문 붙여넣기를 이용해주세요.",
+          : userMessage(e, "내용을 불러오지 못했어요. 본문 붙여넣기를 이용해주세요."),
       );
   } finally {
     clearTimeout(timeout);

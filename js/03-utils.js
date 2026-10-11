@@ -108,3 +108,19 @@ function download(blob, name) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 15000);
 }
+
+// Error text for people: our own messages are Korean and pass through; browser/network errors
+// (English, e.g. "Failed to fetch") become a plain Korean line instead of leaking to the screen.
+function userMessage(err, fallback) {
+  const m = String(err?.message || err || "");
+  if (!navigator.onLine || /failed to fetch|networkerror|load failed|network request failed/i.test(m))
+    return "인터넷 연결을 확인하고 다시 시도해 주세요.";
+  return /[가-힣]/.test(m) ? m : fallback;
+}
+
+// Empty search results: say "offline" instead of "nothing found" when there is no connection.
+function noResultsText() {
+  return navigator.onLine
+    ? "검색 결과가 없어요."
+    : "인터넷에 연결되어 있지 않아요. 연결 후 다시 검색해 주세요.";
+}

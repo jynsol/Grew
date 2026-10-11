@@ -193,7 +193,7 @@ async function changeProfilePhoto(file, form) {
       $("profileError").textContent =
         err.message === "이미지를 읽지 못했어요."
           ? "사진을 열지 못했어요. JPG, PNG 또는 WebP 사진을 선택해주세요."
-          : err.message || "사진을 불러오지 못했어요.";
+          : userMessage(err, "사진을 불러오지 못했어요.");
   } finally {
     if (url) URL.revokeObjectURL(url);
     if (profileEdit === draft && draft.request === ticket && form.isConnected) {

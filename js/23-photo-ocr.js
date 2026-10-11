@@ -1197,7 +1197,10 @@ async function runOCR() {
     renderCandidates();
   } catch (e) {
     if (ticket === ocrGeneration) {
-      $("ocrProgress").textContent = e?.message || "사진을 읽지 못했어요. 다시 시도하거나 직접 입력해주세요.";
+      $("ocrProgress").textContent = userMessage(
+        e,
+        "사진을 읽지 못했어요. 다시 시도하거나 직접 입력해주세요.",
+      );
       $("ocrButton").disabled = false;
     }
   } finally {

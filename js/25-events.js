@@ -996,7 +996,7 @@ document.addEventListener("change", async (e) => {
         "복원",
       );
     } catch (err) {
-      toast(err.message || "백업 파일을 확인해주세요.");
+      toast(userMessage(err, "백업 파일을 확인해주세요."));
     }
     el.value = "";
   }
@@ -1070,7 +1070,8 @@ document.addEventListener("submit", async (e) => {
         saved(c, event);
       }
     } catch (err) {
-      if ($("formError")) $("formError").textContent = err.message;
+      if ($("formError"))
+        $("formError").textContent = userMessage(err, "저장하지 못했어요. 다시 시도해 주세요.");
       submit.disabled = false;
     }
   }

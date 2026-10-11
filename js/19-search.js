@@ -710,7 +710,9 @@ function renderRemoteBooks(results, message = "") {
 
   if (!results.length) {
     el.innerHTML =
-      '<div class="scrap-empty"><p>검색 결과가 없어요.</p>' +
+      '<div class="scrap-empty"><p>' +
+      noResultsText() +
+      "</p>" +
       button("직접 입력하기", "manual", "textbtn scrap-manual") +
       "</div>";
     return;
@@ -919,7 +921,7 @@ async function searchResults(q) {
     remoteBookResults = [];
     bookSearchRawResults = [];
     bookSearchHasMore = false;
-    renderRemoteBooks([], err?.message || "책 검색 서버에 연결하지 못했어요.");
+    renderRemoteBooks([], userMessage(err, "책 검색 서버에 연결하지 못했어요."));
   }
 }
 
@@ -1009,7 +1011,9 @@ function renderRemoteAlbums(results, message = "") {
         )
         .join("") +
       "</div>"
-    : '<div class="scrap-empty"><p>검색 결과가 없어요.</p>' +
+    : '<div class="scrap-empty"><p>' +
+      noResultsText() +
+      "</p>" +
       button("직접 입력하기", "manual", "textbtn scrap-manual") +
       "</div>";
 }
@@ -1052,7 +1056,7 @@ async function musicSearchResults(q) {
   } catch (err) {
     if (seq !== musicSearchSeq || !$("musicCatalogResults")) return;
     remoteAlbumResults = [];
-    renderRemoteAlbums([], err?.message || "음악 검색 서버에 연결하지 못했어요.");
+    renderRemoteAlbums([], userMessage(err, "음악 검색 서버에 연결하지 못했어요."));
   }
 }
 
@@ -1238,7 +1242,9 @@ function renderRemoteMovies(results, message = "") {
         )
         .join("") +
       "</div>"
-    : '<div class="scrap-empty"><p>검색 결과가 없어요.</p>' +
+    : '<div class="scrap-empty"><p>' +
+      noResultsText() +
+      "</p>" +
       button("직접 입력하기", "manual", "textbtn scrap-manual") +
       "</div>";
 }
@@ -1368,6 +1374,6 @@ async function movieSearchResults(q) {
   } catch (err) {
     if (seq !== movieSearchSeq || !$("movieCatalogResults")) return;
     remoteMovieResults = [];
-    renderRemoteMovies([], err?.message || "영화 검색 서버에 연결하지 못했어요.");
+    renderRemoteMovies([], userMessage(err, "영화 검색 서버에 연결하지 못했어요."));
   }
 }

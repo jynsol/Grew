@@ -2877,7 +2877,7 @@ document.addEventListener("submit", async (e) => {
           ? "이메일 또는 비밀번호가 맞지 않아요."
           : login && /not confirmed/i.test(msg)
             ? "메일 인증을 마친 뒤 로그인해주세요."
-            : msg || "로그인 정보를 확인해주세요.";
+            : userMessage(err, "로그인 정보를 확인해주세요.");
       if (login) loginError = text;
       if (f.isConnected && $("flowError")) {
         $("flowError").textContent = text;
@@ -2911,7 +2911,7 @@ document.addEventListener("submit", async (e) => {
       await cloudRecover($("recoveryEmail").value.trim().toLowerCase());
       flowTo("recoverSent");
     } catch (err) {
-      $("flowError").textContent = err.message || "재설정 안내를 보내지 못했어요.";
+      $("flowError").textContent = userMessage(err, "재설정 안내를 보내지 못했어요.");
     } finally {
       if (f.isConnected) submit.disabled = false;
     }
@@ -2934,7 +2934,7 @@ document.addEventListener("submit", async (e) => {
         $("flowError").textContent =
           err.status === 401 || err.status === 403
             ? "재설정 링크가 만료됐어요. 새 메일을 받아주세요."
-            : err.message;
+            : userMessage(err, "비밀번호를 바꾸지 못했어요. 다시 시도해 주세요.");
     } finally {
       if (f.isConnected) submit.disabled = false;
     }

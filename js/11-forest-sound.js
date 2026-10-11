@@ -151,7 +151,7 @@ class ForestAmbience {
           this._notify();
         };
       } catch (error) {
-        this._error = error.message || String(error);
+        this._error = userMessage(error, "숲의 소리를 준비하지 못했어요. 다시 시도해 주세요.");
         if (this._context) {
           this._context.onstatechange = null;
           try {
@@ -297,7 +297,7 @@ class ForestAmbience {
     } catch (error) {
       if (this._disposed || serial !== this._loadSerial) return;
       this._loadingPreset = null;
-      this._error = error.message || "숲의 소리를 준비하지 못했어요. 다시 시도해 주세요.";
+      this._error = userMessage(error, "숲의 소리를 준비하지 못했어요. 다시 시도해 주세요.");
     }
     this._notify();
   }

@@ -13407,3 +13407,30 @@ button.primary,
 #page.ob-page .ob-check.is-all {
   gap: 6px;
 }
+
+/* App feel: no grey tap flash, no double-tap zoom, no text selection or image callout on controls and art */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button,
+[data-action],
+.tabs,
+label,
+summary,
+img,
+svg {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+img {
+  -webkit-user-drag: none;
+}
+/* Planted card: a very long title stops at three lines */
+.pl-copy strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
