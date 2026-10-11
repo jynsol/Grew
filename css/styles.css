@@ -10959,7 +10959,6 @@ body[data-view="intro"] .app {
 .sticker-intro,
 .page.entry-page {
   --sb-card: 0 0 0 1px rgba(30, 42, 34, 0.07), 0 6px 14px -8px rgba(30, 42, 34, 0.14);
-    0 10px 20px -8px rgba(30, 42, 34, 0.22);
 }
 /* Large titles match across tabs (Apple large-title feel); one soft grey pill for + 스크랩 */
 .page:not(.entry-page) .page-heading .page-title,
