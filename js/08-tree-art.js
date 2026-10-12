@@ -1576,8 +1576,22 @@ function treeVisualProfile(c) {
     evergreen: { radius: 27, bias: 1.03 },
   };
   const base = byId[sp.id.replace(/^winter/, "")] || { radius: 24, bias: 1 };
-  return { species: sp, shape: sp.shape, radius: base.radius, scaleBias: base.bias };
+  // Even out how big each species looks: drawings fill their frames differently (a flat zelkova is half
+  // as tall as a metasequoia), so scale each one by its drawn size, weighted toward height.
+  const bounds = SONGLIM_TREE_ASSETS[sp.id]?.bounds,
+    bias = bounds
+      ? Math.min(1.3, Math.max(0.85, TREE_SIZE_TARGET / (bounds.height ** 0.75 * bounds.width ** 0.25)))
+      : base.bias;
+  return {
+    species: sp,
+    shape: sp.shape,
+    radius: Math.round((base.radius * bias) / base.bias),
+    scaleBias: bias,
+  };
 }
+
+// Typical drawn size (height^0.75 × width^0.25, in forest units) every finished tree is scaled to.
+const TREE_SIZE_TARGET = 78;
 
 function hiddenTreeScale(kind, theme = "basic") {
   const snow = theme === "snow" || theme === "winter";
@@ -1585,11 +1599,10 @@ function hiddenTreeScale(kind, theme = "basic") {
   return kind === "A" ? 1.42464 : 1.4396;
 }
 
+// A small, stable per-work size wobble (±6%) so a forest doesn't look stamped out.
 function treeSizeVariance(item) {
   const seed = (hash(String(item?.id || item?.title || "") + "|size") % 1000) / 1000;
-  if (seed < 0.2) return 0.78 + (seed / 0.2) * 0.1;
-  if (seed > 0.8) return 1.08 + ((seed - 0.8) / 0.2) * 0.2;
-  return 0.92 + ((seed - 0.2) / 0.6) * 0.14;
+  return 0.94 + seed * 0.12;
 }
 
 // Shared vector art for the forest and collection. Position belongs to the outer group;
