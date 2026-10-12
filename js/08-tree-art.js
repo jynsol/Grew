@@ -1546,7 +1546,7 @@ function treeVisualProfile(c) {
     return {
       species: contentSpecies(c),
       shape: "hidden",
-      radius: c.hiddenTree === "A" ? 38 : 40,
+      radius: c.hiddenTree === "A" ? 30 : 32,
       scaleBias: 1,
     };
   const sp =
@@ -1595,8 +1595,9 @@ const TREE_SIZE_TARGET = 78;
 
 function hiddenTreeScale(kind, theme = "basic") {
   const snow = theme === "snow" || theme === "winter";
-  if (snow) return kind === "A" ? 1.53216 : 1.64256;
-  return kind === "A" ? 1.42464 : 1.4396;
+  // Hidden trees read a little grander than the rest, never so big they hide the trees behind them.
+  if (snow) return kind === "A" ? 1.16 : 1.2;
+  return kind === "A" ? 1.1 : 1.1;
 }
 
 // A small, stable per-work size wobble (±6%) so a forest doesn't look stamped out.
